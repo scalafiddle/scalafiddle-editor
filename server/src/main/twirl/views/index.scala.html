@@ -1,0 +1,29 @@
+@(title: String)(implicit config: play.api.Configuration, env: play.api.Environment)
+
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>@title</title>
+        <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
+        <link rel="stylesheet" media="screen" href=@routes.Assets.versioned("stylesheets/main.min.css") >
+        <link rel="shortcut icon" href=@routes.Assets.versioned("images/favicon.ico")>
+        <link rel="icon" sizes="16x16 32x32 64x64" href=@routes.Assets.versioned("images/favicon.ico")>
+        <link rel="icon" type="image/png" sizes="196x196" href=@routes.Assets.versioned("images/favicon-192.png")>
+        <link rel="icon" type="image/png" sizes="160x160" href=@routes.Assets.versioned("images/favicon-160.png")>
+        <link rel="icon" type="image/png" sizes="96x96" href=@routes.Assets.versioned("images/favicon-96.png")>
+        <link rel="icon" type="image/png" sizes="64x64" href=@routes.Assets.versioned("images/favicon-64.png")>
+        <link rel="icon" type="image/png" sizes="32x32" href=@routes.Assets.versioned("images/favicon-32.png")>
+        <link rel="icon" type="image/png" sizes="16x16" href=@routes.Assets.versioned("images/favicon-16.png")>
+        <link rel="apple-touch-icon" href=@routes.Assets.versioned("images/favicon-60.png")>
+        <link rel="apple-touch-icon" sizes="120x120" href=@routes.Assets.versioned("images/favicon-120.png")>
+        <link rel="apple-touch-icon" sizes="76x76" href=@routes.Assets.versioned("images/favicon-76.png")>
+        <link rel="apple-touch-icon" sizes="152x152" href=@routes.Assets.versioned("images/favicon-152.png")>
+    </head>
+    <body>
+        <div id="root">
+        </div>
+        @playscalajs.html.scripts(projectName = "client")
+    </body>
+</html>
