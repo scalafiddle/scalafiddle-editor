@@ -23,6 +23,10 @@ class Application @Inject() (implicit val config: Configuration, env: Environmen
     Ok(views.html.index("ScalaFiddle"))
   }
 
+  def resultFrame = Action {
+    Ok(views.html.resultframe())
+  }
+
   def autowireApi(path: String) = Action.async(parse.raw) {
     implicit request =>
       println(s"Request path: $path")

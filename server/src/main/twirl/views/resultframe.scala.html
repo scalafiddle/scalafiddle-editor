@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="robots" content="noindex">
+        <link rel="stylesheet" media="screen" href=@routes.Assets.versioned("stylesheets/main.min.css")>
+    </head>
+    <body>
+        <div id="container">
+            <canvas id="canvas" style="position: absolute"></canvas>
+            <div id="result">Result goes here!</div>
+            <script type="text/javascript">
+                var canvas = document.getElementById("canvas");
+                var result = document.getElementById("result");
+                var container = document.getElementById("container");
+                window.addEventListener('message', function (e) {
+                    var msg = e.data;
+                    switch (msg.cmd) {
+                        case "clear":
+                            result.innerHTML = "";
+                            canvas.height = container.clientHeight;
+                            canvas.width = container.clientWidth;
+                            canvas.getContext("2d").clearRect(0, 0, 10000, 10000);
+                            break;
+                        case "print":
+                            result.innerHTML = msg.data;
+                            break;
+                        case "code":
+                            eval(msg.data);
+                            eval("ScalaFiddle().main();");
+                            break;
+                    }
+                });
+            </script>
+        </div>
+    </body>
+</html>

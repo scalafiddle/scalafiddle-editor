@@ -33,6 +33,7 @@ object Settings {
 
     val jQuery = "3.0.0"
     val semantic = "2.2.2"
+    val ace = "1.2.2"
 
     val react = "15.1.0"
 
@@ -53,6 +54,7 @@ object Settings {
     "com.vmunier" %% "play-scalajs-scripts" % versions.playScripts,
     "org.webjars" % "font-awesome" % "4.6.3" % Provided,
     "org.webjars" % "Semantic-UI" % versions.semantic % Provided,
+    "org.webjars" % "ace" % versions.ace % Provided,
     "com.lihaoyi" %% "utest" % versions.uTest % Test
   ))
 

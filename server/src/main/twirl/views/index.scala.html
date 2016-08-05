@@ -20,10 +20,53 @@
         <link rel="apple-touch-icon" sizes="120x120" href=@routes.Assets.versioned("images/favicon-120.png")>
         <link rel="apple-touch-icon" sizes="76x76" href=@routes.Assets.versioned("images/favicon-76.png")>
         <link rel="apple-touch-icon" sizes="152x152" href=@routes.Assets.versioned("images/favicon-152.png")>
+        <link href="https://fonts.googleapis.com/css?family=Raleway:200,300,400,500,700" rel="stylesheet">
     </head>
     <body>
         <div id="root">
+            <div class="full-screen">
+                <header>
+                    <div class="logo"><a href="#"><img src="@routes.Assets.versioned("images/scalafiddle-logo.png")" alt="ScalaFiddle"></a></div>
+                    <div class="ui basic button"><i class="icon play"></i>Run</div>
+                    <div class="ui basic button"><i class="icon write"></i>Save</div>
+                    <div class="ui basic button"><i class="icon fork"></i>Fork</div>
+                    <div class="ui basic button">Embed<i class="icon caret down"></i></div>
+                </header>
+                <div class="main">
+                    <div class="sidebar">
+                        <div>Sidebar goes here!</div>
+                    </div>
+                    <div class="editor-area">
+                        <div class="editor">
+                            <div class="label">SCALA<i class="icon setting"></i></div>
+                            <div id="editor">First Line
+Second line
+Third Line
+Final line
+</div></div>
+                        <div class="output">
+                            <div class="label">RESULT</div>
+                            <iframe id="resultframe" style="width: 100%;height: 100%;" frameborder="0" sandbox="allow-scripts" src="/resultframe"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/ace.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/ext-static_highlight.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/mode-scala.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/theme-eclipse.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/ext-language_tools.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/theme-tomorrow_night_eighties.js"></script>
         @playscalajs.html.scripts(projectName = "client")
+        <script>
+                var editor = ace.edit("editor");
+                var Range = ace.require("ace/range").Range;
+                editor.setTheme("ace/theme/eclipse");
+                editor.getSession().setMode("ace/mode/scala");
+                editor.getSession().setTabSize(2);
+                editor.setShowPrintMargin(false);
+                editor.getSession().setOption("useWorker", false);
+        </script>
     </body>
 </html>
