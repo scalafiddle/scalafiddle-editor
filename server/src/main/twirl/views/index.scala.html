@@ -7,6 +7,12 @@
         <meta charset="UTF-8">
         <title>@title</title>
         <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/ace.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/ext-static_highlight.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/mode-scala.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/theme-eclipse.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/ext-language_tools.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/theme-tomorrow_night_eighties.js"></script>
         <link rel="stylesheet" media="screen" href=@routes.Assets.versioned("stylesheets/main.min.css") >
         <link rel="shortcut icon" href=@routes.Assets.versioned("images/favicon.ico")>
         <link rel="icon" sizes="16x16 32x32 64x64" href=@routes.Assets.versioned("images/favicon.ico")>
@@ -34,30 +40,93 @@
                 </header>
                 <div class="main">
                     <div class="sidebar">
-                        <div>Sidebar goes here!</div>
+                        <div class="ui accordion">
+                            <div class="title active">Info</div>
+                            <div class="content active">
+                                <div class="ui transparent large input">
+                                    <input type="text" placeholder="Enter name">
+                                </div>
+                                <div class="ui transparent input">
+                                    <input type="text" placeholder="Description">
+                                </div>
+                            </div>
+                            <div class="title">Libraries</div>
+                            <div class="content">
+                                <div class="ui horizontal divider header">Selected</div>
+                                <div id="dependencies">
+                                </div>
+                                <div class="ui horizontal divider header">Available</div>
+                                <div class="ui icon search fluid input">
+                                    <i class="search icon"></i>
+                                    <input type="text" placeholder="Search libs...">
+                                </div>
+                                <div class="liblist">
+                                    <div class="ui middle aligned divided list">
+                                        <div class="item">
+                                            <div class="right floated">
+                                                <button class="mini ui icon basic button"><i class="plus green icon"></i></button>
+                                            </div>
+                                            <div class="content">Cats 0.7.0</div>
+                                        </div>
+                                        <div class="item">
+                                            <div class="right floated">
+                                                <button class="mini ui icon basic button"><i class="plus green icon"></i></button>
+                                            </div>
+                                            <div class="content">Scala.js React 0.11.2</div>
+                                        </div>
+                                        <div class="item">
+                                            <div class="right floated">
+                                                <button class="mini ui icon basic button"><i class="plus green icon"></i></button>
+                                            </div>
+                                            <div class="content">Scala.js React 0.10.2</div>
+                                        </div>
+                                        <div class="item">
+                                            <div class="right floated">
+                                                <button class="mini ui icon basic button"><i class="plus green icon"></i></button>
+                                            </div>
+                                            <div class="content">Scala.js React 0.11.1</div>
+                                        </div>
+                                        <div class="item">
+                                            <div class="right floated">
+                                                <button class="mini ui icon basic button"><i class="plus green icon"></i></button>
+                                            </div>
+                                            <div class="content">Scala.js React 0.11.0</div>
+                                        </div>
+                                        <div class="item">
+                                            <div class="right floated">
+                                                <button class="mini ui icon basic button"><i class="plus green icon"></i></button>
+                                            </div>
+                                            <div class="content">Scala.js React 0.10.5</div>
+                                        </div>
+                                        <div class="item">
+                                            <div class="right floated">
+                                                <button class="mini ui icon basic button"><i class="plus green icon"></i></button>
+                                            </div>
+                                            <div class="content">Scala.js React 0.10.9</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="ui checkbox">
+                                    <input type="checkbox" name="all-versions">
+                                    <label>Show all versions</label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="editor-area">
                         <div class="editor">
                             <div class="label">SCALA<i class="icon setting"></i></div>
-                            <div id="editor">First Line
-Second line
-Third Line
-Final line
-</div></div>
+                            <div id="editor"></div>
+                        </div>
                         <div class="output">
                             <div class="label">RESULT</div>
-                            <iframe id="resultframe" style="width: 100%;height: 100%;" frameborder="0" sandbox="allow-scripts" src="/resultframe"></iframe>
+                            <iframe id="resultframe" style="width: 100%;
+                                height: 100%;" frameborder="0" sandbox="allow-scripts" src="/resultframe"></iframe>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/ace.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/ext-static_highlight.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/mode-scala.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/theme-eclipse.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/ext-language_tools.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/theme-tomorrow_night_eighties.js"></script>
         @playscalajs.html.scripts(projectName = "client")
         <script>
                 var editor = ace.edit("editor");
@@ -67,6 +136,14 @@ Final line
                 editor.getSession().setTabSize(2);
                 editor.setShowPrintMargin(false);
                 editor.getSession().setOption("useWorker", false);
+
+                $('.ui.accordion').accordion();
+                $('.ui.dropdown').dropdown({
+                    action: 'hide',
+                    onChange: function (text, value, selectedItem) {
+                        $('#dependencies').append("<div class='ui transparent fluid icon input'><input type='text' value='" + text + "'><i class='icon remove red'></i></div>");
+                    }
+                });
         </script>
     </body>
 </html>
