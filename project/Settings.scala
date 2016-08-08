@@ -10,7 +10,7 @@ object Settings {
   val name = "scalafiddle-web"
 
   /** The version of your application */
-  val version = "1.0.0"
+  val version = "1.0.0-SNAPSHOT"
 
   /** Options for the scala compiler */
   val scalacOptions = Seq(
@@ -30,6 +30,7 @@ object Settings {
     val booPickle = "1.2.4"
     val diode = "1.0.0"
     val uTest = "0.4.3"
+    val upickle = "0.3.8"
 
     val jQuery = "3.0.0"
     val semantic = "2.2.2"
@@ -46,7 +47,7 @@ object Settings {
     */
   val sharedDependencies = Def.setting(Seq(
     "com.lihaoyi" %%% "autowire" % versions.autowire,
-    "me.chrons" %%% "boopickle" % versions.booPickle
+    "com.lihaoyi" %%% "upickle" % versions.upickle
   ))
 
   /** Dependencies only used by the JVM project */
@@ -65,6 +66,7 @@ object Settings {
     "com.github.japgolly.scalacss" %%% "ext-react" % versions.scalaCSS,
     "me.chrons" %%% "diode" % versions.diode,
     "me.chrons" %%% "diode-react" % versions.diode,
+    "com.github.marklister" %%% "base64" % "0.2.2",
     "org.scala-js" %%% "scalajs-dom" % versions.scalaDom,
     "com.lihaoyi" %%% "utest" % versions.uTest % Test
   ))

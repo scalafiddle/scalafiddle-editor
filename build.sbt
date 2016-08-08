@@ -51,9 +51,34 @@ lazy val server = (project in file("server"))
     scalaJSProjects := clients,
     pipelineStages := Seq(scalaJSProd, digest, gzip),
     // compress CSS
-    LessKeys.compress in Assets := true
+    LessKeys.compress in Assets := true,
+    scriptClasspath := Seq("../config/") ++ scriptClasspath.value,
+    dockerfile in docker := {
+      val appDir: File = stage.value
+      val targetDir = "/app"
+
+      new Dockerfile {
+        from("java:8")
+        entryPoint(s"$targetDir/bin/${executableScriptName.value}")
+        copy(appDir, targetDir)
+        expose(8080)
+      }
+    },
+    imageNames in docker := Seq(
+      ImageName(
+        namespace = Some("scalafiddle"),
+        repository = "scalafiddle-web",
+        tag = Some("latest")
+      ),
+      ImageName(
+        namespace = Some("scalafiddle"),
+        repository = "scalafiddle-web",
+        tag = Some(version.value)
+      )
+    )
   )
   .enablePlugins(PlayScala)
+  .enablePlugins(sbtdocker.DockerPlugin)
   .disablePlugins(PlayLayoutPlugin) // use the standard directory layout instead of Play's custom
   .aggregate(clients.map(projectToRef): _*)
   .dependsOn(sharedJVM)

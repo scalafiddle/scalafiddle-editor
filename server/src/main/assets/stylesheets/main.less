@@ -114,6 +114,7 @@ i.icon {
 
 .ui.header:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) {
   font-size: 1em;
+  color: #aaa;
 }
 
 .ui.list[class*="middle aligned"] .content {
@@ -149,9 +150,50 @@ i.icon {
 
 .liblist {
   max-height: 250px;
-  overflow-y: scroll;
+  overflow-y: auto;
   border: 1px solid #ddd;
   padding: 2px;
   margin: 4px 0;
+
+  * > .button, .button:hover {
+    box-shadow: none !important;
+    vertical-align: middle !important;
+  }
+  * > .icon {
+    font-size: 1.8em;
+  }
 }
 
+.text.white {
+  color: #FFFFFF;
+}
+.text.grey {
+  color: #CCCCCC;
+}
+.text.black {
+  color: #1B1C1D;
+}
+.text.yellow {
+  color: #F2C61F;
+}
+.text.teal {
+  color: #00B5AD;
+}
+.text.red {
+  color: #D95C5C;
+}
+.text.purple {
+  color: #564F8A;
+}
+.text.pink {
+  color: #D9499A;
+}
+.text.orange {
+  color: #E07B53;
+}
+.text.green {
+  color: #5BBD72;
+}
+.text.blue {
+  color: #3B83C0;
+}
