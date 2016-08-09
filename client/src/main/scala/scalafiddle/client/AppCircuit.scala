@@ -43,16 +43,3 @@ object AppCircuit extends Circuit[AppModel] with ReactConnector[AppModel] {
       None
   }
 }
-
-case class SelectLibrary(lib: Library) extends Action
-
-case class DeselectLibrary(lib: Library) extends Action
-
-class FiddleHandler[M](modelRW: ModelRW[M, Pot[FiddleData]]) extends ActionHandler(modelRW) {
-  override def handle = {
-    case SelectLibrary(lib) =>
-      updated(value.map(fd => fd.copy(libraries = fd.libraries :+ lib)))
-    case DeselectLibrary(lib) =>
-      updated(value.map(fd => fd.copy(libraries = fd.libraries.filterNot(_ == lib))))
-  }
-}
