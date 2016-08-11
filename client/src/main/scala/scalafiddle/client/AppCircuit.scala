@@ -11,17 +11,19 @@ object AppCircuit extends Circuit[AppModel] with ReactConnector[AppModel] {
   override protected def initialModel = AppModel(Home, None, Ready(
     FiddleData("Testing", "desc", "println(5)", Seq.empty, Seq(
       Library("DOM", "", "scalajs-dom", "0.9.1", false, Nil),
-      Library("Scalatags", "", "scalatags", "0.5.4", false, Nil)
+      Library("Scalatags", "", "scalatags", "0.6.0", false, Nil)
     ), Seq(
       Library("Cats", "", "cats", "0.7.0", false, Nil),
       Library("Cats", "", "cats", "0.6.0", false, Nil),
       Library("Cats", "", "cats", "0.5.0", false, Nil),
       Library("Scala.js React", "", "scalajs-react", "0.11.2", false, Nil)
-    )))
+    ))),
+    CompilerData(CompilerStatus.Result, None, Seq.empty, None, "")
   )
 
   override protected def actionHandler = composeHandlers(
     new FiddleHandler(zoomRW(_.fiddleData)((m, v) => m.copy(fiddleData = v))),
+    new CompilerHandler(zoomRW(_.compilerData)((m, v) => m.copy(compilerData = v))),
     navigationHandler
   )
 

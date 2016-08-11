@@ -6,9 +6,6 @@ import js.JSConverters._
 import scala.scalajs.js.annotation.JSName
 import scala.scalajs.js.typedarray.Uint8Array
 
-class Utils {
-}
-
 class JsVal(val value: js.Dynamic) {
   def get(name: String): Option[JsVal] = {
     (value.selectDynamic(name): Any) match {
@@ -59,4 +56,10 @@ object JsVal {
 @js.native
 class Gzip(data: js.Array[Byte]) extends js.Object {
   def compress(): Uint8Array = js.native
+}
+
+@js.native
+@JSName("ScalaFiddleConfig")
+object ScalaFiddleConfig extends js.Object {
+  val compilerURL: String = js.native
 }

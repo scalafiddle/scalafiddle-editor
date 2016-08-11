@@ -22,8 +22,8 @@ class Application @Inject() (implicit val config: Configuration, env: Environmen
     Ok(views.html.index("ScalaFiddle"))
   }
 
-  def resultFrame = Action {
-    Ok(views.html.resultframe())
+  def resultFrame = Action { request =>
+    Ok(views.html.resultframe()).withHeaders(CACHE_CONTROL -> "max-age=86400")
   }
 
   def autowireApi(path: String) = Action.async(parse.raw) {

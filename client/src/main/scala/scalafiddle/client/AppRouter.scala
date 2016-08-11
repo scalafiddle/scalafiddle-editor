@@ -20,8 +20,9 @@ object AppRouter {
 
     val fiddleData = AppCircuit.connect(_.fiddleData)
 
-    (staticRoute(root, Home) ~> render(fiddleData(d => FiddleEditor(d, None)))
-      | dynamicRouteCT((string("\\w+") / int).caseClass[EditorPage]) ~> dynRender((p:EditorPage) => fiddleData(d => FiddleEditor(d, Some(FiddleId(p.id, p.version)))))
+    (staticRoute(root, Home) ~> render(fiddleData(d => FiddleEditor(d, None, AppCircuit.zoom(_.compilerData))))
+      | dynamicRouteCT((string("\\w+") / int).caseClass[EditorPage]) ~> dynRender(
+      (p: EditorPage) => fiddleData(d => FiddleEditor(d, Some(FiddleId(p.id, p.version)), AppCircuit.zoom(_.compilerData))))
       )
       .notFound(redirectToPage(Home)(Redirect.Replace))
   }.logToConsole.renderWith(layout)

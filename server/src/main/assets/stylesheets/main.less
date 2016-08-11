@@ -79,6 +79,15 @@ body {
       > .output {
         flex: 1;
         position: relative;
+        width: 100%;
+        height: 100%;
+        > iframe {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          left: 0;
+          right: 0;
+        }
       }
 
       > div > .label {
@@ -134,7 +143,7 @@ i.icon {
 }
 
 /* CSS for result frame */
-#result {
+#output {
   position: absolute;
   width: 100%;
   max-height: 100%;
@@ -196,4 +205,8 @@ i.icon {
 }
 .text.blue {
   color: #3B83C0;
+}
+
+pre.error {
+  color: #cf040e;
 }

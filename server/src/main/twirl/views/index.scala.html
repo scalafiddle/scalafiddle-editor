@@ -30,115 +30,13 @@
         <link href="https://fonts.googleapis.com/css?family=Raleway:200,300,400,500,700" rel="stylesheet">
     </head>
     <body>
-        <div id="root">
-            @*<div class="full-screen">
-            <header>
-            <div class="logo"><a href="#"><img src="@routes.Assets.versioned("images/scalafiddle-logo.png")" alt="ScalaFiddle"></a></div>
-            <div class="ui basic button"><i class="icon play"></i>Run</div>
-            <div class="ui basic button"><i class="icon write"></i>Save</div>
-            <div class="ui basic button"><i class="icon fork"></i>Fork</div>
-            <div class="ui basic button">Embed<i class="icon caret down"></i></div>
-            </header>
-            <div class="main">
-            <div class="sidebar">
-            <div class="ui accordion">
-            <div class="title active">Info</div>
-            <div class="content active">
-            <div class="ui transparent large input">
-            <input type="text" placeholder="Enter name">
-            </div>
-            <div class="ui transparent input">
-            <input type="text" placeholder="Description">
-            </div>
-            </div>
-            <div class="title">Libraries</div>
-            <div class="content">
-            <div class="ui horizontal divider header">Selected</div>
-            <div id="dependencies">
-            </div>
-            <div class="ui horizontal divider header">Available</div>
-            <div class="ui icon search fluid input">
-            <i class="search icon"></i>
-            <input type="text" placeholder="Search libs...">
-            </div>
-            <div class="liblist">
-            <div class="ui middle aligned divided list">
-            <div class="item">
-            <div class="right floated">
-            <button class="mini ui icon basic button"><i class="plus green icon"></i></button>
-            </div>
-            <div class="content">Cats 0.7.0</div>
-            </div>
-            <div class="item">
-            <div class="right floated">
-            <button class="mini ui icon basic button"><i class="plus green icon"></i></button>
-            </div>
-            <div class="content">Scala.js React 0.11.2</div>
-            </div>
-            <div class="item">
-            <div class="right floated">
-            <button class="mini ui icon basic button"><i class="plus green icon"></i></button>
-            </div>
-            <div class="content">Scala.js React 0.10.2</div>
-            </div>
-            <div class="item">
-            <div class="right floated">
-            <button class="mini ui icon basic button"><i class="plus green icon"></i></button>
-            </div>
-            <div class="content">Scala.js React 0.11.1</div>
-            </div>
-            <div class="item">
-            <div class="right floated">
-            <button class="mini ui icon basic button"><i class="plus green icon"></i></button>
-            </div>
-            <div class="content">Scala.js React 0.11.0</div>
-            </div>
-            <div class="item">
-            <div class="right floated">
-            <button class="mini ui icon basic button"><i class="plus green icon"></i></button>
-            </div>
-            <div class="content">Scala.js React 0.10.5</div>
-            </div>
-            <div class="item">
-            <div class="right floated">
-            <button class="mini ui icon basic button"><i class="plus green icon"></i></button>
-            </div>
-            <div class="content">Scala.js React 0.10.9</div>
-            </div>
-            </div>
-            </div>
-            <div class="ui checkbox">
-            <input type="checkbox" name="all-versions">
-            <label>Show all versions</label>
-            </div>
-            </div>
-            </div>
-            </div>
-            <div class="editor-area">
-            <div class="editor">
-            <div class="label">SCALA<i class="icon setting"></i></div>
-            <div id="editor"></div>
-            </div>
-            <div class="output">
-            <div class="label">RESULT</div>
-            <iframe id="resultframe" style="width: 100%;
-            height: 100%;" frameborder="0" sandbox="allow-scripts" src="/resultframe"></iframe>
-            </div>
-            </div>
-            </div>
-            </div>
-            *@        </div>
-        @playscalajs.html.scripts(projectName = "client")
+        <div id="root"></div>
         <script>
-/*
-                var editor = ace.edit("editor");
-                var Range = ace.require("ace/range").Range;
-                editor.setTheme("ace/theme/eclipse");
-                editor.getSession().setMode("ace/mode/scala");
-                editor.getSession().setTabSize(2);
-                editor.setShowPrintMargin(false);
-                editor.getSession().setOption("useWorker", false);
-*/
+          // store configuration data in a global variable
+          var cfg = {};
+          cfg.compilerURL = "@config.getString("scalafiddle.compilerURL")";
+          window.ScalaFiddleConfig = cfg;
         </script>
+        @playscalajs.html.scripts(projectName = "client", fileName => routes.Assets.versioned(fileName).toString)
     </body>
 </html>

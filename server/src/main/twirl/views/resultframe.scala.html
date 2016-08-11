@@ -9,10 +9,10 @@
     <body>
         <div id="container">
             <canvas id="canvas" style="position: absolute"></canvas>
-            <div id="result">Result goes here!</div>
+            <div id="output"><pre>Press Ctrl/Cmd-Enter to compile and run your code.</pre></div>
             <script type="text/javascript">
                 var canvas = document.getElementById("canvas");
-                var result = document.getElementById("result");
+                var result = document.getElementById("output");
                 var container = document.getElementById("container");
                 window.addEventListener('message', function (e) {
                     var msg = e.data;
@@ -27,8 +27,12 @@
                             result.innerHTML = msg.data;
                             break;
                         case "code":
-                            eval(msg.data);
-                            eval("ScalaFiddle().main();");
+                            try {
+                                eval(msg.data);
+                                eval("ScalaFiddle().main();");
+                            } catch(ex) {
+                                result.innerHTML = '<pre class="error">ERROR: ' + ex.message + '</pre>'
+                            }
                             break;
                     }
                 });
