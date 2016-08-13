@@ -27,7 +27,7 @@ class JsVal(val value: js.Dynamic) {
   def asBoolean: Boolean = value.asInstanceOf[Boolean]
   def asString: String = value.asInstanceOf[String]
 
-  override def toString(): String = js.JSON.stringify(value)
+  override def toString: String = js.JSON.stringify(value)
 }
 
 object JsVal {
@@ -58,8 +58,15 @@ class Gzip(data: js.Array[Byte]) extends js.Object {
   def compress(): Uint8Array = js.native
 }
 
+@JSName("Zlib.Gunzip")
+@js.native
+class Gunzip(data: js.Array[Byte]) extends js.Object {
+  def decompress(): Uint8Array = js.native
+}
+
 @js.native
 @JSName("ScalaFiddleConfig")
 object ScalaFiddleConfig extends js.Object {
   val compilerURL: String = js.native
 }
+

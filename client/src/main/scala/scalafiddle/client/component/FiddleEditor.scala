@@ -1,11 +1,11 @@
 package scalafiddle.client.component
 
-import diode.{Action, ModelR, ModelRO, NoAction}
 import diode.data.{Pot, Ready}
 import diode.react.ModelProxy
+import diode.{Action, ModelR, ModelRO, NoAction}
 import japgolly.scalajs.react._
 import org.scalajs.dom
-import org.scalajs.dom.raw.{Event, HTMLElement, HTMLIFrameElement, MouseEvent}
+import org.scalajs.dom.raw.{Event, HTMLElement, HTMLIFrameElement}
 
 import scala.concurrent.ExecutionContext.Implicits.{global => ecGlobal}
 import scala.concurrent.{Future, Promise}
@@ -13,12 +13,11 @@ import scala.scalajs.js
 import scala.scalajs.js.Dynamic._
 import scala.scalajs.js.{Dynamic => Dyn}
 import scala.util.Success
-import scala.util.matching.Regex
 import scalafiddle.client._
+import scalafiddle.shared._
 
 object FiddleEditor {
   import japgolly.scalajs.react.vdom.Implicits._
-  import SemanticUI._
 
   val editorRef = Ref[dom.raw.HTMLDivElement]("editor")
   val resultRef = Ref[dom.raw.HTMLIFrameElement]("result")
@@ -45,6 +44,9 @@ object FiddleEditor {
     var resultFrame: HTMLIFrameElement = _
 
     def render(props: Props, state: State) = {
+      def showSave = props.fiddleId.isEmpty
+      def showUpdate =props.fiddleId.nonEmpty
+
       import japgolly.scalajs.react.vdom.all._
       div(cls := "full-screen")(
         header(
@@ -54,8 +56,9 @@ object FiddleEditor {
             )
           ),
           div(cls := "ui basic button", onClick --> props.dispatch(compile(reconstructSource(state), FastOpt)))(Icon.play, "Run"),
-          div(cls := "ui basic button")(Icon.pencil, "Save"),
-          div(cls := "ui basic button")(Icon.codeFork, "Fork"),
+          showSave ?= div(cls := "ui basic button", onClick --> props.dispatch(SaveFiddle(reconstructSource(state))))(Icon.pencil, "Save"),
+          showUpdate ?= div(cls := "ui basic button", onClick --> props.dispatch(UpdateFiddle(reconstructSource(state))))(Icon.pencil, "Update"),
+          showUpdate ?= div(cls := "ui basic button", onClick --> props.dispatch(ForkFiddle(reconstructSource(state))))(Icon.codeFork, "Fork"),
           div(cls := "ui basic button")("Embed", Icon.caretDown)
         ),
         div(cls := "main")(
@@ -85,7 +88,7 @@ object FiddleEditor {
                 height := "100%",
                 frameBorder := "0",
                 sandbox := "allow-scripts",
-                src := s"resultframe?theme=light")
+                src := s"/resultframe?theme=light")
             )
           )
         )

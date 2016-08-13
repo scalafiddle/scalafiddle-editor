@@ -7,6 +7,7 @@ import japgolly.scalajs.react._
 import org.scalajs.dom.raw.HTMLDivElement
 
 import scalafiddle.client._
+import scalafiddle.shared._
 
 object Sidebar {
   import japgolly.scalajs.react.vdom.all._
@@ -42,13 +43,19 @@ object Sidebar {
                 case (libs, lib) => if (libs.exists(l => l.name == lib.name)) libs else libs :+ lib
               }
             div(cls := "ui accordion", ref := accordionRef)(
-              div(cls := "title active", "Info"),
+              div(cls := "title large ctive", "Info"),
               div(cls := "content active")(
-                div(cls := "ui transparent large input")(
-                  input.text(placeholder := "Untitled", value := fd.name)
-                ),
-                div(cls := "ui transparent input")(
-                  input.text(placeholder := "Enter description", value := fd.description)
+                div(cls := "ui form")(
+                  div(cls := "field")(
+                    label("Name"),
+                    input.text(placeholder := "Untitled", name := "name", value := fd.name,
+                      onChange ==> {(e: ReactEventI) => props.data.dispatch(UpdateInfo(e.target.value, fd.description))})
+                  ),
+                  div(cls := "field")(
+                    label("Description"),
+                    input.text(placeholder := "Enter description", name := "description", value := fd.description,
+                      onChange ==> {(e: ReactEventI) => props.data.dispatch(UpdateInfo(fd.name, e.target.value))})
+                  )
                 )
               ),
               div(cls := "title", "Libraries"),

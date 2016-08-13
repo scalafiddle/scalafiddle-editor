@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration scan="true">
+    <jmxConfigurator />
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5p [%c:%L] %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="DEBUG">
+        <appender-ref ref="CONSOLE" />
+    </root>
+
+    <logger name="akka.cluster" level="INFO" />
+    <logger name="io.netty" level="WARN" />
+    <logger name="akka" level="DEBUG" />
+    <logger name="akka.http" level="INFO" />
+    <logger name="slick" level="INFO" />
+    <logger name="slick.compiler" level="INFO" />
+    <logger name="com.zaxxer.hikari" level="INFO" />
+    <logger name="com.google.inject" level="INFO" />
+    <logger name="scalafiddle" level="DEBUG" />
+
+</configuration>

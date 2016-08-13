@@ -31,6 +31,7 @@ object Settings {
     val diode = "1.0.0"
     val uTest = "0.4.3"
     val upickle = "0.3.8"
+    val slick = "3.1.0"
 
     val jQuery = "3.0.0"
     val semantic = "2.2.2"
@@ -52,6 +53,10 @@ object Settings {
 
   /** Dependencies only used by the JVM project */
   val jvmDependencies = Def.setting(Seq(
+    "com.typesafe.slick" %% "slick" % versions.slick,
+    "com.typesafe.slick" %% "slick-hikaricp" % versions.slick,
+    "com.h2database" % "h2" % "1.4.190",
+    "org.postgresql" % "postgresql" % "9.4-1206-jdbc41",
     "com.vmunier" %% "play-scalajs-scripts" % versions.playScripts,
     "org.webjars" % "font-awesome" % "4.6.3" % Provided,
     "org.webjars" % "Semantic-UI" % versions.semantic % Provided,

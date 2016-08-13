@@ -1,4 +1,4 @@
-@(title: String)(implicit config: play.api.Configuration, env: play.api.Environment)
+@(title: String, fiddleData: String)(implicit config: play.api.Configuration, env: play.api.Environment)
 
 <!DOCTYPE html>
 
@@ -34,8 +34,9 @@
         <script>
           // store configuration data in a global variable
           var cfg = {};
-          cfg.compilerURL = "@config.getString("scalafiddle.compilerURL")";
+          cfg.compilerURL = "@config.getString("scalafiddle.compilerURL").get";
           window.ScalaFiddleConfig = cfg;
+          window.ScalaFiddleData = @Html(fiddleData);
         </script>
         @playscalajs.html.scripts(projectName = "client", fileName => routes.Assets.versioned(fileName).toString)
     </body>

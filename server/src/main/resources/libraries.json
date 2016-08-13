@@ -1,0 +1,16 @@
+[
+  {
+    "name": "Cats",
+    "group": "org.typelevel",
+    "artifact": "cats",
+    "version": "0.6.1",
+    "compileTimeOnly": false
+  },
+  {
+    "name": "BooPickle",
+    "group": "me.chrons",
+    "artifact": "boopickle",
+    "version": "1.2.4",
+    "compileTimeOnly": false
+  }
+]
