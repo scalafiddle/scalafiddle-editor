@@ -1,0 +1,50 @@
+@import scalafiddle.server.FiddleInfo
+@(fiddles: Seq[FiddleInfo])
+
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>ScalaFiddle listing</title>
+        <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/ace.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/ext-static_highlight.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/mode-scala.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/theme-eclipse.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/ext-language_tools.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/theme-tomorrow_night_eighties.js"></script>
+        <script src=@routes.Assets.versioned("javascript/gzip.js")></script>
+        <link rel="stylesheet" media="screen" href=@routes.Assets.versioned("stylesheets/main.min.css") >
+        <link rel="shortcut icon" href=@routes.Assets.versioned("images/favicon.ico")>
+        <link rel="icon" sizes="16x16 32x32 64x64" href=@routes.Assets.versioned("images/favicon.ico")>
+        <link rel="icon" type="image/png" sizes="196x196" href=@routes.Assets.versioned("images/favicon-192.png")>
+        <link rel="icon" type="image/png" sizes="160x160" href=@routes.Assets.versioned("images/favicon-160.png")>
+        <link rel="icon" type="image/png" sizes="96x96" href=@routes.Assets.versioned("images/favicon-96.png")>
+        <link rel="icon" type="image/png" sizes="64x64" href=@routes.Assets.versioned("images/favicon-64.png")>
+        <link rel="icon" type="image/png" sizes="32x32" href=@routes.Assets.versioned("images/favicon-32.png")>
+        <link rel="icon" type="image/png" sizes="16x16" href=@routes.Assets.versioned("images/favicon-16.png")>
+        <link rel="apple-touch-icon" href=@routes.Assets.versioned("images/favicon-60.png")>
+        <link rel="apple-touch-icon" sizes="120x120" href=@routes.Assets.versioned("images/favicon-120.png")>
+        <link rel="apple-touch-icon" sizes="76x76" href=@routes.Assets.versioned("images/favicon-76.png")>
+        <link rel="apple-touch-icon" sizes="152x152" href=@routes.Assets.versioned("images/favicon-152.png")>
+        <link href="https://fonts.googleapis.com/css?family=Raleway:200,300,400,500,700" rel="stylesheet">
+    </head>
+    <body>
+        <div class="full-screen">
+            <header>
+                <div class="logo"><a href="#"><img src="/assets/images/scalafiddle-logo.png" alt="ScalaFiddle"></a></div>
+            </header>
+            <div class="main">
+            <div class="sidebar">
+                <h2 class="ui header">List of ScalaFiddles with a name</h2>
+                <div class="ui list">
+                @for(fiddle <- fiddles) {
+                    <div class="item"><a href="/sf/@fiddle.id.id/@fiddle.id.version">@fiddle.name</a></div>
+                }
+                </div>
+            </div>
+        </div>
+        </div>
+    </body>
+</html>

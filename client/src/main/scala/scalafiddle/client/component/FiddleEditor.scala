@@ -61,7 +61,7 @@ object FiddleEditor {
           showSave ?= div(cls := "ui basic button", onClick --> props.dispatch(SaveFiddle(reconstructSource(state))))(Icon.pencil, "Save"),
           showUpdate ?= div(cls := "ui basic button", onClick --> props.dispatch(UpdateFiddle(reconstructSource(state))))(Icon.pencil, "Update"),
           showUpdate ?= div(cls := "ui basic button", onClick --> props.dispatch(ForkFiddle(reconstructSource(state))))(Icon.codeFork, "Fork"),
-          div(cls := "ui basic button")("Embed", Icon.caretDown)
+          div(cls := "ui basic disabled button")("Embed", Icon.caretDown)
         ),
         div(cls := "main")(
           Sidebar(props.data),
@@ -111,7 +111,9 @@ object FiddleEditor {
     def beginCompilation(): Future[Unit] = {
       // fully clear the code iframe by reloading it
       val p = Promise[Unit]
-      resultFrame.onload = (e: Event) => p.complete(Success(()))
+      resultFrame.onload = (e: Event) => {
+        p.complete(Success(()))
+      }
       resultFrame.src = resultFrame.src
       p.future
     }

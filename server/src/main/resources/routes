@@ -4,6 +4,7 @@
 
 # Home page
 GET     /                                 controllers.Application.index(id = "", version = "0")
+GET     /list                             controllers.Application.fiddleList
 GET     /sf/:id                           controllers.Application.index(id, version = "0")
 GET     /sf/:id/$version<\d+>             controllers.Application.index(id, version)
 GET     /resultframe                      controllers.Application.resultFrame

@@ -25,6 +25,10 @@ case class FindFiddle(id: String, version: Int)
 
 case class FindLastFiddle(id: String)
 
+case object GetFiddleInfo
+
+case class FiddleInfo(name: String, id: FiddleId)
+
 case class RemoveFiddle(id: String, version: Int)
 
 class Persistence(config: Configuration) extends Actor with ActorLogging {
@@ -102,6 +106,14 @@ class Persistence(config: Configuration) extends Actor with ActorLogging {
         case 1 => Success(id)
         case _ => Failure(new NoSuchElementException)
       }.recover {
+        case e: Throwable => Failure(e)
+      }
+      res pipeTo sender()
+
+    case GetFiddleInfo =>
+      val res = db.run(dal.getAll).map(r => Success(r.map {
+        case (id, version, name) => FiddleInfo(name, FiddleId(id, version))
+      })).recover {
         case e: Throwable => Failure(e)
       }
       res pipeTo sender()

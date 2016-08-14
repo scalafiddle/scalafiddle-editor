@@ -18,7 +18,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success, Try}
 import scalafiddle.server.dao.{Fiddle, FiddleDAL}
-import scalafiddle.server.{ApiService, FindFiddle, Persistence}
+import scalafiddle.server._
 import scalafiddle.shared.{Api, FiddleData, Library}
 
 object Router extends autowire.Server[Js.Value, Reader, Writer] {
@@ -34,14 +34,14 @@ class Application @Inject()(implicit val config: Configuration, env: Environment
 
   val persistence = actorSystem.actorOf(Props(new Persistence(config)), "persistence")
 
-  if(env.mode != Mode.Prod)
+  if (env.mode != Mode.Prod)
     createTables()
 
   def index(fiddleId: String, version: String) = Action.async {
     loadFiddle(fiddleId, version.toInt).map {
       case Success(fd) =>
         val fdJson = write(fd)
-        Ok(views.html.index("ScalaFiddle", fdJson))
+        Ok(views.html.index("ScalaFiddle", fdJson)).withHeaders(CACHE_CONTROL -> "max-age=3600")
       case Failure(ex) =>
         NotFound
     }
@@ -49,6 +49,17 @@ class Application @Inject()(implicit val config: Configuration, env: Environment
 
   def resultFrame = Action { request =>
     Ok(views.html.resultframe()).withHeaders(CACHE_CONTROL -> "max-age=86400")
+  }
+
+  def fiddleList = Action.async { implicit request =>
+    ask(persistence, GetFiddleInfo).mapTo[Try[Seq[FiddleInfo]]].map {
+      case Success(info) =>
+        // remove duplicates
+        val fiddles = info.groupBy(_.id.id).values.map(_.sortBy(_.id.version).last).toVector
+        Ok(views.html.listfiddles(fiddles)).withHeaders(CACHE_CONTROL -> "max-age=60")
+      case Failure(ex) =>
+        NotFound
+    }
   }
 
   def autowireApi(path: String) = Action.async {
@@ -79,7 +90,7 @@ class Application @Inject()(implicit val config: Configuration, env: Environment
   }
 
   def loadFiddle(id: String, version: Int): Future[Try[FiddleData]] = {
-    if(id == "") {
+    if (id == "") {
       // build default fiddle data
       val (source, libs) = parseFiddle(defaultSource)
       Future(Success(FiddleData("", "", source, libs, Seq.empty, libraries)))

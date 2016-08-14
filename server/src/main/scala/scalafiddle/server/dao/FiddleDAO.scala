@@ -52,4 +52,7 @@ trait FiddleDAO {
 
   def remove(id: String, version: Int) =
     fiddles.filter(f => f.id === id && f.version === version).map(_.removed).update(true)
+
+  def getAll =
+    fiddles.filter(_.name =!= "").map(f => (f.id, f.version, f.name)).result
 }

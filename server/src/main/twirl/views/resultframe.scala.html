@@ -7,13 +7,13 @@
         <link rel="stylesheet" media="screen" href=@routes.Assets.versioned("stylesheets/main.min.css")>
     </head>
     <body>
-        <div id="container">
+        <div id="fiddle-container">
             <canvas id="canvas" style="position: absolute"></canvas>
             <div id="output"><pre>Press Ctrl/Cmd-Enter to compile and run your code.</pre></div>
             <script type="text/javascript">
                 var canvas = document.getElementById("canvas");
                 var result = document.getElementById("output");
-                var container = document.getElementById("container");
+                var container = document.getElementById("fiddle-container");
                 window.addEventListener('message', function (e) {
                     var msg = e.data;
                     switch (msg.cmd) {

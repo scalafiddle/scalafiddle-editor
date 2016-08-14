@@ -69,7 +69,7 @@ class CompilerHandler[M](modelRW: ModelRW[M, CompilerData]) extends ActionHandle
         case e: Throwable =>
           ServerError(s"Unknown error while compiling")
       }
-      updated(value.copy(status = CompilerStatus.Compiling), Effect(effect))
+      updated(value.copy(status = CompilerStatus.Compiling, jsCode = None), Effect(effect))
 
     case CompilerResult(Right(jsCode), log) =>
       updated(CompilerData(CompilerStatus.Result, Some(jsCode), Seq.empty, None, log))

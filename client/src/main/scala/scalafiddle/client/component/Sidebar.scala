@@ -45,7 +45,7 @@ object Sidebar {
                 case (libs, lib) => if (libs.exists(l => l.name == lib.name)) libs else libs :+ lib
               }
             div(cls := "ui accordion", ref := accordionRef)(
-              div(cls := "title large ctive", "Info"),
+              div(cls := "title large active", "Info", i(cls := "icon dropdown")),
               div(cls := "content active")(
                 div(cls := "ui form")(
                   div(cls := "field")(
@@ -60,7 +60,7 @@ object Sidebar {
                   )
                 )
               ),
-              div(cls := "title", "Libraries"),
+              div(cls := "title", "Libraries", i(cls := "icon dropdown")),
               div(cls := "content")(
                 div(cls := "ui horizontal divider header", "Selected"),
                 div(cls := "liblist")(
