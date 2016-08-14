@@ -57,7 +57,9 @@ object FiddleEditor {
               img(src := "/assets/images/scalafiddle-logo.png", alt := "ScalaFiddle")
             )
           ),
-          div(cls := "ui basic button", onClick --> {buildFullSource.flatMap { source => props.dispatch(compile(source, FastOpt)) }})(Icon.play, "Run"),
+          div(cls := "ui basic button", onClick --> {
+            Callback.future(beginCompilation().map(_ => {buildFullSource.flatMap { source => props.dispatch(compile(source, FastOpt)) }}))
+          })(Icon.play, "Run"),
           showSave ?= div(cls := "ui basic button", onClick --> props.dispatch(SaveFiddle(reconstructSource(state))))(Icon.pencil, "Save"),
           showUpdate ?= div(cls := "ui basic button", onClick --> props.dispatch(UpdateFiddle(reconstructSource(state))))(Icon.pencil, "Update"),
           showUpdate ?= div(cls := "ui basic button", onClick --> props.dispatch(ForkFiddle(reconstructSource(state))))(Icon.codeFork, "Fork"),
@@ -148,7 +150,7 @@ object FiddleEditor {
 
     def coordinatesFrom(row: Int, col: Int): (Int, Int) = {
       val state = $.accessDirect.state
-      if(!state.showTemplate) {
+      if (!state.showTemplate) {
         (row + state.preCode.size, col + state.indent)
       } else
         (row, col)
@@ -156,7 +158,7 @@ object FiddleEditor {
 
     def coordinatesTo(row: Int, col: Int): (Int, Int) = {
       val state = $.accessDirect.state
-      if(!state.showTemplate) {
+      if (!state.showTemplate) {
         (row - state.preCode.size, col - state.indent)
       } else
         (row, col)
