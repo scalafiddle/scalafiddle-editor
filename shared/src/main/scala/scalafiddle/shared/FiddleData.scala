@@ -15,7 +15,7 @@ object Library {
 case class FiddleData(
   name: String,
   description: String,
-  origSource: String,
+  sourceCode: String,
   libraries: Seq[Library],
   forced: Seq[Library],
   available: Seq[Library]

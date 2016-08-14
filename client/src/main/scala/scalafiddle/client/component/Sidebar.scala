@@ -23,7 +23,9 @@ object Sidebar {
 
   case object AvailableLib extends LibMode
 
-  case class Props(data: ModelProxy[Pot[FiddleData]])
+  case class Props(data: ModelProxy[Pot[FiddleData]]) {
+    def dispatch = data.theDispatch
+  }
 
   case class State(showAllVersions: Boolean)
 
@@ -49,12 +51,12 @@ object Sidebar {
                   div(cls := "field")(
                     label("Name"),
                     input.text(placeholder := "Untitled", name := "name", value := fd.name,
-                      onChange ==> {(e: ReactEventI) => props.data.dispatch(UpdateInfo(e.target.value, fd.description))})
+                      onChange ==> {(e: ReactEventI) => props.dispatch(UpdateInfo(e.target.value, fd.description))})
                   ),
                   div(cls := "field")(
                     label("Description"),
                     input.text(placeholder := "Enter description", name := "description", value := fd.description,
-                      onChange ==> {(e: ReactEventI) => props.data.dispatch(UpdateInfo(fd.name, e.target.value))})
+                      onChange ==> {(e: ReactEventI) => props.dispatch(UpdateInfo(fd.name, e.target.value))})
                   )
                 )
               ),
@@ -63,14 +65,14 @@ object Sidebar {
                 div(cls := "ui horizontal divider header", "Selected"),
                 div(cls := "liblist")(
                   div(cls := "ui middle aligned divided list")(
-                    fd.forced.map(renderLibrary(_, ForcedLib, props.data.theDispatch)) ++
-                      fd.libraries.map(renderLibrary(_, SelectedLib, props.data.theDispatch))
+                    fd.forced.map(renderLibrary(_, ForcedLib, props.dispatch)) ++
+                      fd.libraries.map(renderLibrary(_, SelectedLib, props.dispatch))
                   )
                 ),
                 div(cls := "ui horizontal divider header", "Available"),
                 div(cls := "liblist")(
                   div(cls := "ui middle aligned divided list")(
-                    available.map(renderLibrary(_, AvailableLib, props.data.theDispatch))
+                    available.map(renderLibrary(_, AvailableLib, props.dispatch))
                   )
                 ),
                 div(cls := "ui checkbox")(

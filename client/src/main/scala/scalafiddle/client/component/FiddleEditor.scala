@@ -44,10 +44,12 @@ object FiddleEditor {
     var resultFrame: HTMLIFrameElement = _
 
     def render(props: Props, state: State) = {
-      def showSave = props.fiddleId.isEmpty
-      def showUpdate =props.fiddleId.nonEmpty
-
       import japgolly.scalajs.react.vdom.all._
+
+      def showSave = props.fiddleId.isEmpty
+      def showUpdate = props.fiddleId.nonEmpty
+
+      val selectedLibs = props.data().fold(Seq.empty[Library])(_.libraries)
       div(cls := "full-screen")(
         header(
           div(cls := "logo")(
@@ -55,7 +57,7 @@ object FiddleEditor {
               img(src := "/assets/images/scalafiddle-logo.png", alt := "ScalaFiddle")
             )
           ),
-          div(cls := "ui basic button", onClick --> props.dispatch(compile(reconstructSource(state), FastOpt)))(Icon.play, "Run"),
+          div(cls := "ui basic button", onClick --> {buildFullSource.flatMap { source => props.dispatch(compile(source, FastOpt)) }})(Icon.play, "Run"),
           showSave ?= div(cls := "ui basic button", onClick --> props.dispatch(SaveFiddle(reconstructSource(state))))(Icon.pencil, "Save"),
           showUpdate ?= div(cls := "ui basic button", onClick --> props.dispatch(UpdateFiddle(reconstructSource(state))))(Icon.pencil, "Update"),
           showUpdate ?= div(cls := "ui basic button", onClick --> props.dispatch(ForkFiddle(reconstructSource(state))))(Icon.codeFork, "Fork"),
@@ -118,6 +120,46 @@ object FiddleEditor {
       CompileFiddle(source, opt)
     }
 
+    def reconstructSource(state: State): String = {
+      val editorContent = editor.getSession().getValue().asInstanceOf[String]
+      val source = if (state.showTemplate) {
+        editorContent
+      } else {
+        val reIndent = " " * state.indent
+        val newSource = editorContent.split("\n").map(reIndent + _)
+        (state.preCode ++ newSource ++ state.postCode).mkString("\n")
+      }
+      //println(s"Reconstructed:\n$source")
+      source
+    }
+
+    def buildFullSource: CallbackTo[String] = {
+      for {
+        props <- $.props
+        state <- $.state
+      } yield {
+        val source = reconstructSource(state)
+        val libs = props.data().fold(Seq.empty[Library])(_.libraries)
+        source + "\n" + libs.map(lib => s"// $$FiddleDependency ${Library.stringify(lib)}\n").mkString
+      }
+    }
+
+    def coordinatesFrom(row: Int, col: Int): (Int, Int) = {
+      val state = $.accessDirect.state
+      if(!state.showTemplate) {
+        (row + state.preCode.size, col + state.indent)
+      } else
+        (row, col)
+    }
+
+    def coordinatesTo(row: Int, col: Int): (Int, Int) = {
+      val state = $.accessDirect.state
+      if(!state.showTemplate) {
+        (row - state.preCode.size, col - state.indent)
+      } else
+        (row, col)
+    }
+
     def mounted(refs: RefsObject, props: Props): Callback = {
       import JsVal.jsVal2jsAny
 
@@ -138,9 +180,9 @@ object FiddleEditor {
 
         val bindings = Seq(
           EditorBinding("Compile", "Enter",
-            () => beginCompilation().foreach(_ => props.data.dispatch(compile(reconstructSource($.accessDirect.state), FastOpt)).runNow())),
+            () => beginCompilation().foreach(_ => {buildFullSource.flatMap { source => props.dispatch(compile(source, FastOpt)) }.runNow()})),
           EditorBinding("FullOptimize", "Shift-Enter",
-            () => beginCompilation().foreach(_ => props.data.dispatch(compile(reconstructSource($.accessDirect.state), FullOpt)).runNow())),
+            () => beginCompilation().foreach(_ => {buildFullSource.flatMap { source => props.dispatch(compile(source, FullOpt)) }.runNow()})),
           EditorBinding("Save", "S", () => NoAction),
           EditorBinding("Complete", "Space", () => complete())
         )
@@ -157,6 +199,7 @@ object FiddleEditor {
           ))
         }
 
+        // register auto complete
         editor.completers = js.Array(JsVal.obj(
           "getCompletions" -> { (editor: Dyn, session: Dyn, pos: Dyn, prefix: Dyn, callback: Dyn) => {
             def applyResults(results: Seq[(String, String)]): Unit = {
@@ -168,17 +211,25 @@ object FiddleEditor {
               }
               callback(null, js.Array(aceVersion: _*))
             }
-            // dispatch an action to fetch completion results
-            props.data.dispatch(AutoCompleteFiddle(
-              session.getValue().asInstanceOf[String],
-              pos.row.asInstanceOf[Int],
-              pos.column.asInstanceOf[Int],
-              applyResults)
-            ).runNow()
+            val (row, col) = coordinatesFrom(pos.row.asInstanceOf[Int], pos.column.asInstanceOf[Int])
+            // build full source
+            buildFullSource.flatMap { source =>
+              // dispatch an action to fetch completion results
+              props.dispatch(AutoCompleteFiddle(
+                source,
+                row,
+                col,
+                applyResults)
+              )
+            }.runNow()
           }
           }
         ).value)
 
+        // listen for changes in source code
+        editor.on("input", () => props.dispatch(UpdateSource(reconstructSource($.accessDirect.state))).runNow())
+        // focus to the editor
+        editor.focus()
         // apply Semantic UI
         // JQueryStatic(".ui.checkbox").checkbox()
 
@@ -211,7 +262,7 @@ object FiddleEditor {
     def updateFiddle(fiddlePot: Pot[FiddleData]): Callback = {
       fiddlePot match {
         case Ready(fiddle) =>
-          val (pre, main, post) = extractCode(fiddle.origSource)
+          val (pre, main, post) = extractCode(fiddle.sourceCode)
           $.state.flatMap { state =>
             if (state.showTemplate) {
               editor.getSession().setValue((pre ++ main ++ post).mkString("\n"))
@@ -225,17 +276,6 @@ object FiddleEditor {
           }
         case _ =>
           Callback.empty
-      }
-    }
-
-    def reconstructSource(state: State): String = {
-      val editorContent = editor.getSession().getValue().asInstanceOf[String]
-      if (state.showTemplate) {
-        editorContent
-      } else {
-        val reIndent = " " * state.indent
-        val newSource = editorContent.split("\n").map(reIndent + _)
-        (state.preCode ++ newSource ++ state.postCode).mkString("\n")
       }
     }
 
@@ -274,9 +314,11 @@ object FiddleEditor {
       editor.getSession().clearAnnotations()
       if (compilerData.annotations.nonEmpty) {
         val aceAnnotations = compilerData.annotations.map { ann =>
+          // adjust coordinates
+          val (row, col) = coordinatesTo(ann.row, ann.col)
           JsVal.obj(
-            "row" -> ann.row,
-            "col" -> ann.col,
+            "row" -> row,
+            "col" -> col,
             "text" -> ann.text.mkString("\n"),
             "type" -> ann.tpe
           ).value
@@ -285,7 +327,9 @@ object FiddleEditor {
 
         // show compiler errors in output
         val allErrors = compilerData.annotations.map { ann =>
-          s"ScalaFiddle.scala:${ann.row + 1}: ${ann.tpe}: ${ann.text.mkString("\n")}"
+          // adjust coordinates
+          val (row, col) = coordinatesTo(ann.row, ann.col)
+          s"ScalaFiddle.scala:${row + 1}: ${ann.tpe}: ${ann.text.mkString("\n")}"
         }.mkString("\n")
 
         sendFrameCmd("print", s"""<pre class="error">$allErrors</pre>""")
@@ -303,7 +347,7 @@ object FiddleEditor {
     .renderBackend[Backend]
     .componentDidMount(scope => scope.backend.mounted(scope.refs, scope.props))
     .componentWillUnmount(scope => scope.backend.unmounted)
-    .componentWillReceiveProps(scope => scope.$.backend.updateFiddle(scope.nextProps.data()))
+    //.componentWillReceiveProps(scope => scope.$.backend.updateFiddle(scope.nextProps.data()))
     .build
 
   def apply(data: ModelProxy[Pot[FiddleData]], fiddleId: Option[FiddleId], compilerData: ModelR[AppModel, CompilerData]) =

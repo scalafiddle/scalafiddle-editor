@@ -31,7 +31,6 @@ class Application @Inject()(implicit val config: Configuration, env: Environment
   val log = Logger(getClass)
   val libraries = loadLibraries(config.getString("scalafiddle.librariesURL").get)
   val defaultSource = config.getString("scalafiddle.defaultSource").get
-  val errorSource = config.getString("scalafiddle.errorSource").get
 
   val persistence = actorSystem.actorOf(Props(new Persistence(config)), "persistence")
 

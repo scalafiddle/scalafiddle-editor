@@ -56,13 +56,13 @@ class Persistence(config: Configuration) extends Actor with ActorLogging {
   def receive = {
     case AddFiddle(fiddle, user) =>
       val id = createId
-      val newFiddle = Fiddle(id, 0, fiddle.name, fiddle.description, fiddle.origSource, fiddle.libraries.map(Library.stringify).toList, user)
+      val newFiddle = Fiddle(id, 0, fiddle.name, fiddle.description, fiddle.sourceCode, fiddle.libraries.map(Library.stringify).toList, user)
       log.debug(s"Storing new fiddle: $newFiddle")
       runAndReply(dal.insert(newFiddle))(r => Success(FiddleId(id, 0))) pipeTo sender()
 
     case ForkFiddle(fiddle, id, version, user) =>
       val id = createId
-      val newFiddle = Fiddle(id, 0, fiddle.name, fiddle.description, fiddle.origSource, fiddle.libraries.map(Library.stringify).toList, user, Some(s"$id/$version"))
+      val newFiddle = Fiddle(id, 0, fiddle.name, fiddle.description, fiddle.sourceCode, fiddle.libraries.map(Library.stringify).toList, user, Some(s"$id/$version"))
       log.debug(s"Forking new fiddle: $newFiddle")
       runAndReply(dal.insert(newFiddle))(r => Success(FiddleId(id, 0))) pipeTo sender()
 
@@ -80,7 +80,7 @@ class Persistence(config: Configuration) extends Actor with ActorLogging {
       val res = db.run(dal.findVersions(id)).flatMap {
         case fiddles if fiddles.nonEmpty =>
           val newVersion = fiddles.last.version + 1
-          val newFiddle = Fiddle(id, newVersion, fiddle.name, fiddle.description, fiddle.origSource, fiddle.libraries.map(Library.stringify).toList, user)
+          val newFiddle = Fiddle(id, newVersion, fiddle.name, fiddle.description, fiddle.sourceCode, fiddle.libraries.map(Library.stringify).toList, user)
           runAndReply(dal.insert(newFiddle))(r => Success(FiddleId(id, newVersion)))
         case _ => Future.successful(Failure(new NoSuchElementException))
       }.recover {
