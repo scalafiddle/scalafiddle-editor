@@ -5,13 +5,13 @@ import diode.react.ModelProxy
 import diode.{Action, ModelR, ModelRO, NoAction}
 import japgolly.scalajs.react._
 import org.scalajs.dom
-import org.scalajs.dom.raw.{Event, HTMLElement, HTMLIFrameElement}
+import org.scalajs.dom.raw.{Event, HTMLElement, HTMLIFrameElement, MessageEvent}
 
 import scala.concurrent.ExecutionContext.Implicits.{global => ecGlobal}
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic._
-import scala.scalajs.js.{Dynamic => Dyn}
+import scala.scalajs.js.{JSON, Dynamic => Dyn}
 import scala.util.Success
 import scalafiddle.client._
 import scalafiddle.shared._
@@ -31,6 +31,7 @@ object FiddleEditor {
 
   case class State(
     compilerData: CompilerData,
+    status: CompilerStatus,
     showTemplate: Boolean = false,
     preCode: List[String] = Nil,
     mainCode: List[String] = Nil,
@@ -70,7 +71,7 @@ object FiddleEditor {
           div(cls := "editor-area")(
             div(cls := "editor")(
               div(cls := "optionsmenu")(
-                Dropdown("top right pointing mini button", span("SCALA", i(cls := "icon setting")))(
+                Dropdown("top right pointing mini button optionsbutton", span("SCALA", i(cls := "icon setting")))(
                   div(cls := "header")("Options"),
                   div(cls := "divider"),
                   div(cls := "ui input")(
@@ -84,7 +85,7 @@ object FiddleEditor {
               div(id := "editor", ref := editorRef)
             ),
             div(cls := "output")(
-              div(cls := "label", state.compilerData.status.show),
+              div(cls := "label", state.status.show),
               iframe(
                 id := "resultframe",
                 ref := resultRef,
@@ -237,6 +238,10 @@ object FiddleEditor {
         // apply Semantic UI
         // JQueryStatic(".ui.checkbox").checkbox()
 
+        // listen to messages from the iframe
+        dom.window.addEventListener("message", (e: MessageEvent) => {
+          $.modState(s => s.copy(status = CompilerStatus.Result)).runNow()
+        })
         // subscribe to changes in compiler data
         unsubscribe = AppCircuit.subscribe(props.compilerData)(compilerDataUpdated)
       } >> updateFiddle(props.data())
@@ -332,7 +337,7 @@ object FiddleEditor {
         // show compiler errors in output
         val allErrors = compilerData.annotations.map { ann =>
           // adjust coordinates
-          val (row, col) = coordinatesTo(ann.row, ann.col)
+          val (row, _) = coordinatesTo(ann.row, ann.col)
           s"ScalaFiddle.scala:${row + 1}: ${ann.tpe}: ${ann.text.mkString("\n")}"
         }.mkString("\n")
 
@@ -340,15 +345,18 @@ object FiddleEditor {
       }
 
       compilerData.jsCode.foreach { jsCode =>
-        // start running the code after a short delay, to allow DOM to update
-        js.timers.setTimeout(20)(sendFrameCmd("code", jsCode))
+        // start running the code after a short delay, to allow DOM to update in case the code is slow to complete
+        js.timers.setTimeout(20) {
+          $.modState(s => s.copy(status = CompilerStatus.Running)).runNow()
+          sendFrameCmd("code", jsCode)
+        }
       }
-      $.modState(s => s.copy(compilerData = compilerData)).runNow()
+      $.modState(s => s.copy(compilerData = compilerData, status = compilerData.status)).runNow()
     }
   }
 
   val component = ReactComponentB[Props]("FiddleEditor")
-    .initialState_P(props => State(props.compilerData()))
+    .initialState_P(props => State(props.compilerData(), CompilerStatus.Result))
     .renderBackend[Backend]
     .componentDidMount(scope => scope.backend.mounted(scope.refs, scope.props))
     .componentWillUnmount(scope => scope.backend.unmounted)

@@ -72,7 +72,7 @@ class CompilerHandler[M](modelRW: ModelRW[M, CompilerData]) extends ActionHandle
       updated(value.copy(status = CompilerStatus.Compiling, jsCode = None, annotations = Nil, errorMessage = None, log = ""), Effect(effect))
 
     case CompilerResult(Right(jsCode), log) =>
-      updated(CompilerData(CompilerStatus.Result, Some(jsCode), Seq.empty, None, log))
+      updated(CompilerData(CompilerStatus.Compiled, Some(jsCode), Seq.empty, None, log))
     case CompilerResult(Left(annotations), log) =>
       updated(CompilerData(CompilerStatus.Error, None, annotations, None, log))
     case ServerError(message) =>

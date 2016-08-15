@@ -18,6 +18,12 @@ object CompilerStatus {
   case object Compiling extends CompilerStatus {
     val show = "COMPILING"
   }
+  case object Compiled extends CompilerStatus {
+    val show = "COMPILED"
+  }
+  case object Running extends CompilerStatus {
+    val show = "RUNNING"
+  }
   case object Error extends CompilerStatus {
     val show = "ERROR"
   }
