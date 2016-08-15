@@ -53,7 +53,7 @@ object FiddleEditor {
       div(cls := "full-screen")(
         header(
           div(cls := "logo")(
-            a(href := "#")(
+            a(href := "/")(
               img(src := "/assets/images/scalafiddle-logo.png", alt := "ScalaFiddle")
             )
           ),
@@ -340,7 +340,8 @@ object FiddleEditor {
       }
 
       compilerData.jsCode.foreach { jsCode =>
-        sendFrameCmd("code", jsCode)
+        // start running the code after a short delay, to allow DOM to update
+        js.timers.setTimeout(20)(sendFrameCmd("code", jsCode))
       }
       $.modState(s => s.copy(compilerData = compilerData)).runNow()
     }

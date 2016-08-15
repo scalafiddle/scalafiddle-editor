@@ -29,7 +29,7 @@
                         case "code":
                             try {
                                 eval(msg.data);
-                                eval("ScalaFiddle().main();");
+                                eval("ScalaFiddle();");
                             } catch(ex) {
                                 result.innerHTML = '<pre class="error">ERROR: ' + ex.message + '</pre>'
                             }
@@ -40,3 +40,4 @@
         </div>
     </body>
 </html>
+    
