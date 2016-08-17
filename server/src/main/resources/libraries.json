@@ -1,30 +1,58 @@
 [
   {
-    "name": "Cats",
-    "group": "org.typelevel",
-    "artifact": "cats",
-    "version": "0.6.1",
-    "compileTimeOnly": false
+    "name": "Akka.Js",
+    "group": "eu.unicredit",
+    "artifact": "akkajsactor",
+    "version": "0.2.0",
+    "compileTimeOnly": false,
+    "scalaVersions": ["2.11"]
   },
   {
-    "name": "uPickle",
-    "group": "com.lihaoyi",
-    "artifact": "upickle",
-    "version": "0.4.1",
-    "compileTimeOnly": false
+    "name": "AkkaStream.Js",
+    "group": "eu.unicredit",
+    "artifact": "akkajsactorstream",
+    "version": "0.2.0",
+    "compileTimeOnly": false,
+    "scalaVersions": ["2.11"]
   },
   {
     "name": "BooPickle",
     "group": "me.chrons",
     "artifact": "boopickle",
     "version": "1.2.4",
-    "compileTimeOnly": false
+    "compileTimeOnly": false,
+    "scalaVersions": ["2.11"]
+  },
+  {
+    "name": "Cats",
+    "group": "org.typelevel",
+    "artifact": "cats",
+    "version": "0.6.1",
+    "compileTimeOnly": false,
+    "scalaVersions": ["2.11"]
   },
   {
     "name": "Diode",
     "group": "me.chrons",
     "artifact": "diode",
     "version": "1.0.0",
-    "compileTimeOnly": false
+    "compileTimeOnly": false,
+    "scalaVersions": ["2.11"]
+  },
+  {
+    "name": "Java8 Time",
+    "group": "org.scala-js",
+    "artifact": "scalajs-java-time",
+    "version": "0.1.0",
+    "compileTimeOnly": false,
+    "scalaVersions": ["2.11"]
+  },
+  {
+    "name": "uPickle",
+    "group": "com.lihaoyi",
+    "artifact": "upickle",
+    "version": "0.4.1",
+    "compileTimeOnly": false,
+    "scalaVersions": ["2.11"]
   }
 ]

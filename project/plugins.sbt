@@ -8,7 +8,7 @@ addSbtPlugin("se.marcuslonnberg" % "sbt-docker" % "1.3.0")
 
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.7.1")
 
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.5.3")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.5.4")
 
 addSbtPlugin("com.vmunier" % "sbt-play-scalajs" % "0.3.0")
 

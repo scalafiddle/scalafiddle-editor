@@ -7,6 +7,7 @@ GET     /                                 controllers.Application.index(id = "",
 GET     /list                             controllers.Application.fiddleList
 GET     /sf/:id                           controllers.Application.index(id, version = "0")
 GET     /sf/:id/$version<\d+>             controllers.Application.index(id, version)
+GET     /raw/:id/$version<\d+>            controllers.Application.rawFiddle(id, version)
 GET     /resultframe                      controllers.Application.resultFrame
 
 # Map static resources from the /public folder to the /assets URL path

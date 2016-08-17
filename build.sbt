@@ -46,7 +46,9 @@ lazy val server = (project in file("server"))
     version := Settings.version,
     scalaVersion := Settings.versions.scala,
     scalacOptions ++= Settings.scalacOptions,
-    libraryDependencies ++= Settings.jvmDependencies.value,
+    libraryDependencies ++= Settings.jvmDependencies.value ++ Seq(
+      filters
+    ),
     // connect to the client project
     scalaJSProjects := clients,
     pipelineStages := Seq(scalaJSProd, digest, gzip),

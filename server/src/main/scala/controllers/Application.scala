@@ -5,20 +5,19 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.google.inject.Inject
 import play.api.mvc._
-import play.api.{Configuration, Environment, Mode}
-import play.api.Logger
+import play.api.{Configuration, Environment, Logger, Mode}
 import slick.backend.DatabaseConfig
 import slick.driver.JdbcProfile
 import slick.jdbc.meta.MTable
 import upickle.default._
 import upickle.{Js, json}
 
-import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success, Try}
-import scalafiddle.server.dao.{Fiddle, FiddleDAL}
 import scalafiddle.server._
+import scalafiddle.server.dao.{Fiddle, FiddleDAL}
 import scalafiddle.shared.{Api, FiddleData, Library}
 
 object Router extends autowire.Server[Js.Value, Reader, Writer] {
@@ -47,8 +46,27 @@ class Application @Inject()(implicit val config: Configuration, env: Environment
     }
   }
 
+  def rawFiddle(fiddleId: String, version: String) = Action.async {
+    loadFiddle(fiddleId, version.toInt).map {
+      case Success(fd) =>
+        // create a source code file for embedded ScalaFiddle
+        val nameOpt = fd.name match {
+          case empty if empty.replaceAll("\\s", "").isEmpty => None
+          case nonEmpty => Some(nonEmpty.replaceAll("\\s", " "))
+        }
+        val sourceCode = new StringBuilder()
+        sourceCode.append(fd.sourceCode)
+        sourceCode.append(fd.libraries.map(l => s"// $$FiddleDependency ${Library.stringify(l)}").mkString("\n", "\n", "\n"))
+        nameOpt.foreach(name => sourceCode.append(s"// $$FiddleName $name\n"))
+
+        Ok(sourceCode.toString).withHeaders(CACHE_CONTROL -> "max-age=3600")
+      case Failure(ex) =>
+        NotFound
+    }
+  }
+
   def resultFrame = Action { request =>
-    Ok(views.html.resultframe()).withHeaders(CACHE_CONTROL -> "max-age=86400")
+    Ok(views.html.resultframe()).withHeaders(CACHE_CONTROL -> "max-age=3600")
   }
 
   def fiddleList = Action.async { implicit request =>
@@ -56,7 +74,7 @@ class Application @Inject()(implicit val config: Configuration, env: Environment
       case Success(info) =>
         // remove duplicates
         val fiddles = info.groupBy(_.id.id).values.map(_.sortBy(_.id.version).last).toVector
-        Ok(views.html.listfiddles(fiddles)).withHeaders(CACHE_CONTROL -> "max-age=60")
+        Ok(views.html.listfiddles(fiddles)).withHeaders(CACHE_CONTROL -> "max-age=10")
       case Failure(ex) =>
         NotFound
     }
