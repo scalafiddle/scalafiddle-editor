@@ -40,10 +40,9 @@ class CompilerHandler[M](modelRW: ModelRW[M, CompilerData]) extends ActionHandle
           .take(row)
           .map(_.length + 1)
           .sum
-        val flag = if (source.take(intOffset).endsWith(".")) "member" else "scope"
         // call the ScalaFiddle compiler to perform completion
         Ajax.get(
-          url = s"${ScalaFiddleConfig.compilerURL}/complete?flag=$flag&offset=$intOffset&source=${encodeSource(source)}"
+          url = s"${ScalaFiddleConfig.compilerURL}/complete?offset=$intOffset&source=${encodeSource(source)}"
         ).map { request =>
           val results = read[List[(String, String)]](request.responseText)
           println(s"Completion results: $results")
