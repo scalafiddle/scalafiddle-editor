@@ -39,7 +39,7 @@ body {
     min-width: 1000px;
     padding: 5px;
     align-items: center;
-    box-shadow: 0 0 5px rgba(66,66,86,.2);
+    box-shadow: 0 0 5px rgba(66, 66, 86, .2);
     z-index: 42;
 
     > .logo {
@@ -128,7 +128,7 @@ i.icon {
   font-family: FontAwesome;
 }
 
-.ui.button:not(.icon)>.icon:not(.button) {
+.ui.button:not(.icon) > .icon:not(.button) {
   margin: 0 0.25em 0 0;
 }
 
@@ -146,6 +146,18 @@ i.icon {
   position: relative;
   top: 0.6em;
   left: 0.6em;
+}
+
+.ui.list>.item [class*="floated"] {
+  margin: 0;
+}
+
+.ui.list>.item:first-child {
+  padding-top: inherit;
+}
+
+.ui.list.divided {
+  margin-top: 0;
 }
 
 /* Override Ace configs */
@@ -181,9 +193,18 @@ i.icon {
   padding: 2px;
   margin: 4px 0;
 
+  * > .lib-group {
+    margin: 0;
+    padding: 0.5em 0.6em;
+    background-color: #eee;
+    color: #888;
+  }
+
   * > .button, .button:hover {
     box-shadow: none !important;
     vertical-align: middle !important;
+    padding-top: .9rem !important;
+    padding-bottom: 0.3rem !important;
   }
   * > .icon {
     font-size: 1.8em;
@@ -201,33 +222,43 @@ i.icon {
 .text.white {
   color: #FFFFFF;
 }
+
 .text.grey {
   color: #CCCCCC;
 }
+
 .text.black {
   color: #1B1C1D;
 }
+
 .text.yellow {
   color: #F2C61F;
 }
+
 .text.teal {
   color: #00B5AD;
 }
+
 .text.red {
   color: #D95C5C;
 }
+
 .text.purple {
   color: #564F8A;
 }
+
 .text.pink {
   color: #D9499A;
 }
+
 .text.orange {
   color: #E07B53;
 }
+
 .text.green {
   color: #5BBD72;
 }
+
 .text.blue {
   color: #3B83C0;
 }

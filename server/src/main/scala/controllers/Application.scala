@@ -65,6 +65,11 @@ class Application @Inject()(implicit val config: Configuration, env: Environment
     }
   }
 
+  def libraryListing = Action {
+    val libStrings = libraries.map(Library.stringify)
+    Ok(write(libStrings)).withHeaders("Content-type" -> "application/json", CACHE_CONTROL -> "max-age=60")
+  }
+
   def resultFrame = Action { request =>
     Ok(views.html.resultframe()).withHeaders(CACHE_CONTROL -> "max-age=3600")
   }
@@ -97,6 +102,30 @@ class Application @Inject()(implicit val config: Configuration, env: Environment
       })
   }
 
+  case class LibraryVersion(scalaVersions: Seq[String])
+
+  case class LibraryDef(
+    name: String,
+    organization: String,
+    artifact: String,
+    doc: String,
+    versions: Map[String, LibraryVersion],
+    compileTimeOnly: Boolean
+  )
+
+  case class LibraryGroup(
+    group: String,
+    libraries: Seq[LibraryDef]
+  )
+
+  def createDocURL(doc: String): String = {
+    val githubRef = """([^/]+)/([^/]+)""".r
+    doc match {
+      case githubRef(org, lib) => s"https://github.com/$org/$lib"
+      case _ => doc
+    }
+  }
+
   def loadLibraries(uri: String): Seq[Library] = {
     val data = if (uri.startsWith("file:")) {
       // load from file system
@@ -104,7 +133,14 @@ class Application @Inject()(implicit val config: Configuration, env: Environment
     } else {
       env.resourceAsStream(uri).map(s => scala.io.Source.fromInputStream(s, "UTF-8").mkString).get
     }
-    read[Seq[Library]](data)
+    val libGroups = read[Seq[LibraryGroup]](data)
+    for {
+      (group, idx) <- libGroups.zipWithIndex
+      lib <- group.libraries
+      (version, versionDef) <- lib.versions
+    } yield {
+      Library(lib.name, lib.organization, lib.artifact, version, lib.compileTimeOnly, versionDef.scalaVersions, f"$idx%02d:${group.group}", createDocURL(lib.doc))
+    }
   }
 
   def loadFiddle(id: String, version: Int): Future[Try[FiddleData]] = {
@@ -124,9 +160,9 @@ class Application @Inject()(implicit val config: Configuration, env: Environment
 
   def findLibrary(libDef: String): Option[Library] = libDef match {
     case repoSJSRE(group, artifact, version) =>
-      libraries.find(l => l.group == group && l.artifact == artifact && l.version == version && !l.compileTimeOnly)
+      libraries.find(l => l.organization == group && l.artifact == artifact && l.version == version && !l.compileTimeOnly)
     case repoRE(group, artifact, version) =>
-      libraries.find(l => l.group == group && l.artifact == artifact && l.version == version && l.compileTimeOnly)
+      libraries.find(l => l.organization == group && l.artifact == artifact && l.version == version && l.compileTimeOnly)
     case _ =>
       None
   }

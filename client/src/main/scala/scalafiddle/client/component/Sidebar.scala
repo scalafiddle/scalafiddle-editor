@@ -5,6 +5,7 @@ import diode.data.{Pot, Ready}
 import diode.react.ModelProxy
 import japgolly.scalajs.react._
 import org.scalajs.dom.raw.HTMLDivElement
+import scalajs.js
 
 import scalafiddle.client._
 import scalafiddle.shared._
@@ -44,6 +45,8 @@ object Sidebar {
               availableVersions.foldLeft(Vector.empty[Library]) {
                 case (libs, lib) => if (libs.exists(l => l.name == lib.name)) libs else libs :+ lib
               }
+            val libGroups = available.groupBy(_.group).toSeq.sortBy(_._1).map(group => (group._1, group._2.sortBy(_.name)))
+
             div(cls := "ui accordion", ref := accordionRef)(
               div(cls := "title large active", "Info", i(cls := "icon dropdown")),
               div(cls := "content active")(
@@ -51,12 +54,12 @@ object Sidebar {
                   div(cls := "field")(
                     label("Name"),
                     input.text(placeholder := "Untitled", name := "name", value := fd.name,
-                      onChange ==> {(e: ReactEventI) => props.dispatch(UpdateInfo(e.target.value, fd.description))})
+                      onChange ==> { (e: ReactEventI) => props.dispatch(UpdateInfo(e.target.value, fd.description)) })
                   ),
                   div(cls := "field")(
                     label("Description"),
                     input.text(placeholder := "Enter description", name := "description", value := fd.description,
-                      onChange ==> {(e: ReactEventI) => props.dispatch(UpdateInfo(fd.name, e.target.value))})
+                      onChange ==> { (e: ReactEventI) => props.dispatch(UpdateInfo(fd.name, e.target.value)) })
                   )
                 )
               ),
@@ -71,9 +74,14 @@ object Sidebar {
                 ),
                 div(cls := "ui horizontal divider header", "Available"),
                 div(cls := "liblist")(
-                  div(cls := "ui middle aligned divided list")(
-                    available.map(renderLibrary(_, AvailableLib, props.dispatch))
-                  )
+                  libGroups.map { case (group, libraries) =>
+                    div(
+                      h5(cls := "lib-group", group.replaceFirst("\\d+:", "")),
+                      div(cls := "ui middle aligned divided list")(
+                        libraries.map(renderLibrary(_, AvailableLib, props.dispatch))
+                      )
+                    )
+                  }
                 ),
                 div(cls := "ui checkbox")(
                   input.checkbox(name := "all-versions", checked := state.showAllVersions,
@@ -101,7 +109,9 @@ object Sidebar {
         div(cls := "right floated")(
           button(cls := s"mini ui icon basic button ${if (mode == ForcedLib) "disabled" else ""}", onClick --> dispatch(action))(icon)
         ),
-        div(cls := "content left floated", b(lib.name), " ", span(cls := "text grey", lib.version))
+        a(href := lib.docUrl, target := "_blank")(
+          div(cls := "content left floated", b(lib.name), " ", span(cls := "text grey", lib.version))
+        )
       )
     }
   }
@@ -111,7 +121,7 @@ object Sidebar {
     .renderBackend[Backend]
     .componentDidMount(scope => Callback {
       val accordionNode = scope.refs(accordionRef).get
-      JQueryStatic(ReactDOM.findDOMNode(accordionNode)).accordion()
+      JQueryStatic(ReactDOM.findDOMNode(accordionNode)).accordion(js.Dynamic.literal(exclusive = false))
     })
     .build
 

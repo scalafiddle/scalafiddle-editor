@@ -6,7 +6,7 @@ import scala.scalajs.js
 object SemanticUI {
   @js.native
   trait SemanticJQuery extends JQuery {
-    def accordion(): SemanticJQuery = js.native
+    def accordion(params: js.Any*): SemanticJQuery = js.native
     def dropdown(params: js.Any*): SemanticJQuery = js.native
     def checkbox(): SemanticJQuery = js.native
   }

@@ -2,14 +2,14 @@ package scalafiddle.shared
 
 case class FiddleId(id: String, version: Int)
 
-case class Library(name: String, group: String, artifact: String, version: String, compileTimeOnly: Boolean, scalaVersions: Seq[String])
+case class Library(name: String, organization: String, artifact: String, version: String, compileTimeOnly: Boolean, scalaVersions: Seq[String], group: String, docUrl: String)
 
 object Library {
   def stringify(lib: Library) =
     if (lib.compileTimeOnly)
-      s"${lib.group} %% ${lib.artifact} % ${lib.version}"
+      s"${lib.organization} %% ${lib.artifact} % ${lib.version}"
     else
-      s"${lib.group} %%% ${lib.artifact} % ${lib.version}"
+      s"${lib.organization} %%% ${lib.artifact} % ${lib.version}"
 }
 
 case class FiddleData(

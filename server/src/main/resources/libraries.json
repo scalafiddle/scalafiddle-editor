@@ -1,58 +1,195 @@
 [
   {
-    "name": "Akka.Js",
-    "group": "eu.unicredit",
-    "artifact": "akkajsactor",
-    "version": "0.2.0",
-    "compileTimeOnly": false,
-    "scalaVersions": ["2.11"]
+    "group": "Web",
+    "libraries": [
+      {
+        "name": "Diode",
+        "organization": "me.chrons",
+        "artifact": "diode",
+        "doc": "ochrons/diode",
+        "versions": {
+          "1.0.0": {
+            "scalaVersions": ["2.11"]
+          }
+        },
+        "compileTimeOnly": false
+      },
+      {
+        "name": "ScalaCSS",
+        "organization": "com.github.japgolly.scalacss",
+        "artifact": "core",
+        "doc": "japgolly/scalacss",
+        "versions": {
+          "0.4.1": {
+            "scalaVersions": ["2.11"]
+          }
+        },
+        "compileTimeOnly": false
+      }
+    ]
   },
   {
-    "name": "AkkaStream.Js",
-    "group": "eu.unicredit",
-    "artifact": "akkajsactorstream",
-    "version": "0.2.0",
-    "compileTimeOnly": false,
-    "scalaVersions": ["2.11"]
+    "group": "Functional & type-level",
+    "libraries": [
+      {
+        "name": "Cats",
+        "organization": "org.typelevel",
+        "artifact": "cats",
+        "doc": "typelevel/cats",
+        "versions": {
+          "0.6.1": {
+            "scalaVersions": ["2.11"]
+          }
+        },
+        "compileTimeOnly": false
+      },
+      {
+        "name": "Scalaz",
+        "organization": "org.scalaz",
+        "artifact": "scalaz-core",
+        "doc": "scalaz/scalaz",
+        "versions": {
+          "7.2.1": {
+            "scalaVersions": ["2.11"]
+          }
+        },
+        "compileTimeOnly": false
+      },
+      {
+        "name": "Shapeless",
+        "organization": "com.chuusai",
+        "artifact": "shapeless",
+        "doc": "milessabin/shapeless",
+        "versions": {
+          "2.2.5": {
+            "scalaVersions": ["2.11"]
+          }
+        },
+        "compileTimeOnly": false
+      }
+    ]
   },
   {
-    "name": "BooPickle",
-    "group": "me.chrons",
-    "artifact": "boopickle",
-    "version": "1.2.4",
-    "compileTimeOnly": false,
-    "scalaVersions": ["2.11"]
+    "group": "FRP",
+    "libraries": [
+      {
+        "name": "Scala.Rx",
+        "organization": "com.lihaoyi",
+        "artifact": "scalarx",
+        "doc": "lihaoyi/scala.rx",
+        "versions": {
+          "0.3.1": {
+            "scalaVersions": ["2.11"]
+          }
+        },
+        "compileTimeOnly": false
+      },
+      {
+        "name": "Scala.Rx",
+        "organization": "io.monix",
+        "artifact": "monix",
+        "doc": "monixio/monix",
+        "versions": {
+          "2.0-RC11": {
+            "scalaVersions": ["2.11"]
+          }
+        },
+        "compileTimeOnly": false
+      },
+      {
+        "name": "MetaRx",
+        "organization": "pl.metastack",
+        "artifact": "metarx",
+        "doc": "MetaStack-pl/MetaRx",
+        "versions": {
+          "0.1.7": {
+            "scalaVersions": ["2.11"]
+          }
+        },
+        "compileTimeOnly": false
+      },
+      {
+        "name": "Binding.scala",
+        "organization": "com.thoughtworks.binding",
+        "artifact": "dom",
+        "doc": "ThoughtWorksInc/Binding.scala",
+        "versions": {
+          "8.0.0": {
+            "scalaVersions": ["2.11"]
+          }
+        },
+        "compileTimeOnly": false
+      }
+    ]
   },
   {
-    "name": "Cats",
-    "group": "org.typelevel",
-    "artifact": "cats",
-    "version": "0.6.1",
-    "compileTimeOnly": false,
-    "scalaVersions": ["2.11"]
+    "group": "Serialization",
+    "libraries": [
+      {
+        "name": "BooPickle",
+        "organization": "me.chrons",
+        "artifact": "boopickle",
+        "doc": "ochrons/boopickle",
+        "versions": {
+          "1.2.4": {
+            "scalaVersions": ["2.11"]
+          }
+        },
+        "compileTimeOnly": false
+      },
+      {
+        "name": "uPickle",
+        "organization": "com.lihaoyi",
+        "artifact": "upickle",
+        "doc": "lihaoyi/upickle-pprint",
+        "versions": {
+          "0.4.1": {
+            "scalaVersions": ["2.11"]
+          }
+        },
+        "compileTimeOnly": false
+      }
+    ]
   },
   {
-    "name": "Diode",
-    "group": "me.chrons",
-    "artifact": "diode",
-    "version": "1.0.0",
-    "compileTimeOnly": false,
-    "scalaVersions": ["2.11"]
-  },
-  {
-    "name": "Java8 Time",
-    "group": "org.scala-js",
-    "artifact": "scalajs-java-time",
-    "version": "0.1.0",
-    "compileTimeOnly": false,
-    "scalaVersions": ["2.11"]
-  },
-  {
-    "name": "uPickle",
-    "group": "com.lihaoyi",
-    "artifact": "upickle",
-    "version": "0.4.1",
-    "compileTimeOnly": false,
-    "scalaVersions": ["2.11"]
+    "group": "Miscellaneous",
+    "libraries": [
+      {
+        "name": "Akka.Js",
+        "organization": "eu.unicredit",
+        "artifact": "akkajsactor",
+        "doc": "unicredit/akka.js",
+        "versions": {
+          "0.2.0": {
+            "scalaVersions": ["2.11"]
+          }
+        },
+        "compileTimeOnly": false
+      },
+      {
+        "name": "AkkaStream.Js",
+        "organization": "eu.unicredit",
+        "artifact": "akkajsactorstream",
+        "doc": "unicredit/akka.js",
+        "versions": {
+          "0.2.0": {
+            "scalaVersions": ["2.11"]
+          }
+        },
+        "compileTimeOnly": false
+      },
+      {
+        "name": "Java8 Time",
+        "organization": "org.scala-js",
+        "artifact": "scalajs-java-time",
+        "doc": "scala-js/scala-js-java-time",
+        "versions": {
+          "0.1.0": {
+            "scalaVersions": ["2.11"]
+          }
+        },
+        "compileTimeOnly": false
+      }
+    ]
   }
 ]
