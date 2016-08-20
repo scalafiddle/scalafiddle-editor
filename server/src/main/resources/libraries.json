@@ -189,6 +189,18 @@
           }
         },
         "compileTimeOnly": false
+      },
+      {
+        "name": "Rapture",
+        "organization": "com.propensive",
+        "artifact": "rapture",
+        "doc": "http://rapture.io/",
+        "versions": {
+          "2.0.0-M7": {
+            "scalaVersions": ["2.11"]
+          }
+        },
+        "compileTimeOnly": false
       }
     ]
   }

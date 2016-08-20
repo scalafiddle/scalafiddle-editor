@@ -1,6 +1,8 @@
 package scalafiddle.shared
 
-case class FiddleId(id: String, version: Int)
+case class FiddleId(id: String, version: Int) {
+  override def toString: String = s"$id/$version"
+}
 
 case class Library(name: String, organization: String, artifact: String, version: String, compileTimeOnly: Boolean, scalaVersions: Seq[String], group: String, docUrl: String)
 

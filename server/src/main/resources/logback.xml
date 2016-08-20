@@ -14,7 +14,7 @@
 
     <logger name="akka.cluster" level="INFO" />
     <logger name="io.netty" level="WARN" />
-    <logger name="akka" level="DEBUG" />
+    <logger name="akka" level="INFO" />
     <logger name="akka.http" level="INFO" />
     <logger name="slick" level="INFO" />
     <logger name="slick.compiler" level="INFO" />

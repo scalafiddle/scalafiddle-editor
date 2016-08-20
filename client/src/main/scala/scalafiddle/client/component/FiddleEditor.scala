@@ -64,7 +64,9 @@ object FiddleEditor {
           showSave ?= div(cls := "ui basic button", onClick --> props.dispatch(SaveFiddle(reconstructSource(state))))(Icon.pencil, "Save"),
           showUpdate ?= div(cls := "ui basic button", onClick --> props.dispatch(UpdateFiddle(reconstructSource(state))))(Icon.pencil, "Update"),
           showUpdate ?= div(cls := "ui basic button", onClick --> props.dispatch(ForkFiddle(reconstructSource(state))))(Icon.codeFork, "Fork"),
-          div(cls := "ui basic disabled button")("Embed", Icon.caretDown)
+          showUpdate ?= Dropdown("top basic button embed-options", span("Embed", Icon.caretDown))(
+            EmbedEditor(props.fiddleId.get)
+          )
         ),
         div(cls := "main")(
           Sidebar(props.data),

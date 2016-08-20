@@ -35,12 +35,13 @@ body {
 
   > header {
     .flex-container;
+    overflow: visible;
     height: 55px;
     min-width: 1000px;
     padding: 5px;
     align-items: center;
     box-shadow: 0 0 5px rgba(66, 66, 86, .2);
-    z-index: 42;
+    z-index: 999;
 
     > .logo {
       margin: 0 10px;
@@ -99,7 +100,7 @@ body {
         background-color: rgba(230, 230, 230, 0.8);
         border-radius: .3rem;
         color: #aaa;
-        z-index: 999;
+        z-index: 15;
         text-align: right;
         font-size: 0.8em;
       }
@@ -109,7 +110,7 @@ body {
         position: absolute;
         top: 5px;
         right: 5px;
-        z-index: 999;
+        z-index: 15;
 
         > .optionsbutton {
           background-color: rgba(230, 230, 230, 0.8);
@@ -140,6 +141,10 @@ i.icon {
 .ui.header:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) {
   font-size: 1em;
   color: #aaa;
+}
+
+.ui.form .fields {
+  margin-left: 0;
 }
 
 .ui.list[class*="middle aligned"] .content {
@@ -187,7 +192,7 @@ i.icon {
 }
 
 .liblist {
-  max-height: 250px;
+  max-height: 350px;
   overflow-y: auto;
   border: 1px solid #ddd;
   padding: 2px;
@@ -217,6 +222,41 @@ i.icon {
   bottom: 0;
   left: 0;
   right: 0;
+}
+
+.embed-options .menu {
+  left: -300px !important;
+}
+
+.embed-editor {
+  width: 1100px;
+  height: 500px;
+  padding: 10px;
+  display: flex;
+  overflow: hidden;
+  flex-wrap: nowrap;
+
+  > .options {
+    flex: 0 0 320px;
+  }
+
+  > .preview {
+    flex: 1;
+    margin-left: 10px;
+  }
+
+  * > .header {
+    color: #aaaaaa;
+    text-transform: uppercase;
+    font-size: 0.8em;
+    margin-bottom: 1.5em;
+  }
+}
+
+.ui.form textarea.embed-code {
+  height: 70px;
+  color: #888;
+  padding: 2px;
 }
 
 .text.white {
