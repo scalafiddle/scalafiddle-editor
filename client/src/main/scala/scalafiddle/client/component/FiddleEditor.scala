@@ -65,7 +65,7 @@ object FiddleEditor {
           showUpdate ?= div(cls := "ui basic button", onClick --> props.dispatch(UpdateFiddle(reconstructSource(state))))(Icon.pencil, "Update"),
           showUpdate ?= div(cls := "ui basic button", onClick --> props.dispatch(ForkFiddle(reconstructSource(state))))(Icon.codeFork, "Fork"),
           showUpdate ?= Dropdown("top basic button embed-options", span("Embed", Icon.caretDown))(
-            EmbedEditor(props.fiddleId.get)
+            div(cls := "menu", display.block)(EmbedEditor(props.fiddleId.get))
           )
         ),
         div(cls := "main")(
@@ -74,12 +74,14 @@ object FiddleEditor {
             div(cls := "editor")(
               div(cls := "optionsmenu")(
                 Dropdown("top right pointing mini button optionsbutton", span("SCALA", i(cls := "icon setting")))(
-                  div(cls := "header")("Options"),
-                  div(cls := "divider"),
-                  div(cls := "ui input")(
-                    div(cls := "ui checkbox")(
-                      input.checkbox(checked := state.showTemplate, onChange --> switchTemplate),
-                      label("Show template")
+                  div(cls := "menu", display.block)(
+                    div(cls := "header")("Options"),
+                    div(cls := "divider"),
+                    div(cls := "ui input")(
+                      div(cls := "ui checkbox")(
+                        input.checkbox(checked := state.showTemplate, onChange --> switchTemplate),
+                        label("Show template")
+                      )
                     )
                   )
                 )

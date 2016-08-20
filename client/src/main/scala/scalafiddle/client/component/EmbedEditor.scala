@@ -3,7 +3,6 @@ package scalafiddle.client.component
 import japgolly.scalajs.react._
 import org.scalajs.dom.raw.HTMLTextAreaElement
 
-import scala.util.{Success, Try}
 import scalafiddle.client.ScalaFiddleConfig
 import scalafiddle.shared.FiddleId
 
