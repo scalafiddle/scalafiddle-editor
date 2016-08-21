@@ -30,9 +30,10 @@
                             try {
                                 eval(msg.data);
                                 eval("var sf = ScalaFiddle();if(typeof sf.main === 'function') sf.main();");
-                                e.source.postMessage("evalCompleted", "*");
                             } catch(ex) {
-                                result.innerHTML = '<pre class="error">ERROR: ' + ex.message + '</pre>'
+                                result.insertAdjacentHTML('beforeend', '<pre class="error">ERROR: ' + ex.message + '</pre>')
+                            } finally {
+                                e.source.postMessage("evalCompleted", "*");
                             }
                             break;
                     }
