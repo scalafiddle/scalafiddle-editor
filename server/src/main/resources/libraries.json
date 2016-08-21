@@ -25,6 +25,30 @@
           }
         },
         "compileTimeOnly": false
+      },
+      {
+        "name": "Widok",
+        "organization": "io.github.widok",
+        "artifact": "widok",
+        "doc": "https://widok.github.io",
+        "versions": {
+          "0.2.2": {
+            "scalaVersions": ["2.11"]
+          }
+        },
+        "compileTimeOnly": false
+      },
+      {
+        "name": "Udash",
+        "organization": "io.udash",
+        "artifact": "udash-core-frontend",
+        "doc": "http://udash.io",
+        "versions": {
+          "0.3.1": {
+            "scalaVersions": ["2.11"]
+          }
+        },
+        "compileTimeOnly": false
       }
     ]
   },
