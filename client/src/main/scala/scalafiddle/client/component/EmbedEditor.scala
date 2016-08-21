@@ -94,7 +94,7 @@ object EmbedEditor {
         ),
         div(cls := "preview")(
           div(cls := "header", "Preview"),
-          iframe(height := 300, width := "100%", frameBorder := 0, style := "width: 100%; overflow: hidden", src := createIframeSource)
+          iframe(height := 300, width := "100%", frameBorder := 0, style := "width: 100%; overflow: hidden", src := s"$createIframeSource&preview=true")
         )
       )
     }

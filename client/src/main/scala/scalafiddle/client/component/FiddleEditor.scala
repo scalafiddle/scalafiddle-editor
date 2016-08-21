@@ -349,9 +349,9 @@ object FiddleEditor {
       }
 
       compilerData.jsCode.foreach { jsCode =>
+        $.modState(s => s.copy(status = CompilerStatus.Running)).runNow()
         // start running the code after a short delay, to allow DOM to update in case the code is slow to complete
         js.timers.setTimeout(20) {
-          $.modState(s => s.copy(status = CompilerStatus.Running)).runNow()
           sendFrameCmd("code", jsCode)
         }
       }

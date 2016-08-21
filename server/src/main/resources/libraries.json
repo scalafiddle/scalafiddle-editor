@@ -32,7 +32,7 @@
         "artifact": "widok",
         "doc": "https://widok.github.io",
         "versions": {
-          "0.2.2": {
+          "0.2.4": {
             "scalaVersions": ["2.11"]
           }
         },
@@ -86,6 +86,18 @@
         "doc": "milessabin/shapeless",
         "versions": {
           "2.2.5": {
+            "scalaVersions": ["2.11"]
+          }
+        },
+        "compileTimeOnly": false
+      },
+      {
+        "name": "FS2",
+        "organization": "co.fs2",
+        "artifact": "fs2-core",
+        "doc": "functional-streams-for-scala/fs2",
+        "versions": {
+          "0.9.0-RC1": {
             "scalaVersions": ["2.11"]
           }
         },
