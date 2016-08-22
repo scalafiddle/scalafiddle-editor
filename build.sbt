@@ -69,12 +69,12 @@ lazy val server = (project in file("server"))
     imageNames in docker := Seq(
       ImageName(
         namespace = Some("scalafiddle"),
-        repository = "scalafiddle-web",
+        repository = "scalafiddle-editor",
         tag = Some("latest")
       ),
       ImageName(
         namespace = Some("scalafiddle"),
-        repository = "scalafiddle-web",
+        repository = "scalafiddle-editor",
         tag = Some(version.value)
       )
     )

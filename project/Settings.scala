@@ -7,7 +7,7 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
   */
 object Settings {
   /** The name of your application */
-  val name = "scalafiddle-web"
+  val name = "scalafiddle-editor"
 
   /** The version of your application */
   val version = "1.0.0-SNAPSHOT"
