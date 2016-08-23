@@ -41,7 +41,7 @@
       {
         "name": "Udash",
         "organization": "io.udash",
-        "artifact": "udash-core-frontend",
+        "artifact": "udash-bootstrap",
         "doc": "http://udash.io",
         "versions": {
           "0.3.1": {
