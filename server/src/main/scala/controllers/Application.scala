@@ -66,7 +66,7 @@ class Application @Inject()(implicit val config: Configuration, env: Environment
   }
 
   def libraryListing = Action {
-    val libStrings = libraries.map(Library.stringify)
+    val libStrings = libraries.flatMap(lib => Library.stringify(lib) +: lib.extraDeps)
     Ok(write(libStrings)).withHeaders("Content-type" -> "application/json", CACHE_CONTROL -> "max-age=60")
   }
 
@@ -102,7 +102,10 @@ class Application @Inject()(implicit val config: Configuration, env: Environment
       })
   }
 
-  case class LibraryVersion(scalaVersions: Seq[String])
+  case class LibraryVersion(
+    scalaVersions: Seq[String],
+    extraDeps: Seq[String]
+  )
 
   case class LibraryDef(
     name: String,
@@ -139,7 +142,7 @@ class Application @Inject()(implicit val config: Configuration, env: Environment
       lib <- group.libraries
       (version, versionDef) <- lib.versions
     } yield {
-      Library(lib.name, lib.organization, lib.artifact, version, lib.compileTimeOnly, versionDef.scalaVersions, f"$idx%02d:${group.group}", createDocURL(lib.doc))
+      Library(lib.name, lib.organization, lib.artifact, version, lib.compileTimeOnly, versionDef.scalaVersions, versionDef.extraDeps, f"$idx%02d:${group.group}", createDocURL(lib.doc))
     }
   }
 

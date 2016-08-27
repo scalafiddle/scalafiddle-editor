@@ -3,6 +3,7 @@ package scalafiddle.client.component
 import japgolly.scalajs.react._
 import org.scalajs.dom
 import org.scalajs.dom.raw.{HTMLElement, MouseEvent}
+import scalajs.js
 
 object Dropdown {
   import japgolly.scalajs.react.vdom.all._
@@ -20,10 +21,12 @@ object Dropdown {
       )
     }
 
+    val closeFn: js.Function1[MouseEvent, _] = (e: MouseEvent) => closeDropdown(e)
+
     def dropdownClicked(e: ReactEventH, isOpen: Boolean): Callback = {
       if (!isOpen) {
         Callback {
-          dom.document.addEventListener("click", closeDropdown _)
+          dom.document.addEventListener("click", closeFn)
         } >> $.modState(s => s.copy(isOpen = true))
       } else {
         Callback.empty
@@ -32,7 +35,7 @@ object Dropdown {
 
     def closeDropdown(e: MouseEvent): Unit = {
       if($.accessDirect.state.isOpen && !$.getDOMNode().asInstanceOf[HTMLElement].contains(e.target.asInstanceOf[HTMLElement])) {
-        dom.document.removeEventListener("click", closeDropdown _)
+        dom.document.removeEventListener("click", closeFn)
         $.modState(s => s.copy(isOpen = false)).runNow()
       }
     }

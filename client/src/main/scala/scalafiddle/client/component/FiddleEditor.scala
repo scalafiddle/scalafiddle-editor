@@ -50,7 +50,6 @@ object FiddleEditor {
       def showSave = props.fiddleId.isEmpty
       def showUpdate = props.fiddleId.nonEmpty
 
-      val selectedLibs = props.data().fold(Seq.empty[Library])(_.libraries)
       div(cls := "full-screen")(
         header(
           div(cls := "logo")(
@@ -149,7 +148,9 @@ object FiddleEditor {
       } yield {
         val source = reconstructSource(state)
         val libs = props.data().fold(Seq.empty[Library])(_.libraries)
-        source + "\n" + libs.map(lib => s"// $$FiddleDependency ${Library.stringify(lib)}\n").mkString
+        val extraDeps = libs.flatMap(_.extraDeps)
+        val allDeps = extraDeps ++ libs.map(Library.stringify)
+        source + "\n" + allDeps.map(dep => s"// $$FiddleDependency $dep\n").mkString
       }
     }
 
