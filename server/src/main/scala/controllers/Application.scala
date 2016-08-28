@@ -1,9 +1,10 @@
 package controllers
 
+import javax.inject.{Inject, Named}
+
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
-import com.google.inject.Inject
 import play.api.mvc._
 import play.api.{Configuration, Environment, Logger, Mode}
 import slick.backend.DatabaseConfig
@@ -25,13 +26,12 @@ object Router extends autowire.Server[Js.Value, Reader, Writer] {
   override def write[R: Writer](r: R) = writeJs(r)
 }
 
-class Application @Inject()(implicit val config: Configuration, env: Environment, actorSystem: ActorSystem) extends Controller {
+class Application @Inject()(implicit val config: Configuration, env: Environment,
+  actorSystem: ActorSystem, @Named("persistence") persistence: ActorRef) extends Controller {
   implicit val timeout = Timeout(15.seconds)
   val log = Logger(getClass)
   val libraries = loadLibraries(config.getString("scalafiddle.librariesURL").get)
   val defaultSource = config.getString("scalafiddle.defaultSource").get
-
-  val persistence = actorSystem.actorOf(Props(new Persistence(config)), "persistence")
 
   if (env.mode != Mode.Prod)
     createTables()

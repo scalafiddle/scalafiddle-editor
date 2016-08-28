@@ -1,9 +1,11 @@
 package scalafiddle.server
 
 import java.util.UUID
+import javax.inject.Inject
 
 import akka.actor.{Actor, ActorLogging}
 import akka.pattern.pipe
+import com.mohiva.play.silhouette.api.LoginInfo
 import play.api.Configuration
 import slick.backend.DatabaseConfig
 import slick.dbio.{DBIOAction, NoStream}
@@ -13,6 +15,7 @@ import scala.util.{Failure, Success, Try}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scalafiddle.server.dao.{Fiddle, FiddleDAL}
+import scalafiddle.server.models.User
 import scalafiddle.shared.{FiddleData, FiddleId, Library}
 
 case class AddFiddle(fiddle: FiddleData, user: String)
@@ -31,7 +34,15 @@ case class FiddleInfo(name: String, id: FiddleId)
 
 case class RemoveFiddle(id: String, version: Int)
 
-class Persistence(config: Configuration) extends Actor with ActorLogging {
+case class FindUser(id: String)
+
+case class FindUserLogin(loginInfo: LoginInfo)
+
+case class AddUser(user: User)
+
+case class UpdateUser(user: User)
+
+class Persistence @Inject() (config: Configuration) extends Actor with ActorLogging {
   val dbConfig = DatabaseConfig.forConfig[JdbcProfile](config.getString("scalafiddle.dbConfig").get)
   val db = dbConfig.db
   val dal = new FiddleDAL(dbConfig.driver)
@@ -50,7 +61,7 @@ class Persistence(config: Configuration) extends Actor with ActorLogging {
     var id = math.abs(UUID.randomUUID().getLeastSignificantBits)
     // encode to 0-9A-Za-z
     var strId = ""
-    while (strId.length < 6) {
+    while (strId.length < 7) {
       strId += mapping((id % mapping.length).toInt)
       id /= mapping.length
     }
@@ -117,5 +128,29 @@ class Persistence(config: Configuration) extends Actor with ActorLogging {
         case e: Throwable => Failure(e)
       }
       res pipeTo sender()
+
+    case FindUser(id) =>
+      val res = db.run(dal.findUser(id)).map {
+        case Some(user) => Success(user)
+        case None => Failure(new NoSuchElementException)
+      }.recover {
+        case e: Throwable => Failure(e)
+      }
+      res pipeTo sender()
+
+    case FindUserLogin(loginInfo) =>
+      val res = db.run(dal.findUser(loginInfo)).map {
+        case Some(user) => Success(user)
+        case None => Failure(new NoSuchElementException)
+      }.recover {
+        case e: Throwable => Failure(e)
+      }
+      res pipeTo sender()
+
+    case AddUser(user) =>
+      runAndReply(dal.insert(user))(_ => Success(user)) pipeTo sender()
+
+    case UpdateUser(user) =>
+      runAndReply(dal.update(user))(_ => Success(user)) pipeTo sender()
   }
 }

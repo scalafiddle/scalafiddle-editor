@@ -32,6 +32,7 @@ object Settings {
     val uTest = "0.4.3"
     val upickle = "0.3.8"
     val slick = "3.1.0"
+    val silhouette = "4.0.0"
 
     val jQuery = "3.0.0"
     val semantic = "2.2.2"
@@ -57,6 +58,12 @@ object Settings {
     "com.typesafe.slick" %% "slick-hikaricp" % versions.slick,
     "com.h2database" % "h2" % "1.4.190",
     "org.postgresql" % "postgresql" % "9.4-1206-jdbc41",
+    "com.mohiva" %% "play-silhouette" % versions.silhouette,
+    "com.mohiva" %% "play-silhouette-password-bcrypt" % versions.silhouette,
+    "com.mohiva" %% "play-silhouette-persistence" % versions.silhouette,
+    "com.mohiva" %% "play-silhouette-crypto-jca" % versions.silhouette,
+    "net.codingwell" %% "scala-guice" % "4.0.1",
+    "com.iheart" %% "ficus" % "1.2.6",
     "com.vmunier" %% "play-scalajs-scripts" % versions.playScripts,
     "org.webjars" % "font-awesome" % "4.6.3" % Provided,
     "org.webjars" % "Semantic-UI" % versions.semantic % Provided,
