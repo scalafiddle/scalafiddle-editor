@@ -44,12 +44,17 @@
       {
         "name": "Udash",
         "organization": "io.udash",
-        "artifact": "udash-bootstrap",
+        "artifact": "udash-core-frontend",
         "doc": "http://udash.io",
         "versions": {
           "0.3.1": {
             "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "extraDeps": [
+              "io.udash %%% udash-bootstrap % 0.3.1",
+              "io.udash %%% udash-i18n-frontend % 0.3.1",
+              "io.udash %%% udash-rpc-frontend % 0.3.1",
+              "io.udash %%% udash-rest-shared % 0.3.1"
+            ]
           }
         },
         "compileTimeOnly": false
