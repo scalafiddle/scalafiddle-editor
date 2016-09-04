@@ -21,16 +21,16 @@ object AppRouter {
 
     val fiddleData = AppCircuit.connect(_.fiddleData)
 
-    (staticRoute(root, Home) ~> render(fiddleData(d => FiddleEditor(d, None, AppCircuit.zoom(_.compilerData))))
+    (staticRoute(root, Home) ~> render(fiddleData(d => FiddleEditor(d, None, AppCircuit.zoom(_.compilerData), AppCircuit.zoom(_.loginData))))
       | dynamicRouteCT("sf" / (string("\\w+") / int).caseClass[EditorPage]) ~> dynRender(
       (p: EditorPage) => {
         val fid = FiddleId(p.id, p.version)
         AppCircuit.dispatch(UpdateId(fid, true))
-        fiddleData(d => FiddleEditor(d, Some(fid), AppCircuit.zoom(_.compilerData)))
+        fiddleData(d => FiddleEditor(d, Some(fid), AppCircuit.zoom(_.compilerData), AppCircuit.zoom(_.loginData)))
       })
       )
       .notFound(redirectToPage(Home)(Redirect.Replace))
-  }.logToConsole.renderWith(layout)
+  }.renderWith(layout)
 
   val baseUrl =
     if (dom.window.location.hostname == "localhost")

@@ -43,9 +43,48 @@ body {
     box-shadow: 0 0 5px rgba(66, 66, 86, .2);
     z-index: 999;
 
-    > .logo {
-      margin: 0 10px;
+    > .left {
+      display: flex;
+      overflow: hidden;
+      flex-wrap: nowrap;
+      flex: 1;
+      align-items: center;
+
+      > .logo {
+        margin: 0 10px;
+      }
     }
+
+    > .right {
+      display: flex;
+      overflow: hidden;
+      flex-wrap: nowrap;
+      align-items: center;
+
+      > .userinfo {
+        .flex-container;
+        align-items: center;
+
+        > img {
+          height: 42px;
+          border-radius: 50%;
+        }
+        > .username {
+          padding: 0 10px;
+        }
+      }
+      > * > .login {
+        vertical-align: middle;
+        padding: 8px 10px;
+
+        > img {
+          height: 24px;
+          padding-right: 10px;
+          vertical-align: middle;
+        }
+      }
+    }
+
   }
 
   > .main {

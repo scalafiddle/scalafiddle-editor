@@ -122,7 +122,7 @@
         "artifact": "monix",
         "doc": "https://monix.io/",
         "versions": {
-          "2.0-RC13": {
+          "2.0.0": {
             "scalaVersions": ["2.11"],
             "extraDeps": []
           }

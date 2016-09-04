@@ -5,6 +5,8 @@ import javax.inject.{Inject, Named}
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
+import com.mohiva.play.silhouette.api.{LogoutEvent, Silhouette}
+import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import play.api.mvc._
 import play.api.{Configuration, Environment, Logger, Mode}
 import slick.backend.DatabaseConfig
@@ -19,6 +21,7 @@ import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success, Try}
 import scalafiddle.server._
 import scalafiddle.server.dao.{Fiddle, FiddleDAL}
+import utils.auth.{AllLoginProviders, DefaultEnv}
 import scalafiddle.shared.{Api, FiddleData, Library}
 
 object Router extends autowire.Server[Js.Value, Reader, Writer] {
@@ -26,8 +29,14 @@ object Router extends autowire.Server[Js.Value, Reader, Writer] {
   override def write[R: Writer](r: R) = writeJs(r)
 }
 
-class Application @Inject()(implicit val config: Configuration, env: Environment,
-  actorSystem: ActorSystem, @Named("persistence") persistence: ActorRef) extends Controller {
+class Application @Inject()(
+  implicit val config: Configuration,
+  env: Environment,
+  silhouette: Silhouette[DefaultEnv],
+  socialProviderRegistry: SocialProviderRegistry,
+  actorSystem: ActorSystem,
+  @Named("persistence") persistence: ActorRef
+) extends Controller {
   implicit val timeout = Timeout(15.seconds)
   val log = Logger(getClass)
   val libraries = loadLibraries(config.getString("scalafiddle.librariesURL").get)
@@ -44,6 +53,12 @@ class Application @Inject()(implicit val config: Configuration, env: Environment
       case Failure(ex) =>
         NotFound
     }
+  }
+
+  def signOut = silhouette.SecuredAction.async { implicit request =>
+    val result = Redirect(routes.Application.index("", "0"))
+    silhouette.env.eventBus.publish(LogoutEvent(request.identity, request))
+    silhouette.env.authenticatorService.discard(request.authenticator, result)
   }
 
   def rawFiddle(fiddleId: String, version: String) = Action.async {
@@ -67,7 +82,7 @@ class Application @Inject()(implicit val config: Configuration, env: Environment
 
   def libraryListing = Action {
     val libStrings = libraries.flatMap(lib => Library.stringify(lib) +: lib.extraDeps)
-    Ok(write(libStrings)).withHeaders("Content-type" -> "application/json", CACHE_CONTROL -> "max-age=60")
+    Ok(write(libStrings)).as("application/json").withHeaders(CACHE_CONTROL -> "max-age=60")
   }
 
   def resultFrame = Action { request =>
@@ -85,9 +100,11 @@ class Application @Inject()(implicit val config: Configuration, env: Environment
     }
   }
 
-  def autowireApi(path: String) = Action.async {
+  val loginProviders = config.getStringSeq("scalafiddle.loginProviders").get.map(AllLoginProviders.providers)
+
+  def autowireApi(path: String) = silhouette.UserAwareAction.async {
     implicit request =>
-      val apiService: Api = new ApiService(persistence, "anonymous")
+      val apiService: Api = new ApiService(persistence, request.identity, loginProviders)
       println(s"Request path: $path")
 
       // get the request body as JSON
@@ -199,6 +216,6 @@ class Application @Inject()(implicit val config: Configuration, env: Environment
         })
       }
     }
-    Await.result(createTableIfNotExists(Seq(dal.fiddles)), Duration.Inf)
+    Await.result(createTableIfNotExists(Seq(dal.fiddles, dal.users)), Duration.Inf)
   }
 }

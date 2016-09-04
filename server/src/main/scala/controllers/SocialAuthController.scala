@@ -20,14 +20,12 @@ import scalafiddle.server.utils.auth.DefaultEnv
  * @param messagesApi The Play messages API.
  * @param silhouette The Silhouette stack.
  * @param userService The user service implementation.
- * @param authInfoRepository The auth info service implementation.
  * @param socialProviderRegistry The social provider registry.
  */
 class SocialAuthController @Inject() (
   val messagesApi: MessagesApi,
   silhouette: Silhouette[DefaultEnv],
   userService: UserService,
-  authInfoRepository: AuthInfoRepository,
   socialProviderRegistry: SocialProviderRegistry)
   extends Controller with I18nSupport with Logger {
 
@@ -45,7 +43,6 @@ class SocialAuthController @Inject() (
           case Right(authInfo) => for {
             profile <- p.retrieveProfile(authInfo)
             user <- userService.save(profile)
-            authInfo <- authInfoRepository.save(profile.loginInfo, authInfo)
             authenticator <- silhouette.env.authenticatorService.create(profile.loginInfo)
             value <- silhouette.env.authenticatorService.init(authenticator)
             result <- silhouette.env.authenticatorService.embed(value, Redirect(routes.Application.index("","0")))

@@ -25,7 +25,11 @@ object FiddleEditor {
 
   case class EditorBinding(name: String, keys: String, action: () => Any)
 
-  case class Props(data: ModelProxy[Pot[FiddleData]], fiddleId: Option[FiddleId], compilerData: ModelR[AppModel, CompilerData]) {
+  case class Props(
+    data: ModelProxy[Pot[FiddleData]],
+    fiddleId: Option[FiddleId],
+    compilerData: ModelR[AppModel, CompilerData],
+    loginData: ModelR[AppModel, LoginData]) {
     def dispatch = data.theDispatch
   }
 
@@ -52,19 +56,24 @@ object FiddleEditor {
 
       div(cls := "full-screen")(
         header(
-          div(cls := "logo")(
-            a(href := "/")(
-              img(src := "/assets/images/scalafiddle-logo.png", alt := "ScalaFiddle")
+          div(cls := "left")(
+            div(cls := "logo")(
+              a(href := "/")(
+                img(src := "/assets/images/scalafiddle-logo.png", alt := "ScalaFiddle")
+              )
+            ),
+            div(cls := "ui basic button", onClick --> {
+              Callback.future(beginCompilation().map(_ => {buildFullSource.flatMap { source => props.dispatch(compile(source, FastOpt)) }}))
+            })(Icon.play, "Run"),
+            showSave ?= div(cls := "ui basic button", onClick --> props.dispatch(SaveFiddle(reconstructSource(state))))(Icon.pencil, "Save"),
+            showUpdate ?= div(cls := "ui basic button", onClick --> props.dispatch(UpdateFiddle(reconstructSource(state))))(Icon.pencil, "Update"),
+            showUpdate ?= div(cls := "ui basic button", onClick --> props.dispatch(ForkFiddle(reconstructSource(state))))(Icon.codeFork, "Fork"),
+            showUpdate ?= Dropdown("top basic button embed-options", span("Embed", Icon.caretDown))(
+              div(cls := "menu", display.block)(EmbedEditor(props.fiddleId.get))
             )
           ),
-          div(cls := "ui basic button", onClick --> {
-            Callback.future(beginCompilation().map(_ => {buildFullSource.flatMap { source => props.dispatch(compile(source, FastOpt)) }}))
-          })(Icon.play, "Run"),
-          showSave ?= div(cls := "ui basic button", onClick --> props.dispatch(SaveFiddle(reconstructSource(state))))(Icon.pencil, "Save"),
-          showUpdate ?= div(cls := "ui basic button", onClick --> props.dispatch(UpdateFiddle(reconstructSource(state))))(Icon.pencil, "Update"),
-          showUpdate ?= div(cls := "ui basic button", onClick --> props.dispatch(ForkFiddle(reconstructSource(state))))(Icon.codeFork, "Fork"),
-          showUpdate ?= Dropdown("top basic button embed-options", span("Embed", Icon.caretDown))(
-            div(cls := "menu", display.block)(EmbedEditor(props.fiddleId.get))
+          div(cls := "right")(
+            UserLogin(props.loginData)
           )
         ),
         div(cls := "main")(
@@ -243,13 +252,14 @@ object FiddleEditor {
         // apply Semantic UI
         // JQueryStatic(".ui.checkbox").checkbox()
 
+
         // listen to messages from the iframe
         dom.window.addEventListener("message", (e: MessageEvent) => {
           $.modState(s => s.copy(status = CompilerStatus.Result)).runNow()
         })
         // subscribe to changes in compiler data
         unsubscribe = AppCircuit.subscribe(props.compilerData)(compilerDataUpdated)
-      } >> updateFiddle(props.data())
+      } >> props.dispatch(UpdateLoginInfo) >> updateFiddle(props.data())
     }
 
     val fiddleStart = """\s*// \$FiddleStart\s*$""".r
@@ -368,6 +378,7 @@ object FiddleEditor {
     //.componentWillReceiveProps(scope => scope.$.backend.updateFiddle(scope.nextProps.data()))
     .build
 
-  def apply(data: ModelProxy[Pot[FiddleData]], fiddleId: Option[FiddleId], compilerData: ModelR[AppModel, CompilerData]) =
-    component(Props(data, fiddleId, compilerData))
+  def apply(data: ModelProxy[Pot[FiddleData]], fiddleId: Option[FiddleId], compilerData: ModelR[AppModel, CompilerData],
+    loginData: ModelR[AppModel, LoginData]) =
+    component(Props(data, fiddleId, compilerData, loginData))
 }

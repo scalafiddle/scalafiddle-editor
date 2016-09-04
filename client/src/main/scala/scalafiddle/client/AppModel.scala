@@ -3,7 +3,7 @@ package scalafiddle.client
 import diode._
 import diode.data.Pot
 
-import scalafiddle.shared.{FiddleData, FiddleId}
+import scalafiddle.shared._
 
 case class EditorAnnotation(row: Int, col: Int, text: Seq[String], tpe: String)
 
@@ -37,11 +37,17 @@ case class CompilerData(
   log: String
 )
 
+case class LoginData(
+  userInfo: Pot[UserInfo],
+  loginProviders: Pot[Seq[LoginProvider]]
+)
+
 case class AppModel(
   navLocation: Page,
   fiddleId: Option[FiddleId],
   fiddleData: Pot[FiddleData],
-  compilerData: CompilerData
+  compilerData: CompilerData,
+  loginData: LoginData
 )
 
 case class NavigateTo(page: Page) extends Action

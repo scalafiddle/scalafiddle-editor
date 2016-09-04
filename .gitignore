@@ -18,3 +18,4 @@ project/plugins/project/
 .worksheet
 .idea
 temp/*
+/server/src/main/resources/local.conf

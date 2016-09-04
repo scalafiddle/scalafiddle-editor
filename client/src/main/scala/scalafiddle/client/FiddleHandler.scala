@@ -34,7 +34,7 @@ class FiddleHandler[M](modelRW: ModelRW[M, Pot[FiddleData]], fidRW: ModelRW[M, O
     case DeselectLibrary(lib) =>
       updated(value.map(fd => fd.copy(libraries = fd.libraries.filterNot(_ == lib))))
 
-    case  UpdateInfo(name, description) =>
+    case UpdateInfo(name, description) =>
       updated(value.map(fd => fd.copy(name = name, description = description)))
 
     case UpdateSource(source) =>
@@ -86,7 +86,7 @@ class FiddleHandler[M](modelRW: ModelRW[M, Pot[FiddleData]], fidRW: ModelRW[M, O
       }
 
     case UpdateId(fid, silent) =>
-      if(silent)
+      if (silent)
         ModelUpdate(fidRW.updated(Some(fid)))
       else
         ModelUpdateEffect(fidRW.updated(Some(fid)), Effect.action(NavigateTo(AppRouter.EditorPage(fid.id, fid.version))))
