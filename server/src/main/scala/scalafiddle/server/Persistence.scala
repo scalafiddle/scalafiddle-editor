@@ -20,7 +20,7 @@ import scalafiddle.shared.{FiddleData, FiddleId, Library}
 
 case class AddFiddle(fiddle: FiddleData, user: String)
 
-case class UpdateFiddle(fiddle: FiddleData, id: String, user: String)
+case class UpdateFiddle(fiddle: FiddleData, id: String)
 
 case class ForkFiddle(fiddle: FiddleData, id: String, version: Int, user: String)
 
@@ -42,7 +42,7 @@ case class AddUser(user: User)
 
 case class UpdateUser(user: User)
 
-class Persistence @Inject() (config: Configuration) extends Actor with ActorLogging {
+class Persistence @Inject()(config: Configuration) extends Actor with ActorLogging {
   val dbConfig = DatabaseConfig.forConfig[JdbcProfile](config.getString("scalafiddle.dbConfig").get)
   val db = dbConfig.db
   val dal = new FiddleDAL(dbConfig.driver)
@@ -90,12 +90,13 @@ class Persistence @Inject() (config: Configuration) extends Actor with ActorLogg
       }
       res pipeTo sender()
 
-    case UpdateFiddle(fiddle, id, user) =>
+    case UpdateFiddle(fiddle, id) =>
       // find last fiddle version for this id
       val res = db.run(dal.findEventVersions(id)).flatMap {
         case fiddles if fiddles.nonEmpty =>
-          val newVersion = fiddles.last.version + 1
-          val newFiddle = Fiddle(id, newVersion, fiddle.name, fiddle.description, fiddle.sourceCode, fiddle.libraries.map(Library.stringify).toList, user)
+          val latest = fiddles.last
+          val newVersion = latest.version + 1
+          val newFiddle = Fiddle(id, newVersion, fiddle.name, fiddle.description, fiddle.sourceCode, fiddle.libraries.map(Library.stringify).toList, latest.user, Some(s"${latest.id}/${latest.version}"))
           runAndReply(dal.insertEvent(newFiddle))(r => Success(FiddleId(id, newVersion)))
         case _ => Future.successful(Failure(new NoSuchElementException))
       }.recover {

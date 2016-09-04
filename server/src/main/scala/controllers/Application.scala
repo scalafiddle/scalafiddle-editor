@@ -21,8 +21,9 @@ import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success, Try}
 import scalafiddle.server._
 import scalafiddle.server.dao.{Fiddle, FiddleDAL}
+import scalafiddle.server.models.User
 import utils.auth.{AllLoginProviders, DefaultEnv}
-import scalafiddle.shared.{Api, FiddleData, Library}
+import scalafiddle.shared.{Api, FiddleData, Library, UserInfo}
 
 object Router extends autowire.Server[Js.Value, Reader, Writer] {
   override def read[R: Reader](p: Js.Value) = readJs[R](p)
@@ -167,11 +168,22 @@ class Application @Inject()(
     if (id == "") {
       // build default fiddle data
       val (source, libs) = parseFiddle(defaultSource)
-      Future(Success(FiddleData("", "", source, libs, Seq.empty, libraries)))
+      Future(Success(FiddleData("", "", source, libs, Seq.empty, libraries, None)))
     } else {
-      ask(persistence, FindFiddle(id, version)).mapTo[Try[Fiddle]].map(_.map(f =>
-        FiddleData(f.name, f.description, f.sourceCode, f.libraries.flatMap(findLibrary), Seq.empty, libraries)
-      ))
+      ask(persistence, FindFiddle(id, version)).mapTo[Try[Fiddle]].flatMap {
+        case Success(f) if f.user == "anonymous" =>
+          Future.successful(Success(FiddleData(f.name, f.description, f.sourceCode, f.libraries.flatMap(findLibrary), Seq.empty, libraries, None)))
+        case Success(f) =>
+          ask(persistence, FindUser(f.user)).mapTo[Try[User]].map {
+            case Success(u) =>
+              val user = UserInfo(u.userID, u.name.getOrElse("Anonymous"), u.avatarURL, loggedIn = false)
+              Success(FiddleData(f.name, f.description, f.sourceCode, f.libraries.flatMap(findLibrary), Seq.empty, libraries, Some(user)))
+            case _ =>
+              Success(FiddleData(f.name, f.description, f.sourceCode, f.libraries.flatMap(findLibrary), Seq.empty, libraries, None))
+          }
+        case Failure(e) =>
+          Future.successful(Failure(e))
+      }
     }
   }
 

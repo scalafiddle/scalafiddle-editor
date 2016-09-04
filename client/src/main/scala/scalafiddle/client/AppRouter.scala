@@ -47,7 +47,13 @@ object AppRouter {
   }
 
   def navigated(page: ModelRO[Page]): Unit = {
-    scalajs.js.timers.setTimeout(0)(routerLogic.ctl.set(page.value).runNow())
+    // scalajs.js.timers.setTimeout(0)(routerLogic.ctl.set(page.value).runNow())
+    page() match {
+      case Home =>
+        scalajs.js.timers.setTimeout(0)(dom.window.location.assign("/"))
+      case EditorPage(id, version) =>
+        scalajs.js.timers.setTimeout(0)(dom.window.location.assign(s"/sf/$id/$version"))
+    }
   }
 
   // subscribe to navigation changes

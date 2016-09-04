@@ -3,7 +3,6 @@ package scalafiddle.client
 import autowire._
 import diode.ActionResult.{ModelUpdate, ModelUpdateEffect}
 import diode._
-import diode.data.{Pot, Ready}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -25,64 +24,57 @@ case class ForkFiddle(source: String) extends Action
 
 case class UpdateId(fiddleId: FiddleId, silent: Boolean = false) extends Action
 
-class FiddleHandler[M](modelRW: ModelRW[M, Pot[FiddleData]], fidRW: ModelRW[M, Option[FiddleId]]) extends ActionHandler(modelRW) {
+class FiddleHandler[M](modelRW: ModelRW[M, FiddleData], fidRW: ModelRW[M, Option[FiddleId]]) extends ActionHandler(modelRW) {
 
   override def handle = {
     case SelectLibrary(lib) =>
-      updated(value.map(fd => fd.copy(libraries = fd.libraries :+ lib)))
+      updated(value.copy(libraries = value.libraries :+ lib))
 
     case DeselectLibrary(lib) =>
-      updated(value.map(fd => fd.copy(libraries = fd.libraries.filterNot(_ == lib))))
+      updated(value.copy(libraries = value.libraries.filterNot(_ == lib)))
 
     case UpdateInfo(name, description) =>
-      updated(value.map(fd => fd.copy(name = name, description = description)))
+      updated(value.copy(name = name, description = description))
 
     case UpdateSource(source) =>
-      updated(value.map(fd => fd.copy(sourceCode = source)))
+      updated(value.copy(sourceCode = source))
 
     case SaveFiddle(source) =>
-      value match {
-        case Ready(fiddle) =>
-          val newFiddle = fiddle.copy(sourceCode = source, available = Seq.empty)
-          val save: Future[Action] = AjaxClient[Api].save(newFiddle).call().map {
-            case Right(fid) =>
-              UpdateId(fid)
-            case Left(error) =>
-              NoAction
-          }
-          updated(value.map(fd => fd.copy(sourceCode = source)), Effect(save))
-        case _ =>
-          noChange
+      val newFiddle = value.copy(sourceCode = source, available = Seq.empty)
+      val save: Future[Action] = AjaxClient[Api].save(newFiddle).call().map {
+        case Right(fid) =>
+          UpdateId(fid)
+        case Left(error) =>
+          NoAction
       }
+      updated(value.copy(sourceCode = source), Effect(save))
 
     case UpdateFiddle(source) =>
-      value match {
-        case Ready(fiddle) if fidRW().isDefined =>
-          val newFiddle = fiddle.copy(sourceCode = source, available = Seq.empty)
-          val save: Future[Action] = AjaxClient[Api].update(newFiddle, fidRW().get.id).call().map {
-            case Right(fid) =>
-              UpdateId(fid)
-            case Left(error) =>
-              NoAction
-          }
-          updated(value.map(fd => fd.copy(sourceCode = source)), Effect(save))
-        case _ =>
-          noChange
+      if (fidRW().isDefined) {
+        val newFiddle = value.copy(sourceCode = source, available = Seq.empty)
+        val save: Future[Action] = AjaxClient[Api].update(newFiddle, fidRW().get.id).call().map {
+          case Right(fid) =>
+            UpdateId(fid)
+          case Left(error) =>
+            NoAction
+        }
+        updated(value.copy(sourceCode = source), Effect(save))
+      } else {
+        noChange
       }
 
     case ForkFiddle(source) =>
-      value match {
-        case Ready(fiddle) if fidRW().isDefined =>
-          val newFiddle = fiddle.copy(sourceCode = source, available = Seq.empty)
+      if (fidRW().isDefined) {
+          val newFiddle = value.copy(sourceCode = source, available = Seq.empty)
           val save: Future[Action] = AjaxClient[Api].fork(newFiddle, fidRW().get.id, fidRW().get.version).call().map {
             case Right(fid) =>
               UpdateId(fid)
             case Left(error) =>
               NoAction
           }
-          updated(value.map(fd => fd.copy(sourceCode = source)), Effect(save))
-        case _ =>
-          noChange
+          updated(value.copy(sourceCode = source), Effect(save))
+      } else {
+        noChange
       }
 
     case UpdateId(fid, silent) =>

@@ -16,7 +16,7 @@ object AppCircuit extends Circuit[AppModel] with ReactConnector[AppModel] {
   def fiddleData = read[FiddleData](JSON.stringify(js.Dynamic.global.ScalaFiddleData))
 
   override protected def initialModel =
-    AppModel(Home, None, Ready(fiddleData), CompilerData(CompilerStatus.Result, None, Seq.empty, None, ""), LoginData(Empty, Empty))
+    AppModel(Home, None, fiddleData, CompilerData(CompilerStatus.Result, None, Seq.empty, None, ""), LoginData(Empty, Empty))
 
   override protected def actionHandler = composeHandlers(
     new FiddleHandler(zoomRW(_.fiddleData)((m, v) => m.copy(fiddleData = v)), zoomRW(_.fiddleId)((m, v) => m.copy(fiddleId = v))),

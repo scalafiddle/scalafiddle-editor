@@ -26,7 +26,7 @@ object FiddleEditor {
   case class EditorBinding(name: String, keys: String, action: () => Any)
 
   case class Props(
-    data: ModelProxy[Pot[FiddleData]],
+    data: ModelProxy[FiddleData],
     fiddleId: Option[FiddleId],
     compilerData: ModelR[AppModel, CompilerData],
     loginData: ModelR[AppModel, LoginData]) {
@@ -52,7 +52,21 @@ object FiddleEditor {
       import japgolly.scalajs.react.vdom.all._
 
       def showSave = props.fiddleId.isEmpty
-      def showUpdate = props.fiddleId.nonEmpty
+      def fiddleHasId = props.fiddleId.nonEmpty
+      def showUpdate: Boolean = {
+        if (!fiddleHasId)
+          false
+        else if (props.data().author.isEmpty)
+          true
+        else {
+          props.loginData().userInfo match {
+            case Ready(userInfo) =>
+              userInfo.id == props.data().author.get.id
+            case _ =>
+              false
+          }
+        }
+      }
 
       div(cls := "full-screen")(
         header(
@@ -67,8 +81,8 @@ object FiddleEditor {
             })(Icon.play, "Run"),
             showSave ?= div(cls := "ui basic button", onClick --> props.dispatch(SaveFiddle(reconstructSource(state))))(Icon.pencil, "Save"),
             showUpdate ?= div(cls := "ui basic button", onClick --> props.dispatch(UpdateFiddle(reconstructSource(state))))(Icon.pencil, "Update"),
-            showUpdate ?= div(cls := "ui basic button", onClick --> props.dispatch(ForkFiddle(reconstructSource(state))))(Icon.codeFork, "Fork"),
-            showUpdate ?= Dropdown("top basic button embed-options", span("Embed", Icon.caretDown))(
+            fiddleHasId ?= div(cls := "ui basic button", onClick --> props.dispatch(ForkFiddle(reconstructSource(state))))(Icon.codeFork, "Fork"),
+            fiddleHasId ?= Dropdown("top basic button embed-options", span("Embed", Icon.caretDown))(
               div(cls := "menu", display.block)(EmbedEditor(props.fiddleId.get))
             )
           ),
@@ -156,7 +170,7 @@ object FiddleEditor {
         state <- $.state
       } yield {
         val source = reconstructSource(state)
-        val libs = props.data().fold(Seq.empty[Library])(_.libraries)
+        val libs = props.data().libraries
         val extraDeps = libs.flatMap(_.extraDeps)
         val allDeps = extraDeps ++ libs.map(Library.stringify)
         source + "\n" + allDeps.map(dep => s"// $$FiddleDependency $dep\n").mkString
@@ -283,23 +297,18 @@ object FiddleEditor {
       (pre.reverse, main.reverse, post.reverse)
     }
 
-    def updateFiddle(fiddlePot: Pot[FiddleData]): Callback = {
-      fiddlePot match {
-        case Ready(fiddle) =>
-          val (pre, main, post) = extractCode(fiddle.sourceCode)
-          $.state.flatMap { state =>
-            if (state.showTemplate) {
-              editor.getSession().setValue((pre ++ main ++ post).mkString("\n"))
-              $.setState(state.copy(preCode = pre, mainCode = main, postCode = post, indent = 0))
-            } else {
-              // figure out indentation
-              val indent = main.filter(_.nonEmpty).map(_.takeWhile(_ == ' ').length).min
-              editor.getSession().setValue(main.map(_.drop(indent)).mkString("\n"))
-              $.setState(state.copy(preCode = pre, mainCode = main, postCode = post, indent = indent))
-            }
-          }
-        case _ =>
-          Callback.empty
+    def updateFiddle(fiddle: FiddleData): Callback = {
+      val (pre, main, post) = extractCode(fiddle.sourceCode)
+      $.state.flatMap { state =>
+        if (state.showTemplate) {
+          editor.getSession().setValue((pre ++ main ++ post).mkString("\n"))
+          $.setState(state.copy(preCode = pre, mainCode = main, postCode = post, indent = 0))
+        } else {
+          // figure out indentation
+          val indent = main.filter(_.nonEmpty).map(_.takeWhile(_ == ' ').length).min
+          editor.getSession().setValue(main.map(_.drop(indent)).mkString("\n"))
+          $.setState(state.copy(preCode = pre, mainCode = main, postCode = post, indent = indent))
+        }
       }
     }
 
@@ -378,7 +387,7 @@ object FiddleEditor {
     //.componentWillReceiveProps(scope => scope.$.backend.updateFiddle(scope.nextProps.data()))
     .build
 
-  def apply(data: ModelProxy[Pot[FiddleData]], fiddleId: Option[FiddleId], compilerData: ModelR[AppModel, CompilerData],
+  def apply(data: ModelProxy[FiddleData], fiddleId: Option[FiddleId], compilerData: ModelR[AppModel, CompilerData],
     loginData: ModelR[AppModel, LoginData]) =
     component(Props(data, fiddleId, compilerData, loginData))
 }

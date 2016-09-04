@@ -21,9 +21,19 @@ class ApiService(persistence: ActorRef, user: Option[User], _loginProviders: Seq
   }
 
   override def update(fiddle: FiddleData, id: String): Future[Either[String, FiddleId]] = {
-    ask(persistence, UpdateFiddle(fiddle, id, user.fold("anonymous")(_.userID))).mapTo[Try[FiddleId]].map {
-      case Success(fid) => Right(fid)
-      case Failure(ex) => Left(ex.toString)
+    // allow update only when user is the same as fiddle author (or fiddle is anonymous)
+    val updateOk = (fiddle.author.map(_.id), user.map(_.userID)) match {
+      case (Some(authorId), Some(userId)) if authorId == userId => true
+      case (None, _) => true
+      case _ => false
+    }
+    if(updateOk) {
+      ask(persistence, UpdateFiddle(fiddle, id)).mapTo[Try[FiddleId]].map {
+        case Success(fid) => Right(fid)
+        case Failure(ex) => Left(ex.toString)
+      }
+    } else {
+      Future.successful(Left("Not allowed to update fiddle"))
     }
   }
 

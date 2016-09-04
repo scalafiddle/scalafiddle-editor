@@ -29,6 +29,6 @@ case class FiddleData(
   sourceCode: String,
   libraries: Seq[Library],
   forced: Seq[Library],
-  available: Seq[Library]
+  available: Seq[Library],
+  author: Option[UserInfo]
 )
-

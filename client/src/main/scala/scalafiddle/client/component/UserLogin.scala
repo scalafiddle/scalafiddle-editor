@@ -19,7 +19,7 @@ object UserLogin {
       loginData.userInfo match {
         case Ready(userInfo) if userInfo.loggedIn =>
           div(cls := "userinfo")(
-            img(src := userInfo.avatarUrl.getOrElse("/assets/images/anon.png")),
+            img(cls := "author", src := userInfo.avatarUrl.getOrElse("/assets/images/anon.png")),
             div(cls :="username", userInfo.name),
             a(href := "/signout", div(cls := "ui basic button", "Sign out"))
           )

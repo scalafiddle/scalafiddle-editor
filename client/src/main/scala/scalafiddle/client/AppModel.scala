@@ -45,7 +45,7 @@ case class LoginData(
 case class AppModel(
   navLocation: Page,
   fiddleId: Option[FiddleId],
-  fiddleData: Pot[FiddleData],
+  fiddleData: FiddleData,
   compilerData: CompilerData,
   loginData: LoginData
 )

@@ -24,7 +24,7 @@ object Sidebar {
 
   case object AvailableLib extends LibMode
 
-  case class Props(data: ModelProxy[Pot[FiddleData]]) {
+  case class Props(data: ModelProxy[FiddleData]) {
     def dispatch = data.theDispatch
   }
 
@@ -33,69 +33,73 @@ object Sidebar {
   case class Backend($: BackendScope[Props, State]) {
 
     def render(props: Props, state: State) = {
-      div(cls := "sidebar")(
-        props.data() match {
-          case Ready(fd) =>
-            // filter the list of available libs
-            val availableVersions = fd.available.filterNot(lib => fd.libraries.exists(_.name == lib.name))
-            // hide alternative versions, if requested
-            val available = if (state.showAllVersions)
-              availableVersions
-            else
-              availableVersions.foldLeft(Vector.empty[Library]) {
-                case (libs, lib) => if (libs.exists(l => l.name == lib.name)) libs else libs :+ lib
-              }
-            val libGroups = available.groupBy(_.group).toSeq.sortBy(_._1).map(group => (group._1, group._2.sortBy(_.name)))
+      val fd = props.data()
+      // filter the list of available libs
+      val availableVersions = fd.available.filterNot(lib => fd.libraries.exists(_.name == lib.name))
+      // hide alternative versions, if requested
+      val available = if (state.showAllVersions)
+        availableVersions
+      else
+        availableVersions.foldLeft(Vector.empty[Library]) {
+          case (libs, lib) => if (libs.exists(l => l.name == lib.name)) libs else libs :+ lib
+        }
+      val libGroups = available.groupBy(_.group).toSeq.sortBy(_._1).map(group => (group._1, group._2.sortBy(_.name)))
 
-            div(cls := "ui accordion", ref := accordionRef)(
-              div(cls := "title large active", "Info", i(cls := "icon dropdown")),
-              div(cls := "content active")(
-                div(cls := "ui form")(
-                  div(cls := "field")(
-                    label("Name"),
-                    input.text(placeholder := "Untitled", name := "name", value := fd.name,
-                      onChange ==> { (e: ReactEventI) => props.dispatch(UpdateInfo(e.target.value, fd.description)) })
-                  ),
-                  div(cls := "field")(
-                    label("Description"),
-                    input.text(placeholder := "Enter description", name := "description", value := fd.description,
-                      onChange ==> { (e: ReactEventI) => props.dispatch(UpdateInfo(fd.name, e.target.value)) })
-                  )
-                )
+      val (authorName, authorImage) = fd.author match {
+        case Some(userInfo) if userInfo.id != "anonymous" =>
+          (userInfo.name, userInfo.avatarUrl.getOrElse("/assets/images/anon.png"))
+        case _ =>
+          ("Anonymous", "/assets/images/anon.png")
+      }
+      div(cls := "sidebar")(
+        div(cls := "ui accordion", ref := accordionRef)(
+          div(cls := "title large active", "Info", i(cls := "icon dropdown")),
+          div(cls := "content active")(
+            div(cls := "ui form")(
+              div(cls := "field")(
+                label("Name"),
+                input.text(placeholder := "Untitled", name := "name", value := fd.name,
+                  onChange ==> { (e: ReactEventI) => props.dispatch(UpdateInfo(e.target.value, fd.description)) })
               ),
-              div(cls := "title", "Libraries", i(cls := "icon dropdown")),
-              div(cls := "content")(
-                div(cls := "ui horizontal divider header", "Selected"),
-                div(cls := "liblist")(
-                  div(cls := "ui middle aligned divided list")(
-                    fd.forced.map(renderLibrary(_, ForcedLib, props.dispatch)) ++
-                      fd.libraries.map(renderLibrary(_, SelectedLib, props.dispatch))
-                  )
-                ),
-                div(cls := "ui horizontal divider header", "Available"),
-                div(cls := "liblist")(
-                  libGroups.map { case (group, libraries) =>
-                    div(
-                      h5(cls := "lib-group", group.replaceFirst("\\d+:", "")),
-                      div(cls := "ui middle aligned divided list")(
-                        libraries.map(renderLibrary(_, AvailableLib, props.dispatch))
-                      )
-                    )
-                  }
-                ),
-                div(cls := "ui checkbox")(
-                  input.checkbox(name := "all-versions", checked := state.showAllVersions,
-                    onChange --> $.modState(s => s.copy(showAllVersions = !s.showAllVersions))),
-                  label("Show all versions")
-                )
+              div(cls := "field")(
+                label("Description"),
+                input.text(placeholder := "Enter description", name := "description", value := fd.description,
+                  onChange ==> { (e: ReactEventI) => props.dispatch(UpdateInfo(fd.name, e.target.value)) })
+              ),
+              div(cls := "field")(
+                label("Author"),
+                img(cls := "author", src := authorImage),
+                authorName
               )
             )
-          case _ =>
-            div(cls := "ui center aligned basic segment")(
-              div(cls := "ui active inline loader"),
-              div(cls := "ui text", "Loading")
+          ),
+          div(cls := "title", "Libraries", i(cls := "icon dropdown")),
+          div(cls := "content")(
+            div(cls := "ui horizontal divider header", "Selected"),
+            div(cls := "liblist")(
+              div(cls := "ui middle aligned divided list")(
+                fd.forced.map(renderLibrary(_, ForcedLib, props.dispatch)) ++
+                  fd.libraries.map(renderLibrary(_, SelectedLib, props.dispatch))
+              )
+            ),
+            div(cls := "ui horizontal divider header", "Available"),
+            div(cls := "liblist")(
+              libGroups.map { case (group, libraries) =>
+                div(
+                  h5(cls := "lib-group", group.replaceFirst("\\d+:", "")),
+                  div(cls := "ui middle aligned divided list")(
+                    libraries.map(renderLibrary(_, AvailableLib, props.dispatch))
+                  )
+                )
+              }
+            ),
+            div(cls := "ui checkbox")(
+              input.checkbox(name := "all-versions", checked := state.showAllVersions,
+                onChange --> $.modState(s => s.copy(showAllVersions = !s.showAllVersions))),
+              label("Show all versions")
             )
-        }
+          )
+        )
       )
     }
 
@@ -125,5 +129,5 @@ object Sidebar {
     })
     .build
 
-  def apply(data: ModelProxy[Pot[FiddleData]]) = component(Props(data))
+  def apply(data: ModelProxy[FiddleData]) = component(Props(data))
 }

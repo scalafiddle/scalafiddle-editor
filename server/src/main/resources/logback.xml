@@ -20,6 +20,7 @@
     <logger name="slick.compiler" level="INFO" />
     <logger name="com.zaxxer.hikari" level="INFO" />
     <logger name="com.google.inject" level="INFO" />
+    <logger name="org.asynchttpclient" level="INFO" />
     <logger name="scalafiddle" level="DEBUG" />
 
 </configuration>
