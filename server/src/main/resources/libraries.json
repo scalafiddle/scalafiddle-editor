@@ -70,6 +70,10 @@
         "artifact": "cats",
         "doc": "typelevel/cats",
         "versions": {
+          "0.7.2": {
+            "scalaVersions": ["2.11"],
+            "extraDeps": []
+          },
           "0.6.1": {
             "scalaVersions": ["2.11"],
             "extraDeps": []
@@ -148,19 +152,6 @@
         "compileTimeOnly": false
       },
       {
-        "name": "Scala.Rx",
-        "organization": "io.monix",
-        "artifact": "monix",
-        "doc": "monixio/monix",
-        "versions": {
-          "2.0-RC11": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
-          }
-        },
-        "compileTimeOnly": false
-      },
-      {
         "name": "MetaRx",
         "organization": "pl.metastack",
         "artifact": "metarx",
@@ -179,7 +170,7 @@
         "artifact": "dom",
         "doc": "ThoughtWorksInc/Binding.scala",
         "versions": {
-          "8.0.0": {
+          "9.0.0": {
             "scalaVersions": ["2.11"],
             "extraDeps": []
           }
@@ -223,6 +214,10 @@
         "artifact": "circe-core",
         "doc": "travisbrown/circe",
         "versions": {
+          "0.5.1": {
+            "scalaVersions": ["2.11"],
+            "extraDeps": ["io.circe %%% circe-generic % 0.5.1", "io.circe %%% circe-parser % 0.5.1"]
+          },
           "0.4.1": {
             "scalaVersions": ["2.11"],
             "extraDeps": ["io.circe %%% circe-generic % 0.4.1", "io.circe %%% circe-parser % 0.4.1"]
@@ -241,6 +236,10 @@
         "artifact": "akkajsactor",
         "doc": "unicredit/akka.js",
         "versions": {
+          "0.2.4.9": {
+            "scalaVersions": ["2.11"],
+            "extraDeps": []
+          },
           "0.2.0": {
             "scalaVersions": ["2.11"],
             "extraDeps": []
@@ -254,6 +253,10 @@
         "artifact": "akkajsactorstream",
         "doc": "unicredit/akka.js",
         "versions": {
+          "0.2.4.9": {
+            "scalaVersions": ["2.11"],
+            "extraDeps": []
+          },
           "0.2.0": {
             "scalaVersions": ["2.11"],
             "extraDeps": []

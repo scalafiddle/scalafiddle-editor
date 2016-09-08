@@ -7,6 +7,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.mohiva.play.silhouette.api.{LogoutEvent, Silhouette}
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
+import play.api.libs.streams.ActorFlow
 import play.api.mvc._
 import play.api.{Configuration, Environment, Logger, Mode}
 import slick.backend.DatabaseConfig

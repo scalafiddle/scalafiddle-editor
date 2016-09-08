@@ -57,6 +57,10 @@ lazy val server = (project in file("server"))
     // compress CSS
     LessKeys.compress in Assets := true,
     scriptClasspath := Seq("../config/") ++ scriptClasspath.value,
+    mappings in Universal := (mappings in Universal).value.filter {
+      case (file, fileName) => !fileName.endsWith("local.conf")
+    },
+    mappings in (Compile, packageDoc) := Seq(),
     dockerfile in docker := {
       val appDir: File = stage.value
       val targetDir = "/app"

@@ -31,7 +31,9 @@ case class ServerError(message: String) extends Action
 
 class CompilerHandler[M](modelRW: ModelRW[M, CompilerData]) extends ActionHandler(modelRW) {
 
-  case class CompilerResponse(jsCode: Option[String], annotations: Seq[EditorAnnotation], log: String)
+  case class CompilationResponse(jsCode: Option[String], annotations: Seq[EditorAnnotation], log: String)
+
+  case class CompletionResponse(completions: List[(String, String)])
 
   override def handle = {
     case AutoCompleteFiddle(source, row, col, callback) =>
@@ -44,9 +46,9 @@ class CompilerHandler[M](modelRW: ModelRW[M, CompilerData]) extends ActionHandle
         Ajax.get(
           url = s"${ScalaFiddleConfig.compilerURL}/complete?offset=$intOffset&source=${encodeSource(source)}"
         ).map { request =>
-          val results = read[List[(String, String)]](request.responseText)
+          val results = read[CompletionResponse](request.responseText)
           println(s"Completion results: $results")
-          callback(results)
+          callback(results.completions)
           NoAction
         }
       }
@@ -56,10 +58,10 @@ class CompilerHandler[M](modelRW: ModelRW[M, CompilerData]) extends ActionHandle
       val effect = Ajax.get(
         url = s"${ScalaFiddleConfig.compilerURL}/compile?opt=${optimization.flag}&source=${encodeSource(source)}"
       ).map { request =>
-        read[CompilerResponse](request.responseText) match {
-          case CompilerResponse(Some(jsCode), _, log) =>
+        read[CompilationResponse](request.responseText) match {
+          case CompilationResponse(Some(jsCode), _, log) =>
             CompilerResult(Right(jsCode), log)
-          case CompilerResponse(None, annotations, log) =>
+          case CompilationResponse(None, annotations, log) =>
             CompilerResult(Left(annotations), log)
         }
       } recover {
@@ -72,8 +74,10 @@ class CompilerHandler[M](modelRW: ModelRW[M, CompilerData]) extends ActionHandle
 
     case CompilerResult(Right(jsCode), log) =>
       updated(CompilerData(CompilerStatus.Compiled, Some(jsCode), Seq.empty, None, log))
+
     case CompilerResult(Left(annotations), log) =>
       updated(CompilerData(CompilerStatus.Error, None, annotations, None, log))
+
     case ServerError(message) =>
       updated(CompilerData(CompilerStatus.Error, None, Seq.empty, Some(message), ""))
 

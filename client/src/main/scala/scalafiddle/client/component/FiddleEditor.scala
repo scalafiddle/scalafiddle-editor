@@ -45,6 +45,7 @@ object FiddleEditor {
 
   case class Backend($: BackendScope[Props, State]) {
     var unsubscribe: () => Unit = () => ()
+    var unsubscribeLoginData: () => Unit = () => ()
     var editor: Dyn = _
     var resultFrame: HTMLIFrameElement = _
 
@@ -273,6 +274,7 @@ object FiddleEditor {
         })
         // subscribe to changes in compiler data
         unsubscribe = AppCircuit.subscribe(props.compilerData)(compilerDataUpdated)
+        unsubscribeLoginData = AppCircuit.subscribe(props.loginData)(_ => $.forceUpdate.runNow())
       } >> props.dispatch(UpdateLoginInfo) >> updateFiddle(props.data())
     }
 
@@ -313,7 +315,10 @@ object FiddleEditor {
     }
 
     def unmounted: Callback = {
-      Callback(unsubscribe())
+      Callback {
+        unsubscribe()
+        unsubscribeLoginData()
+      }
     }
 
     def switchTemplate: Callback = {
