@@ -27,7 +27,7 @@ object UserLogin {
           loginData.loginProviders match {
             case Ready(loginProviders) if loginProviders.size == 1 =>
               val provider = loginProviders.head
-              a(href := s"/authenticate/${provider.id}")(div(cls := "ui blue button login")(
+              a(href := s"/authenticate/${provider.id}")(div(cls := "ui button login")(
                 img(src := provider.logoUrl),
                 s"Sign in with ${provider.name}"
               ))

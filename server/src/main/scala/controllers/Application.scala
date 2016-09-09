@@ -107,7 +107,6 @@ class Application @Inject()(
   def autowireApi(path: String) = silhouette.UserAwareAction.async {
     implicit request =>
       val apiService: Api = new ApiService(persistence, request.identity, loginProviders)
-      println(s"Request path: $path")
 
       // get the request body as JSON
       val b = request.body.asText.get

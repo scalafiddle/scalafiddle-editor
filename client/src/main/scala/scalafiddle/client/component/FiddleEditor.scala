@@ -48,6 +48,8 @@ object FiddleEditor {
     var unsubscribeLoginData: () => Unit = () => ()
     var editor: Dyn = _
     var resultFrame: HTMLIFrameElement = _
+    var frameReady: Boolean = false
+    var pendingMessages: List[js.Object] = Nil
 
     def render(props: Props, state: State) = {
       import japgolly.scalajs.react.vdom.all._
@@ -129,7 +131,12 @@ object FiddleEditor {
 
     def sendFrameCmd(cmd: String, data: String = "") = {
       val msg = js.Dynamic.literal(cmd = cmd, data = data)
-      resultFrame.contentWindow.postMessage(msg, "*")
+      if(frameReady) {
+        resultFrame.contentWindow.postMessage(msg, "*")
+      } else {
+        println(s"Buffering a frame command: $cmd")
+        pendingMessages = msg :: pendingMessages
+      }
     }
 
     def complete(): Unit = {
@@ -165,16 +172,19 @@ object FiddleEditor {
       source
     }
 
+    def addDeps(source: String, deps: Seq[Library]): String = {
+      val extraDeps = deps.flatMap(_.extraDeps)
+      val allDeps = extraDeps ++ deps.map(Library.stringify)
+      source + "\n" + allDeps.map(dep => s"// $$FiddleDependency $dep\n").mkString
+    }
+
     def buildFullSource: CallbackTo[String] = {
       for {
         props <- $.props
         state <- $.state
       } yield {
         val source = reconstructSource(state)
-        val libs = props.data().libraries
-        val extraDeps = libs.flatMap(_.extraDeps)
-        val allDeps = extraDeps ++ libs.map(Library.stringify)
-        source + "\n" + allDeps.map(dep => s"// $$FiddleDependency $dep\n").mkString
+        addDeps(source, props.data().libraries)
       }
     }
 
@@ -264,18 +274,29 @@ object FiddleEditor {
         editor.on("input", () => props.dispatch(UpdateSource(reconstructSource($.accessDirect.state))).runNow())
         // focus to the editor
         editor.focus()
-        // apply Semantic UI
-        // JQueryStatic(".ui.checkbox").checkbox()
-
 
         // listen to messages from the iframe
         dom.window.addEventListener("message", (e: MessageEvent) => {
-          $.modState(s => s.copy(status = CompilerStatus.Result)).runNow()
+          e.data match {
+            case "evalCompleted" =>
+              $.modState(s => s.copy(status = CompilerStatus.Result)).runNow()
+          }
         })
+        resultFrame.onload = (e: Event) => {
+          println("Frame ready")
+          // send pending messages
+          pendingMessages.reverse.foreach(msg => resultFrame.contentWindow.postMessage(msg, "*"))
+          pendingMessages = Nil
+          frameReady = true
+        }
+
         // subscribe to changes in compiler data
         unsubscribe = AppCircuit.subscribe(props.compilerData)(compilerDataUpdated)
         unsubscribeLoginData = AppCircuit.subscribe(props.loginData)(_ => $.forceUpdate.runNow())
-      } >> props.dispatch(UpdateLoginInfo) >> updateFiddle(props.data())
+      } >>
+        props.dispatch(UpdateLoginInfo) >>
+        updateFiddle(props.data()) >>
+        Callback.when(props.fiddleId.isDefined)(props.dispatch(compile(addDeps(props.data().sourceCode, props.data().libraries), FastOpt)))
     }
 
     val fiddleStart = """\s*// \$FiddleStart\s*$""".r
@@ -389,7 +410,6 @@ object FiddleEditor {
     .renderBackend[Backend]
     .componentDidMount(scope => scope.backend.mounted(scope.refs, scope.props))
     .componentWillUnmount(scope => scope.backend.unmounted)
-    //.componentWillReceiveProps(scope => scope.$.backend.updateFiddle(scope.nextProps.data()))
     .build
 
   def apply(data: ModelProxy[FiddleData], fiddleId: Option[FiddleId], compilerData: ModelR[AppModel, CompilerData],

@@ -16,10 +16,10 @@ object AppRouter {
 
   case class EditorPage(id: String, version: Int) extends Page
 
+  val fiddleData = AppCircuit.connect(_.fiddleData)
+
   val config = RouterConfigDsl[Page].buildConfig { dsl =>
     import dsl._
-
-    val fiddleData = AppCircuit.connect(_.fiddleData)
 
     (staticRoute(root, Home) ~> render(fiddleData(d => FiddleEditor(d, None, AppCircuit.zoom(_.compilerData), AppCircuit.zoom(_.loginData))))
       | dynamicRouteCT("sf" / (string("\\w+") / int).caseClass[EditorPage]) ~> dynRender(
