@@ -45,7 +45,6 @@ body {
 
     > .left {
       display: flex;
-      overflow: hidden;
       flex-wrap: nowrap;
       flex: 1;
       align-items: center;
@@ -60,7 +59,6 @@ body {
 
     > .right {
       display: flex;
-      overflow: hidden;
       flex-wrap: nowrap;
       align-items: center;
 
@@ -203,11 +201,11 @@ i.icon {
   left: 0.6em;
 }
 
-.ui.list>.item [class*="floated"] {
+.ui.list > .item [class*="floated"] {
   margin: 0;
 }
 
-.ui.list>.item:first-child {
+.ui.list > .item:first-child {
   padding-top: inherit;
 }
 
@@ -292,6 +290,8 @@ i.icon {
   > .preview {
     flex: 1;
     margin-left: 10px;
+    border-left: #ddd solid 1px;
+    padding-left: 5px;
   }
 
   * > .header {
