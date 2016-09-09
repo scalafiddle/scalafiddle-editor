@@ -73,7 +73,8 @@ class Application @Inject()(
         }
         val sourceCode = new StringBuilder()
         sourceCode.append(fd.sourceCode)
-        sourceCode.append(fd.libraries.map(l => s"// $$FiddleDependency ${Library.stringify(l)}").mkString("\n", "\n", "\n"))
+        val allLibs = fd.libraries.flatMap(lib => Library.stringify(lib) +: lib.extraDeps)
+        sourceCode.append(allLibs.map(lib => s"// $$FiddleDependency $lib").mkString("\n", "\n", "\n"))
         nameOpt.foreach(name => sourceCode.append(s"// $$FiddleName $name\n"))
 
         Ok(sourceCode.toString).withHeaders(CACHE_CONTROL -> "max-age=3600")
