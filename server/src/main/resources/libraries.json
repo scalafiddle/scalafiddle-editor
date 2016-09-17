@@ -47,6 +47,15 @@
         "artifact": "udash-core-frontend",
         "doc": "http://udash.io",
         "versions": {
+          "0.4.0": {
+            "scalaVersions": ["2.11"],
+            "extraDeps": [
+              "io.udash %%% udash-bootstrap % 0.4.0",
+              "io.udash %%% udash-i18n-frontend % 0.4.0",
+              "io.udash %%% udash-rpc-frontend % 0.4.0",
+              "io.udash %%% udash-rest-shared % 0.4.0"
+            ]
+          },
           "0.3.1": {
             "scalaVersions": ["2.11"],
             "extraDeps": [
