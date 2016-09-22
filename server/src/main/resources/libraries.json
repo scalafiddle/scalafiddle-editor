@@ -179,6 +179,14 @@
         "artifact": "binding",
         "doc": "ThoughtWorksInc/Binding.scala",
         "versions": {
+          "9.0.0": {
+            "scalaVersions": ["2.11"],
+            "extraDeps": [
+              "com.thoughtworks.binding %%% dom % 9.0.2",
+              "com.thoughtworks.binding %%% futurebinding % 9.0.2",
+              "com.thoughtworks.binding %%% jspromisebinding % 9.0.2"
+            ]
+          },
           "9.0.2": {
             "scalaVersions": ["2.11"],
             "extraDeps": [
