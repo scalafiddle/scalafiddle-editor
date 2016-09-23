@@ -295,6 +295,19 @@
         "compileTimeOnly": false
       },
       {
+        "name": "Quill",
+        "organization": "io.getquill",
+        "artifact": "quill-sql",
+        "doc": "http://getquill.io/",
+        "versions": {
+          "0.10.0": {
+            "scalaVersions": ["2.11"],
+            "extraDeps": []
+          }
+        },
+        "compileTimeOnly": false
+      },
+      {
         "name": "Rapture",
         "organization": "com.propensive",
         "artifact": "rapture",
