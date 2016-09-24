@@ -45,7 +45,8 @@ class Application @Inject()(
     if (libUri.startsWith("file:")) {
       // load from file system
       scala.io.Source.fromFile(libUri.drop(5), "UTF-8")
-    } else if(libUri.startsWith("http:") || libUri.startsWith("https:") ) {
+    } else if (libUri.startsWith("http")) {
+      System.setProperty("http.agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.29 Safari/537.36")
       scala.io.Source.fromURL(libUri, "UTF-8")
     } else {
       env.resourceAsStream(libUri).map(s => scala.io.Source.fromInputStream(s, "UTF-8")).get

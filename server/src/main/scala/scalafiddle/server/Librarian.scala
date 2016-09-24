@@ -7,6 +7,7 @@ import scala.io.BufferedSource
 import scalafiddle.shared._
 
 class Librarian(libSource: () => BufferedSource) {
+
   case class LibraryVersion(
     scalaVersions: Seq[String],
     extraDeps: Seq[String]
@@ -72,5 +73,4 @@ class Librarian(libSource: () => BufferedSource) {
       case _ => doc
     }
   }
-
 }
