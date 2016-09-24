@@ -23,17 +23,14 @@ lazy val client = (project in file("client"))
     version := Settings.version,
     scalaVersion := Settings.versions.scala,
     scalacOptions ++= Settings.scalacOptions,
-    libraryDependencies ++= Settings.scalajsDependencies.value,
+    libraryDependencies ++= Settings.sharedDependencies.value ++ Settings.scalajsDependencies.value,
     jsDependencies ++= Settings.jsDependencies.value,
-    // RuntimeDOM is needed for tests
-    jsDependencies += RuntimeDOM % "test",
+    jsEnv := JSDOMNodeJSEnv().value,
     // yes, we want to package JS dependencies
     skip in packageJSDependencies := false,
     // use Scala.js provided launcher code to start the client app
     persistLauncher := true,
-    persistLauncher in Test := false,
-    // use uTest framework for tests
-    testFrameworks += new TestFramework("utest.runner.Framework")
+    persistLauncher in Test := false
   )
   .enablePlugins(ScalaJSPlugin, ScalaJSPlay)
   .dependsOn(sharedJS)
@@ -48,7 +45,7 @@ lazy val server = (project in file("server"))
     version := Settings.version,
     scalaVersion := Settings.versions.scala,
     scalacOptions ++= Settings.scalacOptions,
-    libraryDependencies ++= Settings.jvmDependencies.value ++ Seq(
+    libraryDependencies ++= Settings.sharedDependencies.value ++ Settings.jvmDependencies.value ++ Seq(
       filters
     ),
     // connect to the client project

@@ -19,3 +19,5 @@ project/plugins/project/
 .idea
 temp/*
 /server/src/main/resources/local.conf
+
+node_modules

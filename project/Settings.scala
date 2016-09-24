@@ -20,6 +20,7 @@ object Settings {
   /** Declare global dependency versions here to avoid mismatches in multi part dependencies */
   object versions {
     val scala = "2.11.8"
+    val scalatest = "3.0.0"
     val scalaDom = "0.9.1"
     val scalajsReact = "0.11.1"
     val scalaCSS = "0.4.1"
@@ -46,7 +47,8 @@ object Settings {
     */
   val sharedDependencies = Def.setting(Seq(
     "com.lihaoyi" %%% "autowire" % versions.autowire,
-    "com.lihaoyi" %%% "upickle" % versions.upickle
+    "com.lihaoyi" %%% "upickle" % versions.upickle,
+    "org.scalatest" %%% "scalatest" % versions.scalatest % "test"
   ))
 
   /** Dependencies only used by the JVM project */
@@ -64,8 +66,7 @@ object Settings {
     "com.vmunier" %% "play-scalajs-scripts" % versions.playScripts,
     "org.webjars" % "font-awesome" % "4.6.3" % Provided,
     "org.webjars" % "Semantic-UI" % versions.semantic % Provided,
-    "org.webjars" % "ace" % versions.ace % Provided,
-    "com.lihaoyi" %% "utest" % versions.uTest % Test
+    "org.webjars" % "ace" % versions.ace % Provided
   ))
 
   /** Dependencies only used by the JS project (note the use of %%% instead of %%) */
@@ -76,8 +77,7 @@ object Settings {
     "me.chrons" %%% "diode" % versions.diode,
     "me.chrons" %%% "diode-react" % versions.diode,
     "com.github.marklister" %%% "base64" % "0.2.2",
-    "org.scala-js" %%% "scalajs-dom" % versions.scalaDom,
-    "com.lihaoyi" %%% "utest" % versions.uTest % Test
+    "org.scala-js" %%% "scalajs-dom" % versions.scalaDom
   ))
 
   /** Dependencies for external JS libs that are bundled into a single .js file according to dependency order */

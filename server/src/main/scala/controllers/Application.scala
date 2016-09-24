@@ -7,7 +7,6 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.mohiva.play.silhouette.api.{LogoutEvent, Silhouette}
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
-import play.api.libs.streams.ActorFlow
 import play.api.mvc._
 import play.api.{Configuration, Environment, Logger, Mode}
 import slick.backend.DatabaseConfig
@@ -41,7 +40,20 @@ class Application @Inject()(
 ) extends Controller {
   implicit val timeout = Timeout(15.seconds)
   val log = Logger(getClass)
-  val libraries = loadLibraries(config.getString("scalafiddle.librariesURL").get)
+  val libUri = config.getString("scalafiddle.librariesURL").get
+  def libSource() = {
+    if (libUri.startsWith("file:")) {
+      // load from file system
+      scala.io.Source.fromFile(libUri.drop(5), "UTF-8")
+    } else if(libUri.startsWith("http:") || libUri.startsWith("https:") ) {
+      scala.io.Source.fromURL(libUri, "UTF-8")
+    } else {
+      env.resourceAsStream(libUri).map(s => scala.io.Source.fromInputStream(s, "UTF-8")).get
+    }
+  }
+  val librarian = new Librarian(libSource)
+  // refresh libraries every N minutes
+  actorSystem.scheduler.schedule(config.getInt("scalafiddle.refreshLibraries").get.seconds, config.getInt("scalafiddle.refreshLibraries").get.seconds)(librarian.refresh())
   val defaultSource = config.getString("scalafiddle.defaultSource").get
 
   if (env.mode != Mode.Prod)
@@ -84,7 +96,7 @@ class Application @Inject()(
   }
 
   def libraryListing = Action {
-    val libStrings = libraries.flatMap(lib => Library.stringify(lib) +: lib.extraDeps)
+    val libStrings = librarian.libraries.flatMap(lib => Library.stringify(lib) +: lib.extraDeps)
     Ok(write(libStrings)).as("application/json").withHeaders(CACHE_CONTROL -> "max-age=60")
   }
 
@@ -121,66 +133,22 @@ class Application @Inject()(
       })
   }
 
-  case class LibraryVersion(
-    scalaVersions: Seq[String],
-    extraDeps: Seq[String]
-  )
-
-  case class LibraryDef(
-    name: String,
-    organization: String,
-    artifact: String,
-    doc: String,
-    versions: Map[String, LibraryVersion],
-    compileTimeOnly: Boolean
-  )
-
-  case class LibraryGroup(
-    group: String,
-    libraries: Seq[LibraryDef]
-  )
-
-  def createDocURL(doc: String): String = {
-    val githubRef = """([^/]+)/([^/]+)""".r
-    doc match {
-      case githubRef(org, lib) => s"https://github.com/$org/$lib"
-      case _ => doc
-    }
-  }
-
-  def loadLibraries(uri: String): Seq[Library] = {
-    val data = if (uri.startsWith("file:")) {
-      // load from file system
-      scala.io.Source.fromFile(uri.drop(5), "UTF-8").mkString
-    } else {
-      env.resourceAsStream(uri).map(s => scala.io.Source.fromInputStream(s, "UTF-8").mkString).get
-    }
-    val libGroups = read[Seq[LibraryGroup]](data)
-    for {
-      (group, idx) <- libGroups.zipWithIndex
-      lib <- group.libraries
-      (version, versionDef) <- lib.versions
-    } yield {
-      Library(lib.name, lib.organization, lib.artifact, version, lib.compileTimeOnly, versionDef.scalaVersions, versionDef.extraDeps, f"$idx%02d:${group.group}", createDocURL(lib.doc))
-    }
-  }
-
   def loadFiddle(id: String, version: Int): Future[Try[FiddleData]] = {
     if (id == "") {
       // build default fiddle data
       val (source, libs) = parseFiddle(defaultSource)
-      Future(Success(FiddleData("", "", source, libs, Seq.empty, libraries, None)))
+      Future(Success(FiddleData("", "", source, libs, Seq.empty, librarian.libraries, None)))
     } else {
       ask(persistence, FindFiddle(id, version)).mapTo[Try[Fiddle]].flatMap {
         case Success(f) if f.user == "anonymous" =>
-          Future.successful(Success(FiddleData(f.name, f.description, f.sourceCode, f.libraries.flatMap(findLibrary), Seq.empty, libraries, None)))
+          Future.successful(Success(FiddleData(f.name, f.description, f.sourceCode, f.libraries.flatMap(librarian.findLibrary), Seq.empty, librarian.libraries, None)))
         case Success(f) =>
           ask(persistence, FindUser(f.user)).mapTo[Try[User]].map {
             case Success(u) =>
               val user = UserInfo(u.userID, u.name.getOrElse("Anonymous"), u.avatarURL, loggedIn = false)
-              Success(FiddleData(f.name, f.description, f.sourceCode, f.libraries.flatMap(findLibrary), Seq.empty, libraries, Some(user)))
+              Success(FiddleData(f.name, f.description, f.sourceCode, f.libraries.flatMap(librarian.findLibrary), Seq.empty, librarian.libraries, Some(user)))
             case _ =>
-              Success(FiddleData(f.name, f.description, f.sourceCode, f.libraries.flatMap(findLibrary), Seq.empty, libraries, None))
+              Success(FiddleData(f.name, f.description, f.sourceCode, f.libraries.flatMap(librarian.findLibrary), Seq.empty, librarian.libraries, None))
           }
         case Failure(e) =>
           Future.successful(Failure(e))
@@ -188,23 +156,11 @@ class Application @Inject()(
     }
   }
 
-  val repoSJSRE = """([^ %]+) *%%% *([^ %]+) *% *([^ %]+)""".r
-  val repoRE = """([^ %]+) *%% *([^ %]+) *% *([^ %]+)""".r
-
-  def findLibrary(libDef: String): Option[Library] = libDef match {
-    case repoSJSRE(group, artifact, version) =>
-      libraries.find(l => l.organization == group && l.artifact == artifact && l.version == version && !l.compileTimeOnly)
-    case repoRE(group, artifact, version) =>
-      libraries.find(l => l.organization == group && l.artifact == artifact && l.version == version && l.compileTimeOnly)
-    case _ =>
-      None
-  }
-
   def parseFiddle(source: String): (String, Seq[Library]) = {
     val dependencyRE = """ *// \$FiddleDependency (.+)"""
     val lines = source.split("\n")
     val (libLines, codeLines) = lines.partition(_.matches(dependencyRE))
-    val libs = libLines.flatMap(findLibrary)
+    val libs = libLines.flatMap(librarian.findLibrary)
     (codeLines.mkString("\n"), libs)
   }
 
