@@ -125,7 +125,7 @@ object Sidebar {
     .renderBackend[Backend]
     .componentDidMount(scope => Callback {
       val accordionNode = scope.refs(accordionRef).get
-      JQueryStatic(ReactDOM.findDOMNode(accordionNode)).accordion(js.Dynamic.literal(exclusive = false))
+      JQueryStatic(ReactDOM.findDOMNode(accordionNode)).accordion(js.Dynamic.literal(exclusive = true))
     })
     .build
 

@@ -6,11 +6,8 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
   * You normally don't have to touch the actual build definition after this.
   */
 object Settings {
-  /** The name of your application */
-  val name = "scalafiddle-editor"
-
   /** The version of your application */
-  val version = "1.0.1-SNAPSHOT"
+  val version = "1.0.3"
 
   /** Options for the scala compiler */
   val scalacOptions = Seq(
