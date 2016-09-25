@@ -204,6 +204,12 @@ object FiddleEditor {
         (row, col)
     }
 
+    def showJSCode(state: State): Unit = {
+      state.compilerData.jsCode.foreach { jsCode =>
+        sendFrameCmd("showCode", jsCode)
+      }
+    }
+
     def mounted(refs: RefsObject, props: Props): Callback = {
       import JsVal.jsVal2jsAny
 
@@ -222,15 +228,32 @@ object FiddleEditor {
         editor.updateDynamic("completer")(completer) // because of SI-7420
         editor.updateDynamic("$blockScrolling")(Double.PositiveInfinity)
 
-        val bindings = Seq(
-          EditorBinding("Compile", "Enter",
+        val globalBindings = Seq(
+          EditorBinding("Compile", "enter",
             () => beginCompilation().foreach(_ => {buildFullSource.flatMap { source => props.dispatch(compile(source, FastOpt)) }.runNow()})),
-          EditorBinding("FullOptimize", "Shift-Enter",
+          EditorBinding("FullOptimize", "shift+enter",
             () => beginCompilation().foreach(_ => {buildFullSource.flatMap { source => props.dispatch(compile(source, FullOpt)) }.runNow()})),
-          EditorBinding("Save", "S", () => NoAction),
+          EditorBinding("Show JavaScript", "j", () => $.state.map(state => showJSCode(state)).runNow()),
+          EditorBinding("Save", "s", () => $.state.flatMap { state =>
+            // select between save/update/fork
+            val action = if(props.fiddleId.isEmpty)
+              SaveFiddle(reconstructSource(state))
+            else if(props.data().author.isEmpty || props.loginData().userInfo.exists(_.id == props.data().author.get.id))
+              UpdateFiddle(reconstructSource(state))
+            else
+              ForkFiddle(reconstructSource(state))
+            props.dispatch(action)
+          }.runNow())
+        )
+        for (EditorBinding(name, key, func) <- globalBindings) {
+          val binding = js.Array(s"ctrl+$key", s"command+$key")
+          Mousetrap.bindGlobal(binding, (e: dom.KeyboardEvent) => {func(); false})
+        }
+
+        val editorBindings = Seq(
           EditorBinding("Complete", "Space", () => complete())
         )
-        for (EditorBinding(name, key, func) <- bindings) {
+        for (EditorBinding(name, key, func) <- editorBindings) {
           val binding = s"Ctrl-$key|Cmd-$key"
           editor.commands.addCommand(JsVal.obj(
             "name" -> name,
@@ -337,6 +360,7 @@ object FiddleEditor {
 
     def unmounted: Callback = {
       Callback {
+        Mousetrap.reset()
         unsubscribe()
         unsubscribeLoginData()
       }

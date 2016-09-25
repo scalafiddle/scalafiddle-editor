@@ -5,6 +5,9 @@ import scala.language.implicitConversions
 import js.JSConverters._
 import scala.scalajs.js.annotation.JSName
 import scala.scalajs.js.typedarray.Uint8Array
+import org.scalajs.dom
+
+import scala.scalajs.js.|
 
 class JsVal(val value: js.Dynamic) {
   def get(name: String): Option[JsVal] = {
@@ -70,3 +73,13 @@ object ScalaFiddleConfig extends js.Object {
   val compilerURL: String = js.native
 }
 
+@js.native
+object Mousetrap extends js.Object {
+  def bind(key: String | js.Array[String], f: js.Function1[dom.KeyboardEvent, Any], event: String = js.native): Unit = js.native
+
+  def bindGlobal(key: String | js.Array[String], f: js.Function1[dom.KeyboardEvent, Any], event: String = js.native): Unit = js.native
+
+  def unbind(key: String): Unit = js.native
+
+  def reset(): Unit = js.native
+}

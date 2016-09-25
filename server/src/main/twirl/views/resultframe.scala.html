@@ -30,14 +30,41 @@
                             try {
                                 eval(msg.data);
                                 eval("var sf = ScalaFiddle();if(typeof sf.main === 'function') sf.main();");
-                            } catch(ex) {
+                            } catch (ex) {
                                 result.insertAdjacentHTML('beforeend', '<pre class="error">ERROR: ' + ex.message + '</pre>')
                             } finally {
                                 e.source.postMessage("evalCompleted", "*");
                             }
                             break;
-                    }
-                });
+                        case "showCode":
+                            if (result.getAttribute("data-jscode") != "true") {
+                                result.setAttribute("data-jscode", "true");
+                                result.innerHTML = "<h2>Compiled JS code</h2>";
+                                var pre = document.createElement("pre");
+                                var code = document.createElement("code");
+                                code.setAttribute("class", "language-javascript");
+                                code.appendChild(document.createTextNode(msg.data));
+                                pre.appendChild(code);
+                                result.appendChild(pre);
+                                // disabled because too slow
+                                /*
+                                var css = document.createElement("link");
+                                css.href = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.5.1/themes/prism.min.css";
+                                css.rel = "stylesheet";
+                                css.type = "text/css";
+                                document.head.appendChild(css);
+                                var highlight = document.createElement("script");
+                                highlight.src = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.5.1/prism.min.js";
+                                highlight.type = "text/javascript";
+                                highlight.async = "async";
+                                highlight.setAttribute("data-manual", "");
+                                highlight.onload = function() { Prism.highlightAll(true); }
+                                document.body.appendChild(highlight);
+                                */
+                            }
+                            break;
+                }
+            });
             </script>
         </div>
     </body>
