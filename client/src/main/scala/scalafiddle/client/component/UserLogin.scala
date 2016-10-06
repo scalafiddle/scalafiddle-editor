@@ -2,10 +2,11 @@ package scalafiddle.client.component
 
 import diode.{ModelR, ModelRO}
 import diode.data.Ready
+import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.all._
 import japgolly.scalajs.react.{BackendScope, ReactComponentB, _}
 
-import scalafiddle.client.{AppCircuit, AppModel, LoginData}
+import scalafiddle.client.{AppCircuit, AppModel, LoadUserFiddles, LoginData}
 
 object UserLogin {
 
@@ -20,7 +21,11 @@ object UserLogin {
         case Ready(userInfo) if userInfo.loggedIn =>
           div(cls := "userinfo")(
             img(cls := "author", src := userInfo.avatarUrl.getOrElse("/assets/images/anon.png")),
-            div(cls :="username", userInfo.name),
+            Dropdown("top right pointing", div(cls :="username", userInfo.name))( closeCB =>
+              div(cls := "ui vertical menu", display.block)(
+                a(cls := "item", onClick --> {Callback(AppCircuit.dispatch(LoadUserFiddles)) >> closeCB()})("My fiddles")
+              )
+            ),
             a(href := "/signout", div(cls := "ui basic button", "Sign out"))
           )
         case Ready(userInfo) if !userInfo.loggedIn =>
@@ -32,7 +37,7 @@ object UserLogin {
                 s"Sign in with ${provider.name}"
               ))
             case Ready(loginProviders) =>
-              Dropdown("top basic button embed-options", span("Sign in", Icon.caretDown))(
+              Dropdown("top basic button embed-options", span("Sign in", Icon.caretDown))( _ =>
                 div(cls := "menu", display.block)(div("Login providers"))
               )
             case _ =>

@@ -1,5 +1,6 @@
 package scalafiddle.client
 
+import autowire._
 import diode._
 import org.scalajs.dom
 import org.scalajs.dom.ext.Ajax
@@ -8,6 +9,7 @@ import upickle.default._
 import scala.scalajs.js
 import scala.scalajs.niocharset.StandardCharsets
 import scala.concurrent.ExecutionContext.Implicits.global
+import scalafiddle.shared.{Api, FiddleVersions}
 
 sealed trait SJSOptimization {
   def flag: String
@@ -29,7 +31,11 @@ case class CompilerResult(result: Either[Seq[EditorAnnotation], String], log: St
 
 case class ServerError(message: String) extends Action
 
-class CompilerHandler[M](modelRW: ModelRW[M, CompilerData]) extends ActionHandler(modelRW) {
+case object LoadUserFiddles extends Action
+
+case class UserFiddlesUpdated(fiddles: Seq[FiddleVersions]) extends Action
+
+class CompilerHandler[M](modelRW: ModelRW[M, OutputData]) extends ActionHandler(modelRW) {
 
   case class CompilationResponse(jsCode: Option[String], annotations: Seq[EditorAnnotation], log: String)
 
@@ -70,7 +76,7 @@ class CompilerHandler[M](modelRW: ModelRW[M, CompilerData]) extends ActionHandle
         case e: Throwable =>
           ServerError(s"Unknown error while compiling")
       }
-      updated(value.copy(status = CompilerStatus.Compiling, jsCode = None, annotations = Nil, errorMessage = None, log = ""), Effect(effect))
+      updated(CompilerData(CompilerStatus.Compiling, None, Nil, None, ""), Effect(effect))
 
     case CompilerResult(Right(jsCode), log) =>
       updated(CompilerData(CompilerStatus.Compiled, Some(jsCode), Seq.empty, None, log))
@@ -81,6 +87,11 @@ class CompilerHandler[M](modelRW: ModelRW[M, CompilerData]) extends ActionHandle
     case ServerError(message) =>
       updated(CompilerData(CompilerStatus.Error, None, Seq.empty, Some(message), ""))
 
+    case LoadUserFiddles =>
+      effectOnly(Effect(AjaxClient[Api].listFiddles().call().map(UserFiddlesUpdated)))
+
+    case UserFiddlesUpdated(fiddles) =>
+      updated(UserFiddleData(fiddles))
   }
 
   def encodeSource(source: String): String = {

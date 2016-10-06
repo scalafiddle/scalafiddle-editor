@@ -64,10 +64,16 @@ body {
 
       > .userinfo {
         .flex-container;
+        overflow: visible;
         align-items: center;
 
-        > .username {
+        > div > .username {
           margin-right: 10px;
+          cursor: pointer;
+
+          &:hover {
+            text-decoration: underline;
+          }
         }
       }
       > * > .login {
@@ -263,6 +269,10 @@ i.icon {
   * > .icon {
     font-size: 1.8em;
   }
+}
+
+.fiddle-list {
+  font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 
 #fiddle-container {

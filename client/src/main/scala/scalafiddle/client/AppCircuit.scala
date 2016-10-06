@@ -20,7 +20,7 @@ object AppCircuit extends Circuit[AppModel] with ReactConnector[AppModel] {
 
   override protected def actionHandler = composeHandlers(
     new FiddleHandler(zoomRW(_.fiddleData)((m, v) => m.copy(fiddleData = v)), zoomRW(_.fiddleId)((m, v) => m.copy(fiddleId = v))),
-    new CompilerHandler(zoomRW(_.compilerData)((m, v) => m.copy(compilerData = v))),
+    new CompilerHandler(zoomRW(_.outputData)((m, v) => m.copy(outputData = v))),
     new LoginHandler(zoomRW(_.loginData)((m, v) => m.copy(loginData = v))),
     navigationHandler
   )

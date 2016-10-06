@@ -41,14 +41,17 @@ trait FiddleDAO {
 
   val fiddles = TableQuery[Fiddles]
 
-  def insertEvent(fiddle: Fiddle) =
+  def insertFiddle(fiddle: Fiddle) =
     fiddles += fiddle
 
-  def findEvent(id: String, version: Int) =
+  def findFiddle(id: String, version: Int) =
     fiddles.filter(f => f.id === id && f.version === version && f.removed === false).result.headOption
 
-  def findEventVersions(id: String) =
+  def findFiddleVersions(id: String) =
     fiddles.filter(_.id === id).sortBy(_.version).result
+
+  def findUserFiddles(userId: String) =
+    fiddles.filter(_.user === userId).result
 
   def removeEvent(id: String, version: Int) =
     fiddles.filter(f => f.id === id && f.version === version).map(_.removed).update(true)

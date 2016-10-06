@@ -21,12 +21,12 @@ object AppRouter {
   val config = RouterConfigDsl[Page].buildConfig { dsl =>
     import dsl._
 
-    (staticRoute(root, Home) ~> render(fiddleData(d => FiddleEditor(d, None, AppCircuit.zoom(_.compilerData), AppCircuit.zoom(_.loginData))))
+    (staticRoute(root, Home) ~> render(fiddleData(d => FiddleEditor(d, None, AppCircuit.zoom(_.outputData), AppCircuit.zoom(_.loginData))))
       | dynamicRouteCT("sf" / (string("\\w+") / int).caseClass[EditorPage]) ~> dynRender(
       (p: EditorPage) => {
         val fid = FiddleId(p.id, p.version)
         AppCircuit.dispatch(UpdateId(fid, true))
-        fiddleData(d => FiddleEditor(d, Some(fid), AppCircuit.zoom(_.compilerData), AppCircuit.zoom(_.loginData)))
+        fiddleData(d => FiddleEditor(d, Some(fid), AppCircuit.zoom(_.outputData), AppCircuit.zoom(_.loginData)))
       })
       )
       .notFound(redirectToPage(Home)(Redirect.Replace))

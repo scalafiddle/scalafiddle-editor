@@ -28,13 +28,13 @@ object FiddleEditor {
   case class Props(
     data: ModelProxy[FiddleData],
     fiddleId: Option[FiddleId],
-    compilerData: ModelR[AppModel, CompilerData],
+    outputData: ModelR[AppModel, OutputData],
     loginData: ModelR[AppModel, LoginData]) {
     def dispatch = data.theDispatch
   }
 
   case class State(
-    compilerData: CompilerData,
+    outputData: OutputData,
     status: CompilerStatus,
     showTemplate: Boolean = false,
     preCode: List[String] = Nil,
@@ -85,7 +85,7 @@ object FiddleEditor {
             showSave ?= div(cls := "ui basic button", onClick --> props.dispatch(SaveFiddle(reconstructSource(state))))(Icon.pencil, "Save"),
             showUpdate ?= div(cls := "ui basic button", onClick --> props.dispatch(UpdateFiddle(reconstructSource(state))))(Icon.pencil, "Update"),
             fiddleHasId ?= div(cls := "ui basic button", onClick --> props.dispatch(ForkFiddle(reconstructSource(state))))(Icon.codeFork, "Fork"),
-            fiddleHasId ?= Dropdown("top basic button embed-options", span("Embed", Icon.caretDown))(
+            fiddleHasId ?= Dropdown("top basic button embed-options", span("Embed", Icon.caretDown))( _ =>
               div(cls := "menu", display.block)(EmbedEditor(props.fiddleId.get))
             )
           ),
@@ -98,7 +98,7 @@ object FiddleEditor {
           div(cls := "editor-area")(
             div(cls := "editor")(
               div(cls := "optionsmenu")(
-                Dropdown("top right pointing mini button optionsbutton", span("SCALA", i(cls := "icon setting")))(
+                Dropdown("top right pointing mini button optionsbutton", span("SCALA", i(cls := "icon setting")))( _ =>
                   div(cls := "menu", display.block)(
                     div(cls := "header")("Options"),
                     div(cls := "divider"),
@@ -113,17 +113,57 @@ object FiddleEditor {
               ),
               div(id := "editor", ref := editorRef)
             ),
-            div(cls := "output")(
-              div(cls := "label", state.status.show),
-              iframe(
-                id := "resultframe",
-                ref := resultRef,
-                width := "100%",
-                height := "100%",
-                frameBorder := "0",
-                sandbox := "allow-scripts allow-popups allow-popups-to-escape-sandbox",
-                src := s"/resultframe?theme=light")
-            )
+            state.outputData match {
+              case data: CompilerData =>
+                div(cls := "output")(
+                  div(cls := "label", state.status.show),
+                  iframe(
+                    id := "resultframe",
+                    ref := resultRef,
+                    width := "100%",
+                    height := "100%",
+                    frameBorder := "0",
+                    sandbox := "allow-scripts allow-popups allow-popups-to-escape-sandbox",
+                    src := s"/resultframe?theme=light")
+                )
+              case UserFiddleData(fiddles) =>
+                val libMap = props.data().available.map { lib => Library.stringify(lib) -> lib.name }.toMap
+                div(cls := "output")(
+                  div(id := "output")(
+                    h1("My fiddles"),
+                    if (fiddles.isEmpty) {
+                      p("No fiddles stored")
+                    } else {
+                      table(cls := "ui celled table fiddle-list")(
+                        thead(
+                          tr(
+                            th("Id", width := "10%"),
+                            th("Name"),
+                            th("Versions"),
+                            th("Latest update"),
+                            th("Libs", width := "20%")
+                          )
+                        ),
+                        tbody(
+                          fiddles.map { fiddle =>
+                            def fLink(version: Int)(content: TagMod*): ReactElement =
+                              a(href := s"/sf/${fiddle.id}/$version")(content: _*)
+                            val versions = (0 to fiddle.latestVersion).flatMap(v => Seq[TagMod](fLink(v)(v.toString), span(" | "))).init
+
+                            tr(
+                              td(fLink(fiddle.latestVersion)(fiddle.id)),
+                              td(fLink(fiddle.latestVersion)(if (fiddle.name.isEmpty) "<no name>" else fiddle.name)),
+                              td(versions),
+                              td(new js.Date(fiddle.updated).toLocaleString()),
+                              td(fiddle.libraries.flatMap(libMap.get).mkString(", "))
+                            )
+                          }
+                        )
+                      )
+                    }
+                  )
+                )
+            }
           )
         )
       )
@@ -131,7 +171,7 @@ object FiddleEditor {
 
     def sendFrameCmd(cmd: String, data: String = "") = {
       val msg = js.Dynamic.literal(cmd = cmd, data = data)
-      if(frameReady) {
+      if (frameReady) {
         resultFrame.contentWindow.postMessage(msg, "*")
       } else {
         println(s"Buffering a frame command: $cmd")
@@ -205,8 +245,12 @@ object FiddleEditor {
     }
 
     def showJSCode(state: State): Unit = {
-      state.compilerData.jsCode.foreach { jsCode =>
-        sendFrameCmd("showCode", jsCode)
+      state.outputData match {
+        case compilerData: CompilerData =>
+          compilerData.jsCode.foreach { jsCode =>
+            sendFrameCmd("showCode", jsCode)
+          }
+        case _ =>
       }
     }
 
@@ -236,9 +280,9 @@ object FiddleEditor {
           EditorBinding("Show JavaScript", "j", () => $.state.map(state => showJSCode(state)).runNow()),
           EditorBinding("Save", "s", () => $.state.flatMap { state =>
             // select between save/update/fork
-            val action = if(props.fiddleId.isEmpty)
+            val action = if (props.fiddleId.isEmpty)
               SaveFiddle(reconstructSource(state))
-            else if(props.data().author.isEmpty || props.loginData().userInfo.exists(_.id == props.data().author.get.id))
+            else if (props.data().author.isEmpty || props.loginData().userInfo.exists(_.id == props.data().author.get.id))
               UpdateFiddle(reconstructSource(state))
             else
               ForkFiddle(reconstructSource(state))
@@ -314,7 +358,7 @@ object FiddleEditor {
         }
 
         // subscribe to changes in compiler data
-        unsubscribe = AppCircuit.subscribe(props.compilerData)(compilerDataUpdated)
+        unsubscribe = AppCircuit.subscribe(props.outputData)(outputDataUpdated)
         unsubscribeLoginData = AppCircuit.subscribe(props.loginData)(_ => $.forceUpdate.runNow())
       } >>
         props.dispatch(UpdateLoginInfo) >>
@@ -388,55 +432,60 @@ object FiddleEditor {
 
     def clearResult() = sendFrameCmd("clear")
 
-    def compilerDataUpdated(data: ModelRO[CompilerData]): Unit = {
-      import scala.scalajs.js.JSConverters._
-      val compilerData = data()
-      clearResult()
+    def outputDataUpdated(data: ModelRO[OutputData]): Unit = {
+      data() match {
+        case compilerData: CompilerData =>
+          import scala.scalajs.js.JSConverters._
+          clearResult()
 
-      // show error messages, if any
-      editor.getSession().clearAnnotations()
-      if (compilerData.annotations.nonEmpty) {
-        val aceAnnotations = compilerData.annotations.map { ann =>
-          // adjust coordinates
-          val (row, col) = coordinatesTo(ann.row, ann.col)
-          JsVal.obj(
-            "row" -> row,
-            "col" -> col,
-            "text" -> ann.text.mkString("\n"),
-            "type" -> ann.tpe
-          ).value
-        }.toJSArray
-        editor.getSession().setAnnotations(aceAnnotations)
+          // show error messages, if any
+          editor.getSession().clearAnnotations()
+          if (compilerData.annotations.nonEmpty) {
+            val aceAnnotations = compilerData.annotations.map { ann =>
+              // adjust coordinates
+              val (row, col) = coordinatesTo(ann.row, ann.col)
+              JsVal.obj(
+                "row" -> row,
+                "col" -> col,
+                "text" -> ann.text.mkString("\n"),
+                "type" -> ann.tpe
+              ).value
+            }.toJSArray
+            editor.getSession().setAnnotations(aceAnnotations)
 
-        // show compiler errors in output
-        val allErrors = compilerData.annotations.map { ann =>
-          // adjust coordinates
-          val (row, _) = coordinatesTo(ann.row, ann.col)
-          s"ScalaFiddle.scala:${row + 1}: ${ann.tpe}: ${ann.text.mkString("\n")}"
-        }.mkString("\n")
+            // show compiler errors in output
+            val allErrors = compilerData.annotations.map { ann =>
+              // adjust coordinates
+              val (row, _) = coordinatesTo(ann.row, ann.col)
+              s"ScalaFiddle.scala:${row + 1}: ${ann.tpe}: ${ann.text.mkString("\n")}"
+            }.mkString("\n")
 
-        sendFrameCmd("print", s"""<pre class="error">$allErrors</pre>""")
+            sendFrameCmd("print", s"""<pre class="error">$allErrors</pre>""")
+          }
+
+          compilerData.jsCode.foreach { jsCode =>
+            $.modState(s => s.copy(status = CompilerStatus.Running)).runNow()
+            // start running the code after a short delay, to allow DOM to update in case the code is slow to complete
+            js.timers.setTimeout(20) {
+              sendFrameCmd("code", jsCode)
+            }
+          }
+          $.modState(s => s.copy(outputData = compilerData, status = compilerData.status)).runNow()
+
+        case fiddles: UserFiddleData =>
+          $.modState(s => s.copy(outputData = fiddles)).runNow()
       }
-
-      compilerData.jsCode.foreach { jsCode =>
-        $.modState(s => s.copy(status = CompilerStatus.Running)).runNow()
-        // start running the code after a short delay, to allow DOM to update in case the code is slow to complete
-        js.timers.setTimeout(20) {
-          sendFrameCmd("code", jsCode)
-        }
-      }
-      $.modState(s => s.copy(compilerData = compilerData, status = compilerData.status)).runNow()
     }
   }
 
   val component = ReactComponentB[Props]("FiddleEditor")
-    .initialState_P(props => State(props.compilerData(), CompilerStatus.Result))
+    .initialState_P(props => State(props.outputData(), CompilerStatus.Result))
     .renderBackend[Backend]
     .componentDidMount(scope => scope.backend.mounted(scope.refs, scope.props))
     .componentWillUnmount(scope => scope.backend.unmounted)
     .build
 
-  def apply(data: ModelProxy[FiddleData], fiddleId: Option[FiddleId], compilerData: ModelR[AppModel, CompilerData],
+  def apply(data: ModelProxy[FiddleData], fiddleId: Option[FiddleId], compilerData: ModelR[AppModel, OutputData],
     loginData: ModelR[AppModel, LoginData]) =
     component(Props(data, fiddleId, compilerData, loginData))
 }

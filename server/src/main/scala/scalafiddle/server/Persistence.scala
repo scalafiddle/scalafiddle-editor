@@ -28,6 +28,8 @@ case class FindFiddle(id: String, version: Int)
 
 case class FindLastFiddle(id: String)
 
+case class FindUserFiddles(userId: String)
+
 case object GetFiddleInfo
 
 case class FiddleInfo(name: String, id: FiddleId)
@@ -73,16 +75,16 @@ class Persistence @Inject()(config: Configuration) extends Actor with ActorLoggi
       val id = createId
       val newFiddle = Fiddle(id, 0, fiddle.name, fiddle.description, fiddle.sourceCode, fiddle.libraries.map(Library.stringify).toList, user)
       log.debug(s"Storing new fiddle: $newFiddle")
-      runAndReply(dal.insertEvent(newFiddle))(r => Success(FiddleId(id, 0))) pipeTo sender()
+      runAndReply(dal.insertFiddle(newFiddle))(r => Success(FiddleId(id, 0))) pipeTo sender()
 
     case ForkFiddle(fiddle, id, version, user) =>
       val id = createId
       val newFiddle = Fiddle(id, 0, fiddle.name, fiddle.description, fiddle.sourceCode, fiddle.libraries.map(Library.stringify).toList, user, Some(s"$id/$version"))
       log.debug(s"Forking new fiddle: $newFiddle")
-      runAndReply(dal.insertEvent(newFiddle))(r => Success(FiddleId(id, 0))) pipeTo sender()
+      runAndReply(dal.insertFiddle(newFiddle))(r => Success(FiddleId(id, 0))) pipeTo sender()
 
     case FindFiddle(id, version) =>
-      val res = db.run(dal.findEvent(id, version)).map {
+      val res = db.run(dal.findFiddle(id, version)).map {
         case Some(fiddle) => Success(fiddle)
         case None => Failure(new NoSuchElementException)
       }.recover {
@@ -90,14 +92,22 @@ class Persistence @Inject()(config: Configuration) extends Actor with ActorLoggi
       }
       res pipeTo sender()
 
+    case FindUserFiddles(userId) =>
+      val res = db.run(dal.findUserFiddles(userId)).map { fiddles =>
+        Success(fiddles.groupBy(_.id).map { case (id, versions) => id -> versions.sortBy(_.version) })
+      } recover {
+        case e: Throwable => Failure(e)
+      }
+      res pipeTo sender()
+
     case UpdateFiddle(fiddle, id) =>
       // find last fiddle version for this id
-      val res = db.run(dal.findEventVersions(id)).flatMap {
+      val res = db.run(dal.findFiddleVersions(id)).flatMap {
         case fiddles if fiddles.nonEmpty =>
           val latest = fiddles.last
           val newVersion = latest.version + 1
           val newFiddle = Fiddle(id, newVersion, fiddle.name, fiddle.description, fiddle.sourceCode, fiddle.libraries.map(Library.stringify).toList, latest.user, Some(s"${latest.id}/${latest.version}"))
-          runAndReply(dal.insertEvent(newFiddle))(r => Success(FiddleId(id, newVersion)))
+          runAndReply(dal.insertFiddle(newFiddle))(r => Success(FiddleId(id, newVersion)))
         case _ => Future.successful(Failure(new NoSuchElementException))
       }.recover {
         case e: Throwable => Failure(e)
@@ -105,7 +115,7 @@ class Persistence @Inject()(config: Configuration) extends Actor with ActorLoggi
       res pipeTo sender()
 
     case FindLastFiddle(id) =>
-      val res = db.run(dal.findEventVersions(id)).map {
+      val res = db.run(dal.findFiddleVersions(id)).map {
         case fiddles if fiddles.nonEmpty => Success(fiddles.last)
         case _ => Failure(new NoSuchElementException)
       }.recover {

@@ -10,14 +10,13 @@ object Dropdown {
 
   case class State(isOpen: Boolean = false)
 
-  case class Props(classes: String, buttonContent: ReactNode, content: () => ReactNode)
+  case class Props(classes: String, buttonContent: ReactNode, content: (() => Callback) => ReactNode)
 
   case class Backend($: BackendScope[Props, State]) {
     def render(props: Props, state: State, children: PropsChildren) = {
       div(cls := s"ui dropdown ${props.classes} ${if(state.isOpen) "active visible" else ""}", onClick ==> { (e: ReactEventH) => dropdownClicked(e, state.isOpen) })(
         props.buttonContent,
-        // div(cls := "menu", if(state.isOpen) display.block else display.none)(state.isOpen ?= props.content())
-        state.isOpen ?= props.content()
+        state.isOpen ?= props.content(closeDropdown)
       )
     }
 
@@ -35,9 +34,13 @@ object Dropdown {
 
     def closeDropdown(e: MouseEvent): Unit = {
       if($.accessDirect.state.isOpen && !$.getDOMNode().asInstanceOf[HTMLElement].contains(e.target.asInstanceOf[HTMLElement])) {
-        dom.document.removeEventListener("click", closeFn)
-        $.modState(s => s.copy(isOpen = false)).runNow()
+        closeDropdown().runNow()
       }
+    }
+
+    def closeDropdown(): Callback = {
+      dom.document.removeEventListener("click", closeFn)
+      $.modState(s => s.copy(isOpen = false))
     }
   }
 
@@ -46,5 +49,5 @@ object Dropdown {
     .renderBackend[Backend]
     .build
 
-  def apply(classes: String, buttonContent: ReactNode)(content: => ReactNode) = component(Props(classes, buttonContent, () => content))
+  def apply(classes: String, buttonContent: ReactNode)(content: (() => Callback) => ReactNode) = component(Props(classes, buttonContent, content))
 }

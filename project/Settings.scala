@@ -7,7 +7,7 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
   */
 object Settings {
   /** The version of your application */
-  val version = "1.0.3"
+  val version = "1.0.5"
 
   /** Options for the scala compiler */
   val scalacOptions = Seq(
