@@ -47,7 +47,7 @@ object FiddleEditor {
     var unsubscribe: () => Unit = () => ()
     var unsubscribeLoginData: () => Unit = () => ()
     var editor: Dyn = _
-    var resultFrame: HTMLIFrameElement = _
+    def resultFrame = dom.document.getElementById("resultframe").asInstanceOf[HTMLIFrameElement]
     var frameReady: Boolean = false
     var pendingMessages: List[js.Object] = Nil
 
@@ -85,7 +85,7 @@ object FiddleEditor {
             showSave ?= div(cls := "ui basic button", onClick --> props.dispatch(SaveFiddle(reconstructSource(state))))(Icon.pencil, "Save"),
             showUpdate ?= div(cls := "ui basic button", onClick --> props.dispatch(UpdateFiddle(reconstructSource(state))))(Icon.pencil, "Update"),
             fiddleHasId ?= div(cls := "ui basic button", onClick --> props.dispatch(ForkFiddle(reconstructSource(state))))(Icon.codeFork, "Fork"),
-            fiddleHasId ?= Dropdown("top basic button embed-options", span("Embed", Icon.caretDown))( _ =>
+            fiddleHasId ?= Dropdown("top basic button embed-options", span("Embed", Icon.caretDown))(_ =>
               div(cls := "menu", display.block)(EmbedEditor(props.fiddleId.get))
             )
           ),
@@ -98,7 +98,7 @@ object FiddleEditor {
           div(cls := "editor-area")(
             div(cls := "editor")(
               div(cls := "optionsmenu")(
-                Dropdown("top right pointing mini button optionsbutton", span("SCALA", i(cls := "icon setting")))( _ =>
+                Dropdown("top right pointing mini button optionsbutton", span("SCALA", i(cls := "icon setting")))(_ =>
                   div(cls := "menu", display.block)(
                     div(cls := "header")("Options"),
                     div(cls := "divider"),
@@ -161,7 +161,15 @@ object FiddleEditor {
                         )
                       )
                     }
-                  )
+                  ),
+                  iframe(
+                    id := "resultframe",
+                    ref := resultRef,
+                    width := "0%",
+                    height := "0%",
+                    frameBorder := "0",
+                    sandbox := "allow-scripts allow-popups allow-popups-to-escape-sandbox",
+                    src := s"/resultframe?theme=light")
                 )
             }
           )
@@ -258,7 +266,6 @@ object FiddleEditor {
       import JsVal.jsVal2jsAny
 
       Callback {
-        resultFrame = ReactDOM.findDOMNode(refs(resultRef).get)
         // create the Ace editor and configure it
         val Autocomplete = global.require("ace/autocomplete").Autocomplete
         val completer = Dyn.newInstance(Autocomplete)()
@@ -460,13 +467,16 @@ object FiddleEditor {
               s"ScalaFiddle.scala:${row + 1}: ${ann.tpe}: ${ann.text.mkString("\n")}"
             }.mkString("\n")
 
-            sendFrameCmd("print", s"""<pre class="error">$allErrors</pre>""")
+            // start running the code after a short delay, to allow DOM to update in case the code is slow to complete
+            js.timers.setTimeout(50) {
+              sendFrameCmd("print", s"""<pre class="error">$allErrors</pre>""")
+            }
           }
 
           compilerData.jsCode.foreach { jsCode =>
             $.modState(s => s.copy(status = CompilerStatus.Running)).runNow()
             // start running the code after a short delay, to allow DOM to update in case the code is slow to complete
-            js.timers.setTimeout(20) {
+            js.timers.setTimeout(50) {
               sendFrameCmd("code", jsCode)
             }
           }
