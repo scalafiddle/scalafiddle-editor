@@ -104,6 +104,19 @@
         "compileTimeOnly": false
       },
       {
+        "name": "Each",
+        "organization": "com.thoughtworks.each",
+        "artifact": "each",
+        "doc": "ThoughtWorksInc/each",
+        "versions": {
+          "3.0.1": {
+            "scalaVersions": ["2.11"],
+            "extraDeps": []
+          }
+        },
+        "compileTimeOnly": false
+      },
+      {
         "name": "Shapeless",
         "organization": "com.chuusai",
         "artifact": "shapeless",
