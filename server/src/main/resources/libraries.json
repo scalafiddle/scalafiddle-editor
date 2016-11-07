@@ -8,6 +8,10 @@
         "artifact": "diode",
         "doc": "ochrons/diode",
         "versions": {
+          "1.1.0": {
+            "scalaVersions": ["2.11", "2.12"],
+            "extraDeps": []
+          },
           "1.0.0": {
             "scalaVersions": ["2.11"],
             "extraDeps": []
@@ -230,6 +234,10 @@
         "artifact": "boopickle",
         "doc": "ochrons/boopickle",
         "versions": {
+          "1.2.5": {
+            "scalaVersions": ["2.11", "2.12"],
+            "extraDeps": []
+          },
           "1.2.4": {
             "scalaVersions": ["2.11"],
             "extraDeps": []
