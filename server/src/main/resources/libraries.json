@@ -362,6 +362,10 @@
         "artifact": "quill-sql",
         "doc": "http://getquill.io/",
         "versions": {
+          "1.0.1": {
+            "scalaVersions": ["2.11"],
+            "extraDeps": []
+          },
           "1.0.0": {
             "scalaVersions": ["2.11"],
             "extraDeps": []
