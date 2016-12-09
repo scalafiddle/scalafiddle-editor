@@ -299,6 +299,14 @@
         "artifact": "akkajsactor",
         "doc": "unicredit/akka.js",
         "versions": {
+          "0.2.4.14": {
+            "scalaVersions": ["2.11", "2.12"],
+            "extraDeps": []
+          },
+          "0.2.4.12": {
+            "scalaVersions": ["2.11", "2.12"],
+            "extraDeps": []
+          },
           "0.2.4.11": {
             "scalaVersions": ["2.11"],
             "extraDeps": []
@@ -324,6 +332,14 @@
         "artifact": "akkajsactorstream",
         "doc": "unicredit/akka.js",
         "versions": {
+          "0.2.4.14": {
+            "scalaVersions": ["2.11", "2.12"],
+            "extraDeps": []
+          },
+          "0.2.4.12": {
+            "scalaVersions": ["2.11", "2.12"],
+            "extraDeps": []
+          },
           "0.2.4.11": {
             "scalaVersions": ["2.11"],
             "extraDeps": []
