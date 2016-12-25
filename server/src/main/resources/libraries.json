@@ -205,6 +205,23 @@
               "com.thoughtworks.binding %%% jspromisebinding % 10.0.1"
             ]
           },
+          "10.0.0": {
+            "scalaVersions": ["2.11"],
+            "extraDeps": [
+              "com.thoughtworks.binding %%% route % 10.0.0",
+              "com.thoughtworks.binding %%% dom % 10.0.0",
+              "com.thoughtworks.binding %%% futurebinding % 10.0.0",
+              "com.thoughtworks.binding %%% jspromisebinding % 10.0.0"
+            ]
+          },
+          "9.0.4": {
+            "scalaVersions": ["2.11"],
+            "extraDeps": [
+              "com.thoughtworks.binding %%% dom % 9.0.4",
+              "com.thoughtworks.binding %%% futurebinding % 9.0.4",
+              "com.thoughtworks.binding %%% jspromisebinding % 9.0.4"
+            ]
+          },
           "9.0.3": {
             "scalaVersions": ["2.11"],
             "extraDeps": [
