@@ -196,6 +196,15 @@
         "artifact": "binding",
         "doc": "ThoughtWorksInc/Binding.scala",
         "versions": {
+          "10.0.1": {
+            "scalaVersions": ["2.11"],
+            "extraDeps": [
+              "com.thoughtworks.binding %%% route % 10.0.1",
+              "com.thoughtworks.binding %%% dom % 10.0.1",
+              "com.thoughtworks.binding %%% futurebinding % 10.0.1",
+              "com.thoughtworks.binding %%% jspromisebinding % 10.0.1"
+            ]
+          },
           "9.0.3": {
             "scalaVersions": ["2.11"],
             "extraDeps": [
