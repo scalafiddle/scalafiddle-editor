@@ -197,7 +197,7 @@
         "doc": "ThoughtWorksInc/Binding.scala",
         "versions": {
           "10.0.1": {
-            "scalaVersions": ["2.10", "2.11", "2.12"],
+            "scalaVersions": ["2.11", "2.12"],
             "extraDeps": [
               "com.thoughtworks.binding %%% route % 10.0.1",
               "com.thoughtworks.binding %%% dom % 10.0.1",
@@ -206,7 +206,7 @@
             ]
           },
           "10.0.0": {
-            "scalaVersions": ["2.10", "2.11", "2.12"],
+            "scalaVersions": ["2.11", "2.12"],
             "extraDeps": [
               "com.thoughtworks.binding %%% route % 10.0.0",
               "com.thoughtworks.binding %%% dom % 10.0.0",
@@ -215,7 +215,7 @@
             ]
           },
           "9.0.4": {
-            "scalaVersions": ["2.10", "2.11", "2.12"],
+            "scalaVersions": ["2.11", "2.12"],
             "extraDeps": [
               "com.thoughtworks.binding %%% dom % 9.0.4",
               "com.thoughtworks.binding %%% futurebinding % 9.0.4",
@@ -223,7 +223,7 @@
             ]
           },
           "9.0.3": {
-            "scalaVersions": ["2.10", "2.11"],
+            "scalaVersions": ["2.11"],
             "extraDeps": [
               "com.thoughtworks.binding %%% dom % 9.0.3",
               "com.thoughtworks.binding %%% futurebinding % 9.0.3",
@@ -231,7 +231,7 @@
             ]
           },
           "9.0.2": {
-            "scalaVersions": ["2.10", "2.11"],
+            "scalaVersions": ["2.11"],
             "extraDeps": [
               "com.thoughtworks.binding %%% dom % 9.0.2",
               "com.thoughtworks.binding %%% futurebinding % 9.0.2",
@@ -239,7 +239,7 @@
             ]
           },
           "9.0.0": {
-            "scalaVersions": ["2.10", "2.11"],
+            "scalaVersions": ["2.11"],
             "extraDeps": [
               "com.thoughtworks.binding %%% dom % 9.0.0",
               "com.thoughtworks.binding %%% futurebinding % 9.0.0",
