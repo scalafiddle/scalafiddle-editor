@@ -192,7 +192,7 @@
       },
       {
         "name": "OutWatch",
-        "organization": "io.github",
+        "organization": "io.github.outwatch",
         "artifact": "outwatch",
         "doc": "OutWatch/outwatch",
         "versions": {
