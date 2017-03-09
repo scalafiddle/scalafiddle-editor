@@ -191,6 +191,19 @@
         "compileTimeOnly": false
       },
       {
+        "name": "OutWatch",
+        "organization": "io.github",
+        "artifact": "outwatch",
+        "doc": "OutWatch/outwatch",
+        "versions": {
+          "0.9.0": {
+            "scalaVersions": ["2.11", "2.12"],
+            "extraDeps": []
+          }
+        },
+        "compileTimeOnly": false
+      },
+      {
         "name": "Binding.scala",
         "organization": "com.thoughtworks.binding",
         "artifact": "binding",
