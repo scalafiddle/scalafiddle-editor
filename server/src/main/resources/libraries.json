@@ -158,6 +158,19 @@
           }
         },
         "compileTimeOnly": false
+      },
+      {
+        "name": "Monadless",
+        "organization": "io.monadless",
+        "artifact": "monadless-core",
+        "doc": "http://monadless.io/",
+        "versions": {
+          "0.0.11": {
+            "scalaVersions": ["2.11", "2.12"],
+            "extraDeps": []
+          }
+        },
+        "compileTimeOnly": false
       }
     ]
   },
