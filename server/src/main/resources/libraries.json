@@ -470,6 +470,19 @@
           }
         },
         "compileTimeOnly": false
+      },
+      {
+        "name": "Contextual",
+        "organization": "com.propensive",
+        "artifact": "contextual",
+        "doc": "http://co.ntextu.al/",
+        "versions": {
+          "1.0.1": {
+            "scalaVersions": ["2.11", "2.12"],
+            "extraDeps": []
+          }
+        },
+        "compileTimeOnly": false
       }
     ]
   }
