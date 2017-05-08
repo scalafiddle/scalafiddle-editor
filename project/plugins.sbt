@@ -1,6 +1,6 @@
 resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases/"
 
-addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.13")
+addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.16")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.1.1")
 
@@ -17,3 +17,5 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-digest" % "1.1.0")
 addSbtPlugin("com.typesafe.sbt" % "sbt-gzip" % "1.0.0")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-less" % "1.0.6")
+
+addSbtPlugin("com.geirsson" % "sbt-scalafmt" % "0.6.8")

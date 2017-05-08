@@ -1,7 +1,6 @@
 package scalafiddle.client
 
 import diode._
-import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router._
 import org.scalajs.dom
 
@@ -18,19 +17,21 @@ object AppRouter {
 
   val fiddleData = AppCircuit.connect(_.fiddleData)
 
-  val config = RouterConfigDsl[Page].buildConfig { dsl =>
-    import dsl._
+  val config = RouterConfigDsl[Page]
+    .buildConfig { dsl =>
+      import dsl._
+      import japgolly.scalajs.react.vdom.Implicits._
 
-    (staticRoute(root, Home) ~> render(fiddleData(d => FiddleEditor(d, None, AppCircuit.zoom(_.outputData), AppCircuit.zoom(_.loginData))))
-      | dynamicRouteCT("sf" / (string("\\w+") / int).caseClass[EditorPage]) ~> dynRender(
-      (p: EditorPage) => {
-        val fid = FiddleId(p.id, p.version)
-        AppCircuit.dispatch(UpdateId(fid, true))
-        fiddleData(d => FiddleEditor(d, Some(fid), AppCircuit.zoom(_.outputData), AppCircuit.zoom(_.loginData)))
-      })
-      )
-      .notFound(redirectToPage(Home)(Redirect.Replace))
-  }.renderWith(layout)
+      (staticRoute(root, Home) ~> render(
+        fiddleData(d => FiddleEditor(d, None, AppCircuit.zoom(_.outputData), AppCircuit.zoom(_.loginData))))
+        | dynamicRouteCT("sf" / (string("\\w+") / int).caseClass[EditorPage]) ~> dynRender((p: EditorPage) => {
+          val fid = FiddleId(p.id, p.version)
+          AppCircuit.dispatch(UpdateId(fid, true))
+          fiddleData(d => FiddleEditor(d, Some(fid), AppCircuit.zoom(_.outputData), AppCircuit.zoom(_.loginData)))
+        }))
+        .notFound(redirectToPage(Home)(Redirect.Replace))
+    }
+    .renderWith(layout)
 
   val baseUrl =
     if (dom.window.location.hostname == "localhost")

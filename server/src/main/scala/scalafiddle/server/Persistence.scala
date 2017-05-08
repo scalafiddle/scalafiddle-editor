@@ -46,8 +46,8 @@ case class UpdateUser(user: User)
 
 class Persistence @Inject()(config: Configuration) extends Actor with ActorLogging {
   val dbConfig = DatabaseConfig.forConfig[JdbcProfile](config.getString("scalafiddle.dbConfig").get)
-  val db = dbConfig.db
-  val dal = new FiddleDAL(dbConfig.driver)
+  val db       = dbConfig.db
+  val dal      = new FiddleDAL(dbConfig.driver)
 
   def runAndReply[T, R](stmt: DBIOAction[T, NoStream, Nothing])(process: T => Try[R]) = {
     db.run(stmt).map(r => process(r)).recover {
@@ -73,23 +73,39 @@ class Persistence @Inject()(config: Configuration) extends Actor with ActorLoggi
   def receive = {
     case AddFiddle(fiddle, user) =>
       val id = createId
-      val newFiddle = Fiddle(id, 0, fiddle.name, fiddle.description, fiddle.sourceCode, fiddle.libraries.map(Library.stringify).toList, user)
+      val newFiddle = Fiddle(id,
+                             0,
+                             fiddle.name,
+                             fiddle.description,
+                             fiddle.sourceCode,
+                             fiddle.libraries.map(Library.stringify).toList,
+                             user)
       log.debug(s"Storing new fiddle: $newFiddle")
       runAndReply(dal.insertFiddle(newFiddle))(r => Success(FiddleId(id, 0))) pipeTo sender()
 
     case ForkFiddle(fiddle, id, version, user) =>
       val id = createId
-      val newFiddle = Fiddle(id, 0, fiddle.name, fiddle.description, fiddle.sourceCode, fiddle.libraries.map(Library.stringify).toList, user, Some(s"$id/$version"))
+      val newFiddle = Fiddle(id,
+                             0,
+                             fiddle.name,
+                             fiddle.description,
+                             fiddle.sourceCode,
+                             fiddle.libraries.map(Library.stringify).toList,
+                             user,
+                             Some(s"$id/$version"))
       log.debug(s"Forking new fiddle: $newFiddle")
       runAndReply(dal.insertFiddle(newFiddle))(r => Success(FiddleId(id, 0))) pipeTo sender()
 
     case FindFiddle(id, version) =>
-      val res = db.run(dal.findFiddle(id, version)).map {
-        case Some(fiddle) => Success(fiddle)
-        case None => Failure(new NoSuchElementException)
-      }.recover {
-        case e: Throwable => Failure(e)
-      }
+      val res = db
+        .run(dal.findFiddle(id, version))
+        .map {
+          case Some(fiddle) => Success(fiddle)
+          case None         => Failure(new NoSuchElementException)
+        }
+        .recover {
+          case e: Throwable => Failure(e)
+        }
       res pipeTo sender()
 
     case FindUserFiddles(userId) =>
@@ -102,60 +118,88 @@ class Persistence @Inject()(config: Configuration) extends Actor with ActorLoggi
 
     case UpdateFiddle(fiddle, id) =>
       // find last fiddle version for this id
-      val res = db.run(dal.findFiddleVersions(id)).flatMap {
-        case fiddles if fiddles.nonEmpty =>
-          val latest = fiddles.last
-          val newVersion = latest.version + 1
-          val newFiddle = Fiddle(id, newVersion, fiddle.name, fiddle.description, fiddle.sourceCode, fiddle.libraries.map(Library.stringify).toList, latest.user, Some(s"${latest.id}/${latest.version}"))
-          runAndReply(dal.insertFiddle(newFiddle))(r => Success(FiddleId(id, newVersion)))
-        case _ => Future.successful(Failure(new NoSuchElementException))
-      }.recover {
-        case e: Throwable => Failure(e)
-      }
+      val res = db
+        .run(dal.findFiddleVersions(id))
+        .flatMap {
+          case fiddles if fiddles.nonEmpty =>
+            val latest     = fiddles.last
+            val newVersion = latest.version + 1
+            val newFiddle = Fiddle(
+              id,
+              newVersion,
+              fiddle.name,
+              fiddle.description,
+              fiddle.sourceCode,
+              fiddle.libraries.map(Library.stringify).toList,
+              latest.user,
+              Some(s"${latest.id}/${latest.version}")
+            )
+            runAndReply(dal.insertFiddle(newFiddle))(r => Success(FiddleId(id, newVersion)))
+          case _ => Future.successful(Failure(new NoSuchElementException))
+        }
+        .recover {
+          case e: Throwable => Failure(e)
+        }
       res pipeTo sender()
 
     case FindLastFiddle(id) =>
-      val res = db.run(dal.findFiddleVersions(id)).map {
-        case fiddles if fiddles.nonEmpty => Success(fiddles.last)
-        case _ => Failure(new NoSuchElementException)
-      }.recover {
-        case e: Throwable => Failure(e)
-      }
+      val res = db
+        .run(dal.findFiddleVersions(id))
+        .map {
+          case fiddles if fiddles.nonEmpty => Success(fiddles.last)
+          case _                           => Failure(new NoSuchElementException)
+        }
+        .recover {
+          case e: Throwable => Failure(e)
+        }
       res pipeTo sender()
 
     case RemoveFiddle(id, version) =>
-      val res = db.run(dal.removeEvent(id, version)).map {
-        case 1 => Success(id)
-        case _ => Failure(new NoSuchElementException)
-      }.recover {
-        case e: Throwable => Failure(e)
-      }
+      val res = db
+        .run(dal.removeEvent(id, version))
+        .map {
+          case 1 => Success(id)
+          case _ => Failure(new NoSuchElementException)
+        }
+        .recover {
+          case e: Throwable => Failure(e)
+        }
       res pipeTo sender()
 
     case GetFiddleInfo =>
-      val res = db.run(dal.getAllEvents).map(r => Success(r.map {
-        case (id, version, name) => FiddleInfo(name, FiddleId(id, version))
-      })).recover {
-        case e: Throwable => Failure(e)
-      }
+      val res = db
+        .run(dal.getAllEvents)
+        .map(r =>
+          Success(r.map {
+            case (id, version, name) => FiddleInfo(name, FiddleId(id, version))
+          }))
+        .recover {
+          case e: Throwable => Failure(e)
+        }
       res pipeTo sender()
 
     case FindUser(id) =>
-      val res = db.run(dal.findUser(id)).map {
-        case Some(user) => Success(user)
-        case None => Failure(new NoSuchElementException)
-      }.recover {
-        case e: Throwable => Failure(e)
-      }
+      val res = db
+        .run(dal.findUser(id))
+        .map {
+          case Some(user) => Success(user)
+          case None       => Failure(new NoSuchElementException)
+        }
+        .recover {
+          case e: Throwable => Failure(e)
+        }
       res pipeTo sender()
 
     case FindUserLogin(loginInfo) =>
-      val res = db.run(dal.findUser(loginInfo)).map {
-        case Some(user) => Success(user)
-        case None => Failure(new NoSuchElementException)
-      }.recover {
-        case e: Throwable => Failure(e)
-      }
+      val res = db
+        .run(dal.findUser(loginInfo))
+        .map {
+          case Some(user) => Success(user)
+          case None       => Failure(new NoSuchElementException)
+        }
+        .recover {
+          case e: Throwable => Failure(e)
+        }
       res pipeTo sender()
 
     case AddUser(user) =>

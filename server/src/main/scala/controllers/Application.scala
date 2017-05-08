@@ -9,8 +9,8 @@ import com.mohiva.play.silhouette.api.{LogoutEvent, Silhouette}
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import play.api.mvc._
 import play.api.{Configuration, Environment, Logger, Mode}
-import slick.backend.DatabaseConfig
-import slick.driver.JdbcProfile
+import slick.basic.DatabaseConfig
+import slick.jdbc.JdbcProfile
 import slick.jdbc.meta.MTable
 import upickle.default._
 import upickle.{Js, json}
@@ -27,26 +27,28 @@ import scalafiddle.shared.{Api, FiddleData, Library, UserInfo}
 
 object Router extends autowire.Server[Js.Value, Reader, Writer] {
   override def read[R: Reader](p: Js.Value) = readJs[R](p)
-  override def write[R: Writer](r: R) = writeJs(r)
+  override def write[R: Writer](r: R)       = writeJs(r)
 }
 
 class Application @Inject()(
-  implicit val config: Configuration,
-  env: Environment,
-  silhouette: Silhouette[DefaultEnv],
-  socialProviderRegistry: SocialProviderRegistry,
-  actorSystem: ActorSystem,
-  @Named("persistence") persistence: ActorRef
+    implicit val config: Configuration,
+    env: Environment,
+    silhouette: Silhouette[DefaultEnv],
+    socialProviderRegistry: SocialProviderRegistry,
+    actorSystem: ActorSystem,
+    @Named("persistence") persistence: ActorRef
 ) extends Controller {
   implicit val timeout = Timeout(15.seconds)
-  val log = Logger(getClass)
-  val libUri = config.getString("scalafiddle.librariesURL").get
+  val log              = Logger(getClass)
+  val libUri           = config.getString("scalafiddle.librariesURL").get
   def libSource() = {
     if (libUri.startsWith("file:")) {
       // load from file system
       scala.io.Source.fromFile(libUri.drop(5), "UTF-8")
     } else if (libUri.startsWith("http")) {
-      System.setProperty("http.agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.29 Safari/537.36")
+      System.setProperty(
+        "http.agent",
+        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.29 Safari/537.36")
       scala.io.Source.fromURL(libUri, "UTF-8")
     } else {
       env.resourceAsStream(libUri).map(s => scala.io.Source.fromInputStream(s, "UTF-8")).get
@@ -54,7 +56,8 @@ class Application @Inject()(
   }
   val librarian = new Librarian(libSource)
   // refresh libraries every N minutes
-  actorSystem.scheduler.schedule(config.getInt("scalafiddle.refreshLibraries").get.seconds, config.getInt("scalafiddle.refreshLibraries").get.seconds)(librarian.refresh())
+  actorSystem.scheduler.schedule(config.getInt("scalafiddle.refreshLibraries").get.seconds,
+                                 config.getInt("scalafiddle.refreshLibraries").get.seconds)(librarian.refresh())
   val defaultSource = config.getString("scalafiddle.defaultSource").get
 
   if (env.mode != Mode.Prod)
@@ -82,7 +85,7 @@ class Application @Inject()(
         // create a source code file for embedded ScalaFiddle
         val nameOpt = fd.name match {
           case empty if empty.replaceAll("\\s", "").isEmpty => None
-          case nonEmpty => Some(nonEmpty.replaceAll("\\s", " "))
+          case nonEmpty                                     => Some(nonEmpty.replaceAll("\\s", " "))
         }
         val sourceCode = new StringBuilder()
         sourceCode.append(fd.sourceCode)
@@ -118,17 +121,18 @@ class Application @Inject()(
 
   val loginProviders = config.getStringSeq("scalafiddle.loginProviders").get.map(AllLoginProviders.providers)
 
-  def autowireApi(path: String) = silhouette.UserAwareAction.async {
-    implicit request =>
-      val apiService: Api = new ApiService(persistence, request.identity, loginProviders)
+  def autowireApi(path: String) = silhouette.UserAwareAction.async { implicit request =>
+    val apiService: Api = new ApiService(persistence, request.identity, loginProviders)
 
-      // get the request body as JSON
-      val b = request.body.asText.get
+    // get the request body as JSON
+    val b = request.body.asText.get
 
-      // call Autowire route
-      Router.route[Api](apiService)(
+    // call Autowire route
+    Router
+      .route[Api](apiService)(
         autowire.Core.Request(path.split("/"), json.read(b).asInstanceOf[Js.Obj].value.toMap)
-      ).map(buffer => {
+      )
+      .map(buffer => {
         val data = json.write(buffer)
         Ok(data)
       })
@@ -142,14 +146,36 @@ class Application @Inject()(
     } else {
       ask(persistence, FindFiddle(id, version)).mapTo[Try[Fiddle]].flatMap {
         case Success(f) if f.user == "anonymous" =>
-          Future.successful(Success(FiddleData(f.name, f.description, f.sourceCode, f.libraries.flatMap(librarian.findLibrary), Seq.empty, librarian.libraries, None)))
+          Future.successful(
+            Success(
+              FiddleData(f.name,
+                         f.description,
+                         f.sourceCode,
+                         f.libraries.flatMap(librarian.findLibrary),
+                         Seq.empty,
+                         librarian.libraries,
+                         None)))
         case Success(f) =>
           ask(persistence, FindUser(f.user)).mapTo[Try[User]].map {
             case Success(u) =>
               val user = UserInfo(u.userID, u.name.getOrElse("Anonymous"), u.avatarURL, loggedIn = false)
-              Success(FiddleData(f.name, f.description, f.sourceCode, f.libraries.flatMap(librarian.findLibrary), Seq.empty, librarian.libraries, Some(user)))
+              Success(
+                FiddleData(f.name,
+                           f.description,
+                           f.sourceCode,
+                           f.libraries.flatMap(librarian.findLibrary),
+                           Seq.empty,
+                           librarian.libraries,
+                           Some(user)))
             case _ =>
-              Success(FiddleData(f.name, f.description, f.sourceCode, f.libraries.flatMap(librarian.findLibrary), Seq.empty, librarian.libraries, None))
+              Success(
+                FiddleData(f.name,
+                           f.description,
+                           f.sourceCode,
+                           f.libraries.flatMap(librarian.findLibrary),
+                           Seq.empty,
+                           librarian.libraries,
+                           None))
           }
         case Failure(e) =>
           Future.successful(Failure(e))
@@ -158,10 +184,10 @@ class Application @Inject()(
   }
 
   def parseFiddle(source: String): (String, Seq[Library]) = {
-    val dependencyRE = """ *// \$FiddleDependency (.+)"""
-    val lines = source.split("\n")
+    val dependencyRE          = """ *// \$FiddleDependency (.+)"""
+    val lines                 = source.split("\n")
     val (libLines, codeLines) = lines.partition(_.matches(dependencyRE))
-    val libs = libLines.flatMap(librarian.findLibrary)
+    val libs                  = libLines.flatMap(librarian.findLibrary)
     (codeLines.mkString("\n"), libs)
   }
 
@@ -169,20 +195,21 @@ class Application @Inject()(
     log.debug(s"Creating missing tables")
     // create tables
     val dbConfig = DatabaseConfig.forConfig[JdbcProfile](config.getString("scalafiddle.dbConfig").get)
-    val db = dbConfig.db
-    val dal = new FiddleDAL(dbConfig.driver)
+    val db       = dbConfig.db
+    val dal      = new FiddleDAL(dbConfig.profile)
     import dal.driver.api._
 
     def createTableIfNotExists(tables: Seq[TableQuery[_ <: Table[_]]]): Future[Any] = {
       // create tables in order, waiting for previous "create" to complete before running next
       tables.foldLeft(Future.successful(())) { (f, table) =>
-        f.flatMap(_ => db.run(MTable.getTables(table.baseTableRow.tableName)).flatMap { result =>
-          if (result.isEmpty) {
-            log.debug(s"Creating table: ${table.baseTableRow.tableName}")
-            db.run(table.schema.create)
-          } else {
-            Future.successful(())
-          }
+        f.flatMap(_ =>
+          db.run(MTable.getTables(table.baseTableRow.tableName)).flatMap { result =>
+            if (result.isEmpty) {
+              log.debug(s"Creating table: ${table.baseTableRow.tableName}")
+              db.run(table.schema.create)
+            } else {
+              Future.successful(())
+            }
         })
       }
     }

@@ -16,9 +16,9 @@ import scala.util.{Success, Try}
 import scalafiddle.server._
 import scalafiddle.server.models.User
 
-class UserServiceImpl @Inject() (@Named("persistence") persistence: ActorRef) extends UserService {
+class UserServiceImpl @Inject()(@Named("persistence") persistence: ActorRef) extends UserService {
   implicit val timeout = Timeout(15.seconds)
-  val log = Logger(getClass)
+  val log              = Logger(getClass)
 
   /**
     * Retrieves a user that matches the specified ID.
@@ -60,7 +60,14 @@ class UserServiceImpl @Inject() (@Named("persistence") persistence: ActorRef) ex
     */
   override def save(profile: CommonSocialProfile): Future[User] = {
     log.debug(s"User $profile logged in")
-    val user = User(UUID.randomUUID().toString, profile.loginInfo, profile.firstName, profile.lastName, profile.fullName, profile.email, profile.avatarURL, true)
+    val user = User(UUID.randomUUID().toString,
+                    profile.loginInfo,
+                    profile.firstName,
+                    profile.lastName,
+                    profile.fullName,
+                    profile.email,
+                    profile.avatarURL,
+                    true)
     ask(persistence, AddUser(user)).mapTo[Try[User]].map {
       case Success(u) =>
         u

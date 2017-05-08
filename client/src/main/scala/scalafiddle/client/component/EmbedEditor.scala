@@ -28,7 +28,7 @@ object EmbedEditor {
 
   case class Props(fiddleId: FiddleId)
 
-  case class Backend($: BackendScope[Props, State]) {
+  case class Backend($ : BackendScope[Props, State]) {
     def render(props: Props, state: State) = {
       import japgolly.scalajs.react.vdom.all._
 
@@ -36,12 +36,12 @@ object EmbedEditor {
         val src = new StringBuilder(s"${ScalaFiddleConfig.compilerURL}/embed?sfid=${props.fiddleId}")
         state.theme match {
           case "light" =>
-          case theme => src.append(s"&theme=$theme")
+          case theme   => src.append(s"&theme=$theme")
         }
         state.layout match {
-          case Horizontal(50) =>
+          case Horizontal(50)    =>
           case Horizontal(split) => src.append(s"&layout=h$split")
-          case Vertical(split) => src.append(s"&layout=v$split")
+          case Vertical(split)   => src.append(s"&layout=v$split")
         }
         src.toString()
       }
@@ -55,7 +55,7 @@ object EmbedEditor {
           div(cls := "ui form")(
             div(cls := "header", "Theme"),
             div(cls := "grouped fields")(
-              themes.map { theme =>
+              themes.toTagMod { theme =>
                 div(cls := "field")(
                   div(cls := "ui radio checkbox")(
                     input.radio(name := "theme", checked := (state.theme == theme), onChange --> themeChanged(theme)),
@@ -70,13 +70,17 @@ object EmbedEditor {
                 label(`for` := "layout")("Direction"),
                 div(cls := "field")(
                   div(cls := "ui radio checkbox")(
-                    input.radio(name := "layout", checked := state.layout.isInstanceOf[Horizontal], onChange --> layoutChanged(Horizontal(state.layout.split))),
+                    input.radio(name := "layout",
+                                checked := state.layout.isInstanceOf[Horizontal],
+                                onChange --> layoutChanged(Horizontal(state.layout.split))),
                     label("Horizontal")
                   )
                 ),
                 div(cls := "field")(
                   div(cls := "ui radio checkbox")(
-                    input.radio(name := "layout", checked := state.layout.isInstanceOf[Vertical], onChange --> layoutChanged(Vertical(state.layout.split))),
+                    input.radio(name := "layout",
+                                checked := state.layout.isInstanceOf[Vertical],
+                                onChange --> layoutChanged(Vertical(state.layout.split))),
                     label("Vertical")
                   )
                 )
@@ -88,13 +92,25 @@ object EmbedEditor {
             ),
             div(cls := "field")(
               div(cls := "header", "Embed code"),
-              textarea(cls := "embed-code", value := createEmbedCode, onClick ==> {(e: ReactEventH) => e.target.focus(); e.target.asInstanceOf[HTMLTextAreaElement].select(); Callback.empty})
+              textarea(
+                cls := "embed-code",
+                value := createEmbedCode,
+                onClick ==> { (e: ReactEventFromHtml) =>
+                  e.target.focus(); e.target.asInstanceOf[HTMLTextAreaElement].select(); Callback.empty
+                }
+              )
             )
           )
         ),
         div(cls := "preview")(
           div(cls := "header", "Preview"),
-          iframe(height := 300, width := "100%", frameBorder := 0, style := "width: 100%; overflow: hidden", src := s"$createIframeSource&preview=true")
+          iframe(
+            height := "300",
+            width := "100%",
+            frameBorder := 0,
+            style := scalajs.js.Dictionary("width" -> "100%", "overflow" -> "hidden"),
+            src := s"$createIframeSource&preview=true"
+          )
         )
       )
     }
@@ -107,14 +123,15 @@ object EmbedEditor {
       $.modState(_.copy(layout = layout))
     }
 
-    def splitChanged(e: ReactEventI): Callback = {
+    def splitChanged(e: ReactEventFromInput): Callback = {
       val split = e.target.value.toInt
       $.modState(s => s.copy(layout = s.layout.updated(split = split)))
     }
 
   }
 
-  val component = ReactComponentB[Props]("EmbedEditor")
+  val component = ScalaComponent
+    .builder[Props]("EmbedEditor")
     .initialState(State("light", Horizontal(50)))
     .renderBackend[Backend]
     .build

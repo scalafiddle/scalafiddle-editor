@@ -17,7 +17,7 @@ class LoginHandler[M](modelRW: ModelRW[M, LoginData]) extends ActionHandler(mode
   override def handle = {
     case UpdateLoginInfo =>
       val loginProviders = Effect(AjaxClient[Api].loginProviders().call().map(UpdateLoginProviders))
-      val userInfo = Effect(AjaxClient[Api].userInfo().call().map(UpdateUserInfo))
+      val userInfo       = Effect(AjaxClient[Api].userInfo().call().map(UpdateUserInfo))
       effectOnly(loginProviders + userInfo)
 
     case UpdateLoginProviders(loginProviders) =>

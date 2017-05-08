@@ -10,19 +10,22 @@ object Dropdown {
 
   case class State(isOpen: Boolean = false)
 
-  case class Props(classes: String, buttonContent: ReactNode, content: (() => Callback) => ReactNode)
+  case class Props(classes: String, buttonContent: VdomNode, content: (() => Callback) => VdomNode)
 
-  case class Backend($: BackendScope[Props, State]) {
-    def render(props: Props, state: State, children: PropsChildren) = {
-      div(cls := s"ui dropdown ${props.classes} ${if(state.isOpen) "active visible" else ""}", onClick ==> { (e: ReactEventH) => dropdownClicked(e, state.isOpen) })(
+  case class Backend($ : BackendScope[Props, State]) {
+    def render(props: Props, state: State) = {
+      div(cls := s"ui dropdown ${props.classes} ${if (state.isOpen) "active visible" else ""}", onClick ==> {
+        (e: ReactEventFromHtml) =>
+          dropdownClicked(e, state.isOpen)
+      })(
         props.buttonContent,
-        state.isOpen ?= props.content(closeDropdown)
+        props.content(closeDropdown).when(state.isOpen)
       )
     }
 
     val closeFn: js.Function1[MouseEvent, _] = (e: MouseEvent) => closeDropdown(e)
 
-    def dropdownClicked(e: ReactEventH, isOpen: Boolean): Callback = {
+    def dropdownClicked(e: ReactEventFromHtml, isOpen: Boolean): Callback = {
       if (!isOpen) {
         Callback {
           dom.document.addEventListener("click", closeFn)
@@ -33,7 +36,9 @@ object Dropdown {
     }
 
     def closeDropdown(e: MouseEvent): Unit = {
-      if($.accessDirect.state.isOpen && !$.getDOMNode().asInstanceOf[HTMLElement].contains(e.target.asInstanceOf[HTMLElement])) {
+      val state = $.state.runNow()
+      val node  = $.getDOMNode.runNow().asInstanceOf[HTMLElement]
+      if (state.isOpen && !node.contains(e.target.asInstanceOf[HTMLElement])) {
         closeDropdown().runNow()
       }
     }
@@ -44,10 +49,12 @@ object Dropdown {
     }
   }
 
-  val component = ReactComponentB[Props]("FiddleEditor")
-    .initialState_P(props => State())
+  val component = ScalaComponent
+    .builder[Props]("FiddleEditor")
+    .initialState(State())
     .renderBackend[Backend]
     .build
 
-  def apply(classes: String, buttonContent: ReactNode)(content: (() => Callback) => ReactNode) = component(Props(classes, buttonContent, content))
+  def apply(classes: String, buttonContent: VdomNode)(content: (() => Callback) => VdomNode) =
+    component(Props(classes, buttonContent, content))
 }

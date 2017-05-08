@@ -9,27 +9,27 @@ import scalafiddle.shared._
 class Librarian(libSource: () => BufferedSource) {
 
   case class LibraryVersion(
-    scalaVersions: Seq[String],
-    extraDeps: Seq[String]
+      scalaVersions: Seq[String],
+      extraDeps: Seq[String]
   )
 
   case class LibraryDef(
-    name: String,
-    organization: String,
-    artifact: String,
-    doc: String,
-    versions: Map[String, LibraryVersion],
-    compileTimeOnly: Boolean
+      name: String,
+      organization: String,
+      artifact: String,
+      doc: String,
+      versions: Map[String, LibraryVersion],
+      compileTimeOnly: Boolean
   )
 
   case class LibraryGroup(
-    group: String,
-    libraries: Seq[LibraryDef]
+      group: String,
+      libraries: Seq[LibraryDef]
   )
 
   val repoSJSRE = """([^ %]+) *%%% *([^ %]+) *% *([^ %]+)""".r
-  val repoRE = """([^ %]+) *%% *([^ %]+) *% *([^ %]+)""".r
-  val log = LoggerFactory.getLogger(getClass)
+  val repoRE    = """([^ %]+) *%% *([^ %]+) *% *([^ %]+)""".r
+  val log       = LoggerFactory.getLogger(getClass)
   var libraries = Seq.empty[Library]
   refresh()
 
@@ -46,14 +46,24 @@ class Librarian(libSource: () => BufferedSource) {
   }
 
   def loadLibraries: Seq[Library] = {
-    val data = libSource().mkString
+    val data      = libSource().mkString
     val libGroups = read[Seq[LibraryGroup]](data)
     for {
-      (group, idx) <- libGroups.zipWithIndex
-      lib <- group.libraries
+      (group, idx)          <- libGroups.zipWithIndex
+      lib                   <- group.libraries
       (version, versionDef) <- lib.versions
     } yield {
-      Library(lib.name, lib.organization, lib.artifact, version, lib.compileTimeOnly, versionDef.scalaVersions, versionDef.extraDeps, f"$idx%02d:${group.group}", createDocURL(lib.doc))
+      Library(
+        lib.name,
+        lib.organization,
+        lib.artifact,
+        version,
+        lib.compileTimeOnly,
+        versionDef.scalaVersions,
+        versionDef.extraDeps,
+        f"$idx%02d:${group.group}",
+        createDocURL(lib.doc)
+      )
     }
   }
 
@@ -70,7 +80,7 @@ class Librarian(libSource: () => BufferedSource) {
     val githubRef = """([^/]+)/([^/]+)""".r
     doc match {
       case githubRef(org, lib) => s"https://github.com/$org/$lib"
-      case _ => doc
+      case _                   => doc
     }
   }
 }

@@ -44,33 +44,38 @@ class CompilerHandler[M](modelRW: ModelRW[M, OutputData]) extends ActionHandler(
   override def handle = {
     case AutoCompleteFiddle(source, row, col, callback) =>
       val effect = {
-        val intOffset = col + source.split("\n")
+        val intOffset = col + source
+          .split("\n")
           .take(row)
           .map(_.length + 1)
           .sum
         // call the ScalaFiddle compiler to perform completion
-        Ajax.get(
-          url = s"${ScalaFiddleConfig.compilerURL}/complete?offset=$intOffset&source=${encodeSource(source)}"
-        ).map { request =>
-          val results = read[CompletionResponse](request.responseText)
-          println(s"Completion results: $results")
-          callback(results.completions)
-          NoAction
-        }
+        Ajax
+          .get(
+            url = s"${ScalaFiddleConfig.compilerURL}/complete?offset=$intOffset&source=${encodeSource(source)}"
+          )
+          .map { request =>
+            val results = read[CompletionResponse](request.responseText)
+            println(s"Completion results: $results")
+            callback(results.completions)
+            NoAction
+          }
       }
       effectOnly(Effect(effect))
 
     case CompileFiddle(source, optimization) =>
-      val effect = Ajax.get(
-        url = s"${ScalaFiddleConfig.compilerURL}/compile?opt=${optimization.flag}&source=${encodeSource(source)}"
-      ).map { request =>
-        read[CompilationResponse](request.responseText) match {
-          case CompilationResponse(Some(jsCode), _, log) =>
-            CompilerResult(Right(jsCode), log)
-          case CompilationResponse(None, annotations, log) =>
-            CompilerResult(Left(annotations), log)
-        }
-      } recover {
+      val effect = Ajax
+        .get(
+          url = s"${ScalaFiddleConfig.compilerURL}/compile?opt=${optimization.flag}&source=${encodeSource(source)}"
+        )
+        .map { request =>
+          read[CompilationResponse](request.responseText) match {
+            case CompilationResponse(Some(jsCode), _, log) =>
+              CompilerResult(Right(jsCode), log)
+            case CompilationResponse(None, annotations, log) =>
+              CompilerResult(Left(annotations), log)
+          }
+        } recover {
         case e: dom.ext.AjaxException =>
           ServerError(s"Network error: ${e.xhr.responseText}")
         case e: Throwable =>
@@ -98,10 +103,10 @@ class CompilerHandler[M](modelRW: ModelRW[M, OutputData]) extends ActionHandler(
     import com.github.marklister.base64.Base64._
     import js.JSConverters._
     implicit def scheme: B64Scheme = base64Url
-    val fullSource = source.getBytes(StandardCharsets.UTF_8)
-    val compressedBuffer = new Gzip(fullSource.toJSArray).compress()
-    val compressedSource = new Array[Byte](compressedBuffer.length)
-    var i = 0
+    val fullSource                 = source.getBytes(StandardCharsets.UTF_8)
+    val compressedBuffer           = new Gzip(fullSource.toJSArray).compress()
+    val compressedSource           = new Array[Byte](compressedBuffer.length)
+    var i                          = 0
     while (i < compressedBuffer.length) {
       compressedSource(i) = compressedBuffer.get(i).toByte
       i += 1

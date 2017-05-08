@@ -60,7 +60,7 @@ lazy val server = (project in file("server"))
     mappings in (Compile, packageDoc) := Seq(),
     dockerfile in docker := {
       val appDir: File = stage.value
-      val targetDir = "/app"
+      val targetDir    = "/app"
 
       new Dockerfile {
         from("openjdk:8")

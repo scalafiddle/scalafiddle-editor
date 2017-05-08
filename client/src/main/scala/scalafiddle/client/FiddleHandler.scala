@@ -24,7 +24,8 @@ case class ForkFiddle(source: String) extends Action
 
 case class UpdateId(fiddleId: FiddleId, silent: Boolean = false) extends Action
 
-class FiddleHandler[M](modelRW: ModelRW[M, FiddleData], fidRW: ModelRW[M, Option[FiddleId]]) extends ActionHandler(modelRW) {
+class FiddleHandler[M](modelRW: ModelRW[M, FiddleData], fidRW: ModelRW[M, Option[FiddleId]])
+    extends ActionHandler(modelRW) {
 
   override def handle = {
     case SelectLibrary(lib) =>
@@ -65,14 +66,14 @@ class FiddleHandler[M](modelRW: ModelRW[M, FiddleData], fidRW: ModelRW[M, Option
 
     case ForkFiddle(source) =>
       if (fidRW().isDefined) {
-          val newFiddle = value.copy(sourceCode = source, available = Seq.empty)
-          val forkF: Future[Action] = AjaxClient[Api].fork(newFiddle, fidRW().get.id, fidRW().get.version).call().map {
-            case Right(fid) =>
-              UpdateId(fid)
-            case Left(error) =>
-              NoAction
-          }
-          updated(value.copy(sourceCode = source), Effect(forkF))
+        val newFiddle = value.copy(sourceCode = source, available = Seq.empty)
+        val forkF: Future[Action] = AjaxClient[Api].fork(newFiddle, fidRW().get.id, fidRW().get.version).call().map {
+          case Right(fid) =>
+            UpdateId(fid)
+          case Left(error) =>
+            NoAction
+        }
+        updated(value.copy(sourceCode = source), Effect(forkF))
       } else {
         noChange
       }

@@ -4,8 +4,7 @@ import com.mohiva.play.silhouette.api.LoginInfo
 
 import scalafiddle.server.models.User
 
-trait UserDAO {
-  self: DriverComponent =>
+trait UserDAO { self: DriverComponent =>
 
   import driver.api._
 
@@ -18,12 +17,12 @@ trait UserDAO {
   )
 
   class Users(tag: Tag) extends Table[User](tag, "user") {
-    def userID = column[String]("user_id", O.PrimaryKey)
+    def userID    = column[String]("user_id", O.PrimaryKey)
     def loginInfo = column[LoginInfo]("login_info")
     def firstName = column[Option[String]]("first_name")
-    def lastName = column[Option[String]]("last_name")
-    def fullName = column[Option[String]]("full_name")
-    def email = column[Option[String]]("email")
+    def lastName  = column[Option[String]]("last_name")
+    def fullName  = column[Option[String]]("full_name")
+    def email     = column[Option[String]]("email")
     def avatarURL = column[Option[String]]("avatar_url")
     def activated = column[Boolean]("activated")
 

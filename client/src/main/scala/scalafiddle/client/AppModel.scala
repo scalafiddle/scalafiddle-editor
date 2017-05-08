@@ -32,28 +32,28 @@ object CompilerStatus {
 sealed trait OutputData
 
 case class CompilerData(
-  status: CompilerStatus,
-  jsCode: Option[String],
-  annotations: Seq[EditorAnnotation],
-  errorMessage: Option[String],
-  log: String
+    status: CompilerStatus,
+    jsCode: Option[String],
+    annotations: Seq[EditorAnnotation],
+    errorMessage: Option[String],
+    log: String
 ) extends OutputData
 
 case class UserFiddleData(
-  fiddles: Seq[FiddleVersions]
+    fiddles: Seq[FiddleVersions]
 ) extends OutputData
 
 case class LoginData(
-  userInfo: Pot[UserInfo],
-  loginProviders: Pot[Seq[LoginProvider]]
+    userInfo: Pot[UserInfo],
+    loginProviders: Pot[Seq[LoginProvider]]
 )
 
 case class AppModel(
-  navLocation: Page,
-  fiddleId: Option[FiddleId],
-  fiddleData: FiddleData,
-  outputData: OutputData,
-  loginData: LoginData
+    navLocation: Page,
+    fiddleId: Option[FiddleId],
+    fiddleData: FiddleData,
+    outputData: OutputData,
+    loginData: LoginData
 )
 
 case class NavigateTo(page: Page) extends Action
