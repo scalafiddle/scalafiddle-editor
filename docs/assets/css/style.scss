@@ -1,0 +1,18 @@
+---
+---
+
+@import "{{ site.theme }}";
+
+#main_content_wrap {
+  background: #fff;
+  border: none;
+}
+
+body {
+  background: #fff;
+  font-family: Lato, 'Helvetica Neue', Arial, Helvetica, sans-serif;
+}
+
+.inner {
+  max-width: 1200px;
+}
