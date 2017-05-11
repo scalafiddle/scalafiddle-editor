@@ -19,7 +19,7 @@ object AppCircuit extends Circuit[AppModel] with ReactConnector[AppModel] {
     AppModel(Home,
              None,
              fiddleData,
-             CompilerData(CompilerStatus.Result, None, Seq.empty, None, ""),
+             ScalaFiddleHelp(ScalaFiddleConfig.helpURL),
              LoginData(Empty, Empty))
 
   override protected def actionHandler = composeHandlers(

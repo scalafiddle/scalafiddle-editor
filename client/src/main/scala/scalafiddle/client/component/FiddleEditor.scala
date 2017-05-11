@@ -54,6 +54,7 @@ object FiddleEditor {
 
       def showSave    = props.fiddleId.isEmpty
       def fiddleHasId = props.fiddleId.nonEmpty
+
       def showUpdate: Boolean = {
         if (!fiddleHasId)
           false
@@ -102,6 +103,10 @@ object FiddleEditor {
               div(cls := "menu", display.block)(EmbedEditor(props.fiddleId.get))).when(fiddleHasId)
           ),
           div(cls := "right")(
+            div(cls := "ui basic button", onClick --> props.dispatch(ShowHelp(ScalaFiddleConfig.helpURL)))(
+              "Help"
+            ).when(ScalaFiddleConfig.helpURL.nonEmpty),
+
             UserLogin(props.loginData)
           )
         ),
@@ -190,6 +195,17 @@ object FiddleEditor {
                     frameBorder := "0",
                     sandbox := "allow-scripts allow-popups allow-popups-to-escape-sandbox",
                     src := s"/resultframe?theme=light"
+                  )
+                )
+              case ScalaFiddleHelp(url) =>
+                div(cls := "output")(
+                  iframe.ref(resultRef = _)(
+                    id := "resultframe",
+                    width := "100%",
+                    height := "100%",
+                    frameBorder := "0",
+                    sandbox := "allow-scripts allow-popups allow-popups-to-escape-sandbox",
+                    src := url
                   )
                 )
             }
@@ -550,6 +566,9 @@ object FiddleEditor {
 
         case fiddles: UserFiddleData =>
           $.modState(s => s.copy(outputData = fiddles)).runNow()
+
+        case help: ScalaFiddleHelp =>
+          $.modState(s => s.copy(outputData = help)).runNow()
       }
     }
   }

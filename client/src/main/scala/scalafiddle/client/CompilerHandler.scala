@@ -97,6 +97,9 @@ class CompilerHandler[M](modelRW: ModelRW[M, OutputData]) extends ActionHandler(
 
     case UserFiddlesUpdated(fiddles) =>
       updated(UserFiddleData(fiddles))
+
+    case ShowHelp(url) =>
+      updated(ScalaFiddleHelp(url))
   }
 
   def encodeSource(source: String): String = {

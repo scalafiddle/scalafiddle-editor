@@ -71,6 +71,7 @@ class Gunzip(data: js.Array[Byte]) extends js.Object {
 @JSGlobal("ScalaFiddleConfig")
 object ScalaFiddleConfig extends js.Object {
   val compilerURL: String = js.native
+  val helpURL: String = js.native
 }
 
 @js.native

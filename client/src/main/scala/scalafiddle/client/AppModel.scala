@@ -43,6 +43,8 @@ case class UserFiddleData(
     fiddles: Seq[FiddleVersions]
 ) extends OutputData
 
+case class ScalaFiddleHelp(url: String) extends OutputData
+
 case class LoginData(
     userInfo: Pot[UserInfo],
     loginProviders: Pot[Seq[LoginProvider]]

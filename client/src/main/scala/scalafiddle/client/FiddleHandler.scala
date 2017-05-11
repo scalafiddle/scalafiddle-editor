@@ -24,6 +24,8 @@ case class ForkFiddle(source: String) extends Action
 
 case class UpdateId(fiddleId: FiddleId, silent: Boolean = false) extends Action
 
+case class ShowHelp(url: String) extends Action
+
 class FiddleHandler[M](modelRW: ModelRW[M, FiddleData], fidRW: ModelRW[M, Option[FiddleId]])
     extends ActionHandler(modelRW) {
 

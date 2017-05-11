@@ -41,6 +41,7 @@ class Application @Inject()(
   implicit val timeout = Timeout(15.seconds)
   val log              = Logger(getClass)
   val libUri           = config.getString("scalafiddle.librariesURL").get
+
   def libSource() = {
     if (libUri.startsWith("file:")) {
       // load from file system
@@ -142,40 +143,46 @@ class Application @Inject()(
     if (id == "") {
       // build default fiddle data
       val (source, libs) = parseFiddle(defaultSource)
-      Future(Success(FiddleData("", "", source, libs, Seq.empty, librarian.libraries, None)))
+      Future.successful(Success(FiddleData("", "", source, libs, Seq.empty, librarian.libraries, None)))
     } else {
       ask(persistence, FindFiddle(id, version)).mapTo[Try[Fiddle]].flatMap {
         case Success(f) if f.user == "anonymous" =>
           Future.successful(
             Success(
-              FiddleData(f.name,
-                         f.description,
-                         f.sourceCode,
-                         f.libraries.flatMap(librarian.findLibrary),
-                         Seq.empty,
-                         librarian.libraries,
-                         None)))
+              FiddleData(
+                f.name,
+                f.description,
+                f.sourceCode,
+                f.libraries.flatMap(librarian.findLibrary),
+                Seq.empty,
+                librarian.libraries,
+                None
+              )))
         case Success(f) =>
           ask(persistence, FindUser(f.user)).mapTo[Try[User]].map {
             case Success(u) =>
               val user = UserInfo(u.userID, u.name.getOrElse("Anonymous"), u.avatarURL, loggedIn = false)
               Success(
-                FiddleData(f.name,
-                           f.description,
-                           f.sourceCode,
-                           f.libraries.flatMap(librarian.findLibrary),
-                           Seq.empty,
-                           librarian.libraries,
-                           Some(user)))
+                FiddleData(
+                  f.name,
+                  f.description,
+                  f.sourceCode,
+                  f.libraries.flatMap(librarian.findLibrary),
+                  Seq.empty,
+                  librarian.libraries,
+                  Some(user)
+                ))
             case _ =>
               Success(
-                FiddleData(f.name,
-                           f.description,
-                           f.sourceCode,
-                           f.libraries.flatMap(librarian.findLibrary),
-                           Seq.empty,
-                           librarian.libraries,
-                           None))
+                FiddleData(
+                  f.name,
+                  f.description,
+                  f.sourceCode,
+                  f.libraries.flatMap(librarian.findLibrary),
+                  Seq.empty,
+                  librarian.libraries,
+                  None
+                ))
           }
         case Failure(e) =>
           Future.successful(Failure(e))
