@@ -40,7 +40,7 @@
           window.ScalaFiddleConfig = cfg;
           window.ScalaFiddleData = @Html(fiddleData);
         </script>
-        @playscalajs.html.scripts(projectName = "client", fileName => routes.Assets.versioned(fileName).toString)
+        @scalajs.html.scripts(projectName = "client", fileName => routes.Assets.versioned(fileName).toString, name => getClass.getResource(s"/public/$name") != null)
         <script>
                 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
                             (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

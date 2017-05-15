@@ -8,9 +8,9 @@ addSbtPlugin("se.marcuslonnberg" % "sbt-docker" % "1.4.0")
 
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.7.1")
 
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.5.4")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.5.14")
 
-addSbtPlugin("com.vmunier" % "sbt-play-scalajs" % "0.3.0")
+addSbtPlugin("com.vmunier" % "sbt-web-scalajs" % "1.0.4")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-digest" % "1.1.0")
 

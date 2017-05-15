@@ -39,7 +39,7 @@ object Settings {
 
     val react = "15.5.4"
 
-    val playScripts = "0.5.0"
+    val scalaJsScripts = "1.0.0"
   }
 
   /**
@@ -66,7 +66,7 @@ object Settings {
       "com.mohiva"         %% "play-silhouette-crypto-jca"      % versions.silhouette,
       "net.codingwell"     %% "scala-guice"                     % "4.0.1",
       "com.iheart"         %% "ficus"                           % "1.2.6",
-      "com.vmunier"        %% "play-scalajs-scripts"            % versions.playScripts,
+      "com.vmunier"        %% "scalajs-scripts"                 % versions.scalaJsScripts,
       "org.webjars"        % "font-awesome"                     % "4.6.3" % Provided,
       "org.webjars"        % "Semantic-UI"                      % versions.semantic % Provided,
       "org.webjars"        % "ace"                              % versions.ace % Provided

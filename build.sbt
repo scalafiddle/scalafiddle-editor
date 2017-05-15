@@ -10,7 +10,7 @@ lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared"))
     libraryDependencies ++= Settings.sharedDependencies.value
   )
   // set up settings specific to the JS project
-  .jsConfigure(_ enablePlugins ScalaJSPlay)
+  .jsConfigure(_ enablePlugins ScalaJSWeb)
 
 lazy val sharedJVM = shared.jvm.settings(name := "sharedJVM")
 
@@ -25,14 +25,13 @@ lazy val client = (project in file("client"))
     scalacOptions ++= Settings.scalacOptions,
     libraryDependencies ++= Settings.sharedDependencies.value ++ Settings.scalajsDependencies.value,
     jsDependencies ++= Settings.jsDependencies.value,
-    jsEnv := JSDOMNodeJSEnv().value,
+    jsEnv := new org.scalajs.jsenv.nodejs.JSDOMNodeJSEnv(),
     // yes, we want to package JS dependencies
     skip in packageJSDependencies := false,
     // use Scala.js provided launcher code to start the client app
-    persistLauncher := true,
-    persistLauncher in Test := false
+    scalaJSUseMainModuleInitializer := true
   )
-  .enablePlugins(ScalaJSPlugin, ScalaJSPlay)
+  .enablePlugins(ScalaJSPlugin, ScalaJSWeb)
   .dependsOn(sharedJS)
 
 // Client projects (just one in this case)
@@ -50,17 +49,17 @@ lazy val server = (project in file("server"))
     ),
     // connect to the client project
     scalaJSProjects := clients,
-    pipelineStages := Seq(scalaJSProd, digest, gzip),
+    pipelineStages in Assets := Seq(scalaJSPipeline, digest, gzip),
     // compress CSS
     LessKeys.compress in Assets := true,
     scriptClasspath := Seq("../config/") ++ scriptClasspath.value,
     mappings in Universal := (mappings in Universal).value.filter {
       case (file, fileName) => !fileName.endsWith("local.conf")
     },
-    mappings in (Compile, packageDoc) := Seq(),
+    mappings in(Compile, packageDoc) := Seq(),
     dockerfile in docker := {
       val appDir: File = stage.value
-      val targetDir    = "/app"
+      val targetDir = "/app"
 
       new Dockerfile {
         from("openjdk:8")
@@ -82,8 +81,7 @@ lazy val server = (project in file("server"))
       )
     )
   )
-  .enablePlugins(PlayScala)
-  .enablePlugins(sbtdocker.DockerPlugin)
+  .enablePlugins(PlayScala, SbtWeb, sbtdocker.DockerPlugin)
   .disablePlugins(PlayLayoutPlugin) // use the standard directory layout instead of Play's custom
   .aggregate(clients.map(projectToRef): _*)
   .dependsOn(sharedJVM)
