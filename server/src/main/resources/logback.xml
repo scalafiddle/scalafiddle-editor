@@ -12,6 +12,8 @@
         <appender-ref ref="CONSOLE" />
     </root>
 
+    <logger name="sun" level="WARN" />
+    <logger name="javax" level="WARN" />
     <logger name="akka.cluster" level="INFO" />
     <logger name="io.netty" level="WARN" />
     <logger name="akka" level="INFO" />

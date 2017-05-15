@@ -100,8 +100,10 @@ class Application @Inject()(
     }
   }
 
-  def libraryListing = Action {
-    val libStrings = librarian.libraries.flatMap(lib => Library.stringify(lib) +: lib.extraDeps)
+  def libraryListing(scalaVersion: String) = Action {
+    val libStrings = librarian.libraries
+      .filter(_.scalaVersions.contains(scalaVersion))
+      .flatMap(lib => Library.stringify(lib) +: lib.extraDeps)
     Ok(write(libStrings)).as("application/json").withHeaders(CACHE_CONTROL -> "max-age=60")
   }
 
@@ -113,7 +115,7 @@ class Application @Inject()(
     ask(persistence, GetFiddleInfo).mapTo[Try[Seq[FiddleInfo]]].map {
       case Success(info) =>
         // remove duplicates
-        val fiddles = info.groupBy(_.id.id).values.map(_.sortBy(_.id.version).last).toVector
+        val fiddles = info.groupBy(_.id.id).values.map(_.maxBy(_.id.version)).toVector
         Ok(views.html.listfiddles(fiddles)).withHeaders(CACHE_CONTROL -> "max-age=10")
       case Failure(ex) =>
         NotFound

@@ -11,7 +11,7 @@ GET     /sf/:id                           controllers.Application.index(id, vers
 GET     /sf/:id/$version<\d+>             controllers.Application.index(id, version)
 GET     /raw/:id/$version<\d+>            controllers.Application.rawFiddle(id, version)
 GET     /resultframe                      controllers.Application.resultFrame
-GET     /libraries                        controllers.Application.libraryListing
+GET     /libraries/:scalaVersion          controllers.Application.libraryListing(scalaVersion)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/fonts/*file               controllers.Assets.at(path="/public/lib/font-awesome/fonts", file)

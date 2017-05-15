@@ -1,6 +1,7 @@
 package scalafiddle.server
 
 import org.slf4j.LoggerFactory
+import upickle.Js
 import upickle.default._
 
 import scala.io.BufferedSource
@@ -10,8 +11,23 @@ class Librarian(libSource: () => BufferedSource) {
 
   case class LibraryVersion(
       scalaVersions: Seq[String],
-      extraDeps: Seq[String]
+      extraDeps: Seq[String],
+      organization: Option[String],
+      artifact: Option[String],
+      doc: Option[String]
   )
+
+  implicit val libraryVersionReader = upickle.default.Reader[LibraryVersion] {
+    case Js.Obj(valueSeq @_*) =>
+      val values = valueSeq.toMap
+      LibraryVersion(
+        readJs[Seq[String]](values("scalaVersions")),
+        readJs[Seq[String]](values.getOrElse("extraDeps", Js.Arr())),
+        values.get("organization").map(readJs[String]),
+        values.get("artifact").map(readJs[String]),
+        values.get("doc").map(readJs[String])
+      )
+  }
 
   case class LibraryDef(
       name: String,
@@ -35,7 +51,7 @@ class Librarian(libSource: () => BufferedSource) {
 
   def refresh(): Unit = {
     try {
-      log.debug(s"Loading libraries...")
+      log.debug(s"Loading libraries ...")
       val newLibs = loadLibraries
       log.debug(s"  loaded ${newLibs.size} libraries")
       libraries = newLibs
@@ -55,14 +71,14 @@ class Librarian(libSource: () => BufferedSource) {
     } yield {
       Library(
         lib.name,
-        lib.organization,
-        lib.artifact,
+        versionDef.organization.getOrElse(lib.organization),
+        versionDef.artifact.getOrElse(lib.artifact),
         version,
         lib.compileTimeOnly,
         versionDef.scalaVersions,
         versionDef.extraDeps,
         f"$idx%02d:${group.group}",
-        createDocURL(lib.doc)
+        createDocURL(versionDef.doc.getOrElse(lib.doc))
       )
     }
   }

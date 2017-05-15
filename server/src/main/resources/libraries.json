@@ -4,17 +4,20 @@
     "libraries": [
       {
         "name": "Diode",
-        "organization": "me.chrons",
+        "organization": "io.suzaku",
         "artifact": "diode",
-        "doc": "ochrons/diode",
+        "doc": "https://diode.suzaku.io",
         "versions": {
+          "1.1.2": {
+            "scalaVersions": ["2.11", "2.12"]
+          },
           "1.1.0": {
-            "scalaVersions": ["2.11", "2.12"],
-            "extraDeps": []
+            "organization": "me.chrons",
+            "scalaVersions": ["2.11", "2.12"]
           },
           "1.0.0": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "organization": "me.chrons",
+            "scalaVersions": ["2.11"]
           }
         },
         "compileTimeOnly": false
@@ -23,11 +26,13 @@
         "name": "ScalaCSS",
         "organization": "com.github.japgolly.scalacss",
         "artifact": "core",
-        "doc": "japgolly/scalacss",
+        "doc": "https://japgolly.github.io/scalacss/book/",
         "versions": {
+          "0.5.3": {
+            "scalaVersions": ["2.11", "2.12"]
+          },
           "0.4.1": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "scalaVersions": ["2.11"]
           }
         },
         "compileTimeOnly": false
@@ -39,8 +44,7 @@
         "doc": "https://widok.github.io",
         "versions": {
           "0.2.4": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "scalaVersions": ["2.11"]
           }
         },
         "compileTimeOnly": false
@@ -81,15 +85,16 @@
         "name": "Cats",
         "organization": "org.typelevel",
         "artifact": "cats",
-        "doc": "typelevel/cats",
+        "doc": "http://typelevel.org/cats/",
         "versions": {
+          "0.9.0": {
+            "scalaVersions": ["2.11", "2.12"]
+          },
           "0.7.2": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "scalaVersions": ["2.11"]
           },
           "0.6.1": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "scalaVersions": ["2.11"]
           }
         },
         "compileTimeOnly": false
@@ -100,9 +105,11 @@
         "artifact": "scalaz-core",
         "doc": "scalaz/scalaz",
         "versions": {
+          "7.2.12": {
+            "scalaVersions": ["2.11", "2.12"]
+          },
           "7.2.1": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "scalaVersions": ["2.11"]
           }
         },
         "compileTimeOnly": false
@@ -114,8 +121,7 @@
         "doc": "ThoughtWorksInc/each",
         "versions": {
           "3.0.1": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "scalaVersions": ["2.11"]
           }
         },
         "compileTimeOnly": false
@@ -126,9 +132,11 @@
         "artifact": "shapeless",
         "doc": "milessabin/shapeless",
         "versions": {
+          "2.3.2": {
+            "scalaVersions": ["2.11", "2.12"]
+          },
           "2.2.5": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "scalaVersions": ["2.11"]
           }
         },
         "compileTimeOnly": false
@@ -139,9 +147,11 @@
         "artifact": "fs2-core",
         "doc": "functional-streams-for-scala/fs2",
         "versions": {
+          "0.9.5": {
+            "scalaVersions": ["2.11", "2.12"]
+          },
           "0.9.0-RC1": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "scalaVersions": ["2.11"]
           }
         },
         "compileTimeOnly": false
@@ -152,9 +162,11 @@
         "artifact": "monix",
         "doc": "https://monix.io/",
         "versions": {
+          "2.3.0": {
+            "scalaVersions": ["2.11"]
+          },
           "2.0.0": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "scalaVersions": ["2.11"]
           }
         },
         "compileTimeOnly": false
@@ -170,9 +182,11 @@
         "artifact": "scalarx",
         "doc": "lihaoyi/scala.rx",
         "versions": {
+          "0.3.2": {
+            "scalaVersions": ["2.11", "2.12"]
+          },
           "0.3.1": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "scalaVersions": ["2.11"]
           }
         },
         "compileTimeOnly": false
@@ -184,8 +198,7 @@
         "doc": "MetaStack-pl/MetaRx",
         "versions": {
           "0.1.7": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "scalaVersions": ["2.11"]
           }
         },
         "compileTimeOnly": false
@@ -194,11 +207,13 @@
         "name": "OutWatch",
         "organization": "io.github.outwatch",
         "artifact": "outwatch",
-        "doc": "OutWatch/outwatch",
+        "doc": "https://outwatch.github.io/?lang=scala",
         "versions": {
+          "0.9.4": {
+            "scalaVersions": ["2.11", "2.12"]
+          },
           "0.9.0": {
-            "scalaVersions": ["2.11", "2.12"],
-            "extraDeps": []
+            "scalaVersions": ["2.11", "2.12"]
           }
         },
         "compileTimeOnly": false
@@ -278,17 +293,20 @@
     "libraries": [
       {
         "name": "BooPickle",
-        "organization": "me.chrons",
+        "organization": "io.suzaku",
         "artifact": "boopickle",
-        "doc": "ochrons/boopickle",
+        "doc": "https://boopickle.suzaku.io",
         "versions": {
+          "1.2.6": {
+            "scalaVersions": ["2.11", "2.12"]
+          },
           "1.2.5": {
             "scalaVersions": ["2.11", "2.12"],
-            "extraDeps": []
+            "organization": "me.chrons"
           },
           "1.2.4": {
             "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "organization": "me.chrons"
           }
         },
         "compileTimeOnly": false
@@ -299,9 +317,11 @@
         "artifact": "upickle",
         "doc": "lihaoyi/upickle-pprint",
         "versions": {
+          "0.4.3": {
+            "scalaVersions": ["2.11", "2.12"]
+          },
           "0.4.1": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "scalaVersions": ["2.11"]
           }
         },
         "compileTimeOnly": false
@@ -310,8 +330,12 @@
         "name": "Circe",
         "organization": "io.circe",
         "artifact": "circe-core",
-        "doc": "travisbrown/circe",
+        "doc": "https://circe.github.io/circe",
         "versions": {
+          "0.8.0": {
+            "scalaVersions": ["2.11", "2.12"],
+            "extraDeps": ["io.circe %%% circe-generic % 0.8.0", "io.circe %%% circe-parser % 0.8.0"]
+          },
           "0.5.1": {
             "scalaVersions": ["2.11"],
             "extraDeps": ["io.circe %%% circe-generic % 0.5.1", "io.circe %%% circe-parser % 0.5.1"]
@@ -334,75 +358,83 @@
         "artifact": "accord-core",
         "doc": "http://wix.github.io/accord/",
         "versions": {
+          "0.6.1": {
+            "scalaVersions": ["2.11","2.12"]
+          },
           "0.6": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "scalaVersions": ["2.11"]
           }
         },
         "compileTimeOnly": false
       },
       {
         "name": "Akka.Js",
-        "organization": "eu.unicredit",
+        "organization": "org.akka-js",
         "artifact": "akkajsactor",
-        "doc": "unicredit/akka.js",
+        "doc": "akka-js/akka.js",
         "versions": {
+          "1.2.5.1": {
+            "scalaVersions": ["2.11", "2.12"]
+          },
           "0.2.4.14": {
-            "scalaVersions": ["2.11", "2.12"],
-            "extraDeps": []
+            "organization": "eu.unicredit",
+            "scalaVersions": ["2.11", "2.12"]
           },
           "0.2.4.12": {
-            "scalaVersions": ["2.11", "2.12"],
-            "extraDeps": []
+            "organization": "eu.unicredit",
+            "scalaVersions": ["2.11", "2.12"]
           },
           "0.2.4.11": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "organization": "eu.unicredit",
+            "scalaVersions": ["2.11"]
           },
           "0.2.4.10": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "organization": "eu.unicredit",
+            "scalaVersions": ["2.11"]
           },
           "0.2.4.9": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "organization": "eu.unicredit",
+            "scalaVersions": ["2.11"]
           },
           "0.2.0": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "organization": "eu.unicredit",
+            "scalaVersions": ["2.11"]
           }
         },
         "compileTimeOnly": false
       },
       {
         "name": "AkkaStream.Js",
-        "organization": "eu.unicredit",
+        "organization": "org.akka-js",
         "artifact": "akkajsactorstream",
-        "doc": "unicredit/akka.js",
+        "doc": "akka-js/akka.js",
         "versions": {
+          "1.2.5.1": {
+            "scalaVersions": ["2.11", "2.12"]
+          },
           "0.2.4.14": {
-            "scalaVersions": ["2.11", "2.12"],
-            "extraDeps": []
+            "organization": "eu.unicredit",
+            "scalaVersions": ["2.11", "2.12"]
           },
           "0.2.4.12": {
-            "scalaVersions": ["2.11", "2.12"],
-            "extraDeps": []
+            "organization": "eu.unicredit",
+            "scalaVersions": ["2.11", "2.12"]
           },
           "0.2.4.11": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "organization": "eu.unicredit",
+            "scalaVersions": ["2.11"]
           },
           "0.2.4.10": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "organization": "eu.unicredit",
+            "scalaVersions": ["2.11"]
           },
           "0.2.4.9": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "organization": "eu.unicredit",
+            "scalaVersions": ["2.11"]
           },
           "0.2.0": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "organization": "eu.unicredit",
+            "scalaVersions": ["2.11"]
           }
         },
         "compileTimeOnly": false
@@ -413,9 +445,11 @@
         "artifact": "scalajs-java-time",
         "doc": "scala-js/scala-js-java-time",
         "versions": {
+          "0.2.1": {
+            "scalaVersions": ["2.11", "2.12"]
+          },
           "0.1.0": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "scalaVersions": ["2.11"]
           }
         },
         "compileTimeOnly": false
@@ -426,21 +460,20 @@
         "artifact": "quill-sql",
         "doc": "http://getquill.io/",
         "versions": {
+          "1.2.1": {
+            "scalaVersions": ["2.11", "2.12"]
+          },
           "1.1.0": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "scalaVersions": ["2.11"]
           },
           "1.0.1": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "scalaVersions": ["2.11"]
           },
           "1.0.0": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "scalaVersions": ["2.11"]
           },
           "0.10.0": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "scalaVersions": ["2.11"]
           }
         },
         "compileTimeOnly": false
@@ -452,8 +485,7 @@
         "doc": "http://rapture.io/",
         "versions": {
           "2.0.0-M7": {
-            "scalaVersions": ["2.11"],
-            "extraDeps": []
+            "scalaVersions": ["2.11"]
           }
         },
         "compileTimeOnly": false
@@ -465,8 +497,7 @@
         "doc": "http://co.ntextu.al/",
         "versions": {
           "1.0.1": {
-            "scalaVersions": ["2.11", "2.12"],
-            "extraDeps": []
+            "scalaVersions": ["2.11", "2.12"]
           }
         },
         "compileTimeOnly": false

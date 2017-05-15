@@ -29,7 +29,7 @@ object Settings {
     val booPickle    = "1.2.4"
     val diode        = "1.1.2"
     val uTest        = "0.4.3"
-    val upickle      = "0.3.8"
+    val upickle      = "0.4.3"
     val slick        = "3.2.0"
     val silhouette   = "4.0.0"
 
