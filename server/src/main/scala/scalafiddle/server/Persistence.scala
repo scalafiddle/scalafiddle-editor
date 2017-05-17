@@ -7,9 +7,9 @@ import akka.actor.{Actor, ActorLogging}
 import akka.pattern.pipe
 import com.mohiva.play.silhouette.api.LoginInfo
 import play.api.Configuration
-import slick.backend.DatabaseConfig
+import slick.basic.DatabaseConfig
+import slick.jdbc.JdbcProfile
 import slick.dbio.{DBIOAction, NoStream}
-import slick.driver.JdbcProfile
 
 import scala.util.{Failure, Success, Try}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -47,7 +47,7 @@ case class UpdateUser(user: User)
 class Persistence @Inject()(config: Configuration) extends Actor with ActorLogging {
   val dbConfig = DatabaseConfig.forConfig[JdbcProfile](config.getString("scalafiddle.dbConfig").get)
   val db       = dbConfig.db
-  val dal      = new FiddleDAL(dbConfig.driver)
+  val dal      = new FiddleDAL(dbConfig.profile)
 
   def runAndReply[T, R](stmt: DBIOAction[T, NoStream, Nothing])(process: T => Try[R]) = {
     db.run(stmt).map(r => process(r)).recover {

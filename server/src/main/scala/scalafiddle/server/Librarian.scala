@@ -4,23 +4,26 @@ import org.slf4j.LoggerFactory
 import upickle.Js
 import upickle.default._
 
+import scala.collection.mutable
 import scala.io.BufferedSource
 import scalafiddle.shared._
 
 class Librarian(libSource: () => BufferedSource) {
 
   case class LibraryVersion(
-      scalaVersions: Seq[String],
-      extraDeps: Seq[String],
-      organization: Option[String],
-      artifact: Option[String],
-      doc: Option[String]
+    version: String,
+    scalaVersions: Seq[String],
+    extraDeps: Seq[String],
+    organization: Option[String],
+    artifact: Option[String],
+    doc: Option[String]
   )
 
   implicit val libraryVersionReader = upickle.default.Reader[LibraryVersion] {
-    case Js.Obj(valueSeq @_*) =>
+    case Js.Obj(valueSeq@_*) =>
       val values = valueSeq.toMap
       LibraryVersion(
+        readJs[String](values("version")),
         readJs[Seq[String]](values("scalaVersions")),
         readJs[Seq[String]](values.getOrElse("extraDeps", Js.Arr())),
         values.get("organization").map(readJs[String]),
@@ -30,28 +33,28 @@ class Librarian(libSource: () => BufferedSource) {
   }
 
   case class LibraryDef(
-      name: String,
-      organization: String,
-      artifact: String,
-      doc: String,
-      versions: Map[String, LibraryVersion],
-      compileTimeOnly: Boolean
+    name: String,
+    organization: String,
+    artifact: String,
+    doc: String,
+    versions: Seq[LibraryVersion],
+    compileTimeOnly: Boolean
   )
 
   case class LibraryGroup(
-      group: String,
-      libraries: Seq[LibraryDef]
+    group: String,
+    libraries: Seq[LibraryDef]
   )
 
   val repoSJSRE = """([^ %]+) *%%% *([^ %]+) *% *([^ %]+)""".r
-  val repoRE    = """([^ %]+) *%% *([^ %]+) *% *([^ %]+)""".r
-  val log       = LoggerFactory.getLogger(getClass)
+  val repoRE = """([^ %]+) *%% *([^ %]+) *% *([^ %]+)""".r
+  val log = LoggerFactory.getLogger(getClass)
   var libraries = Seq.empty[Library]
   refresh()
 
   def refresh(): Unit = {
     try {
-      log.debug(s"Loading libraries ...")
+      log.debug(s"Loading libraries...")
       val newLibs = loadLibraries
       log.debug(s"  loaded ${newLibs.size} libraries")
       libraries = newLibs
@@ -62,18 +65,18 @@ class Librarian(libSource: () => BufferedSource) {
   }
 
   def loadLibraries: Seq[Library] = {
-    val data      = libSource().mkString
+    val data = libSource().mkString
     val libGroups = read[Seq[LibraryGroup]](data)
     for {
-      (group, idx)          <- libGroups.zipWithIndex
-      lib                   <- group.libraries
-      (version, versionDef) <- lib.versions
+      (group, idx) <- libGroups.zipWithIndex
+      lib <- group.libraries
+      versionDef <- lib.versions
     } yield {
       Library(
         lib.name,
         versionDef.organization.getOrElse(lib.organization),
         versionDef.artifact.getOrElse(lib.artifact),
-        version,
+        versionDef.version,
         lib.compileTimeOnly,
         versionDef.scalaVersions,
         versionDef.extraDeps,
@@ -96,7 +99,7 @@ class Librarian(libSource: () => BufferedSource) {
     val githubRef = """([^/]+)/([^/]+)""".r
     doc match {
       case githubRef(org, lib) => s"https://github.com/$org/$lib"
-      case _                   => doc
+      case _ => doc
     }
   }
 }

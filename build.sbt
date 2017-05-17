@@ -6,6 +6,7 @@ resolvers in ThisBuild += Resolver.jcenterRepo
 // a special crossProject for configuring a JS/JVM/shared structure
 lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared"))
   .settings(
+    version := Settings.version,
     scalaVersion := Settings.versions.scala,
     libraryDependencies ++= Settings.sharedDependencies.value
   )
@@ -49,7 +50,8 @@ lazy val server = (project in file("server"))
     ),
     // connect to the client project
     scalaJSProjects := clients,
-    pipelineStages in Assets := Seq(scalaJSPipeline, digest, gzip),
+    pipelineStages in Assets := Seq(scalaJSPipeline),
+    pipelineStages := Seq(digest, gzip),
     // compress CSS
     LessKeys.compress in Assets := true,
     scriptClasspath := Seq("../config/") ++ scriptClasspath.value,

@@ -432,6 +432,7 @@ object FiddleEditor {
             case _ =>
           }
         })
+
         resultFrame.onload = (e: Event) => {
           println("Frame ready")
           // send pending messages
@@ -448,6 +449,18 @@ object FiddleEditor {
         updateFiddle(props.data()) >>
         Callback.when(props.fiddleId.isDefined)(
           props.dispatch(compile(addDeps(props.data().sourceCode, props.data().libraries), FastOpt)))
+    }
+
+    def updated: Callback = {
+      Callback {
+        resultFrame.onload = (e: Event) => {
+          println("Frame ready")
+          // send pending messages
+          pendingMessages.reverse.foreach(msg => resultFrame.contentWindow.postMessage(msg, "*"))
+          pendingMessages = Nil
+          frameReady = true
+        }
+      }
     }
 
     val fiddleStart = """\s*// \$FiddleStart\s*$""".r
@@ -579,6 +592,7 @@ object FiddleEditor {
     .renderBackend[Backend]
     .componentDidMount(scope => scope.backend.mounted(scope.props))
     .componentWillUnmount(scope => scope.backend.unmounted)
+    .componentDidUpdate(scope => scope.backend.updated)
     .build
 
   def apply(data: ModelProxy[FiddleData],

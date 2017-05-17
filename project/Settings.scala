@@ -68,8 +68,8 @@ object Settings {
       "com.iheart"         %% "ficus"                           % "1.2.6",
       "com.vmunier"        %% "scalajs-scripts"                 % versions.scalaJsScripts,
       "org.webjars"        % "font-awesome"                     % "4.6.3" % Provided,
-      "org.webjars"        % "Semantic-UI"                      % versions.semantic % Provided,
-      "org.webjars"        % "ace"                              % versions.ace % Provided
+      "org.webjars"        % "Semantic-UI"                      % versions.semantic % Provided
+      //"org.webjars"        % "ace"                              % versions.ace % Provided
     ))
 
   /** Dependencies only used by the JS project (note the use of %%% instead of %%) */
