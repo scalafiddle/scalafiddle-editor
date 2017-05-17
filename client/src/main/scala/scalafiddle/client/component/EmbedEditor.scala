@@ -5,6 +5,7 @@ import org.scalajs.dom.raw.HTMLTextAreaElement
 
 import scalafiddle.client.ScalaFiddleConfig
 import scalafiddle.shared.FiddleId
+import scala.scalajs.js
 
 object EmbedEditor {
   import japgolly.scalajs.react.vdom.Implicits._
@@ -94,7 +95,7 @@ object EmbedEditor {
               div(cls := "header", "Embed code"),
               textarea(
                 cls := "embed-code",
-                value := createEmbedCode,
+                defaultValue := createEmbedCode,
                 onClick ==> { (e: ReactEventFromHtml) =>
                   e.target.focus(); e.target.asInstanceOf[HTMLTextAreaElement].select(); Callback.empty
                 }
@@ -105,10 +106,10 @@ object EmbedEditor {
         div(cls := "preview")(
           div(cls := "header", "Preview"),
           iframe(
-            height := "300",
+            height := "300px",
             width := "100%",
             frameBorder := 0,
-            style := scalajs.js.Dictionary("width" -> "100%", "overflow" -> "hidden"),
+            style := js.Dictionary("width" -> "100%", "overflow" -> "hidden"),
             src := s"$createIframeSource&preview=true"
           )
         )

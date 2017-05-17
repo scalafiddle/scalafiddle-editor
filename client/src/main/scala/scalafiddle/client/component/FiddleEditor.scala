@@ -4,6 +4,7 @@ import diode.data.Ready
 import diode.react.ModelProxy
 import diode.{Action, ModelR, ModelRO}
 import japgolly.scalajs.react._
+import japgolly.scalajs.react.raw.SyntheticEvent
 import org.scalajs.dom
 import org.scalajs.dom.raw.{Event, HTMLIFrameElement, MessageEvent}
 
@@ -12,7 +13,7 @@ import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic._
 import scala.scalajs.js.{Dynamic => Dyn}
-import scala.util.Success
+import scala.util.{Random, Success}
 import scalafiddle.client._
 import scalafiddle.shared._
 
@@ -46,8 +47,9 @@ object FiddleEditor {
     var unsubscribeLoginData: () => Unit = () => ()
     var editor: Dyn                      = _
     def resultFrame                      = dom.document.getElementById("resultframe").asInstanceOf[HTMLIFrameElement]
-    var frameReady: Boolean              = false
+    @volatile var frameReady: Boolean    = false
     var pendingMessages: List[js.Object] = Nil
+    var prevFrame                        = ""
 
     def render(props: Props, state: State) = {
       import japgolly.scalajs.react.vdom.all._
@@ -106,7 +108,6 @@ object FiddleEditor {
             div(cls := "ui basic button", onClick --> props.dispatch(ShowHelp(ScalaFiddleConfig.helpURL)))(
               "Help"
             ).when(ScalaFiddleConfig.helpURL.nonEmpty),
-
             UserLogin(props.loginData)
           )
         ),
@@ -135,6 +136,8 @@ object FiddleEditor {
                   div(cls := "label", state.status.show),
                   iframe.ref(resultRef = _)(
                     id := "resultframe",
+                    onLoad ==> frameLoaded,
+                    VdomAttr[String]("data-frameid") := "frame-code",
                     width := "100%",
                     height := "100%",
                     frameBorder := "0",
@@ -190,6 +193,8 @@ object FiddleEditor {
                   ),
                   iframe.ref(resultRef = _)(
                     id := "resultframe",
+                    onLoad ==> frameLoaded,
+                    VdomAttr[String]("data-frameid") := "frame-uer",
                     width := "0%",
                     height := "0%",
                     frameBorder := "0",
@@ -201,10 +206,12 @@ object FiddleEditor {
                 div(cls := "output")(
                   iframe.ref(resultRef = _)(
                     id := "resultframe",
+                    onLoad ==> frameLoaded,
+                    VdomAttr[String]("data-frameid") := "frame-help",
                     width := "100%",
                     height := "100%",
                     frameBorder := "0",
-                    sandbox := "allow-scripts allow-popups allow-popups-to-escape-sandbox",
+                    sandbox := "allow-scripts allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-top-navigation",
                     src := url
                   )
                 )
@@ -214,12 +221,32 @@ object FiddleEditor {
       )
     }
 
+    def frameLoaded(e: SyntheticEvent[HTMLIFrameElement]): Callback = Callback {
+      val frame = e.target
+      // println("Frame loaded")
+      frameReady = true
+      // send pending messages
+      pendingMessages.reverse.foreach(msg => frame.contentWindow.postMessage(msg, "*"))
+      pendingMessages = Nil
+    }
+
+    def updated: Callback = {
+      Callback {
+        val frame   = resultFrame
+        val frameId = frame.getAttribute("data-frameid")
+        if (frameId != prevFrame) {
+          frameReady = false
+          prevFrame = frameId
+        }
+      }
+    }
+
     def sendFrameCmd(cmd: String, data: String = "") = {
       val msg = js.Dynamic.literal(cmd = cmd, data = data)
       if (frameReady) {
         resultFrame.contentWindow.postMessage(msg, "*")
       } else {
-        println(s"Buffering a frame command: $cmd")
+        // println(s"Buffering a frame command: $cmd")
         pendingMessages = msg :: pendingMessages
       }
     }
@@ -233,9 +260,11 @@ object FiddleEditor {
     def beginCompilation(): Future[Unit] = {
       // fully clear the code iframe by reloading it
       val p = Promise[Unit]
-      resultFrame.onload = (e: Event) => {
+      lazy val handler: js.Function1[Event, Unit] = (e: Event) => {
         p.complete(Success(()))
+        resultFrame.removeEventListener("load", handler)
       }
+      resultFrame.addEventListener("load", handler)
       resultFrame.src = resultFrame.src
       p.future
     }
@@ -433,14 +462,6 @@ object FiddleEditor {
           }
         })
 
-        resultFrame.onload = (e: Event) => {
-          println("Frame ready")
-          // send pending messages
-          pendingMessages.reverse.foreach(msg => resultFrame.contentWindow.postMessage(msg, "*"))
-          pendingMessages = Nil
-          frameReady = true
-        }
-
         // subscribe to changes in compiler data
         unsubscribe = AppCircuit.subscribe(props.outputData)(outputDataUpdated)
         unsubscribeLoginData = AppCircuit.subscribe(props.loginData)(_ => $.forceUpdate.runNow())
@@ -449,18 +470,6 @@ object FiddleEditor {
         updateFiddle(props.data()) >>
         Callback.when(props.fiddleId.isDefined)(
           props.dispatch(compile(addDeps(props.data().sourceCode, props.data().libraries), FastOpt)))
-    }
-
-    def updated: Callback = {
-      Callback {
-        resultFrame.onload = (e: Event) => {
-          println("Frame ready")
-          // send pending messages
-          pendingMessages.reverse.foreach(msg => resultFrame.contentWindow.postMessage(msg, "*"))
-          pendingMessages = Nil
-          frameReady = true
-        }
-      }
     }
 
     val fiddleStart = """\s*// \$FiddleStart\s*$""".r

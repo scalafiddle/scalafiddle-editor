@@ -9,7 +9,7 @@
     <body>
         <div id="fiddle-container">
             <canvas id="canvas" style="position: absolute"></canvas>
-            <div id="output"><pre>Press Ctrl/Cmd-Enter to compile and run your code.</pre></div>
+            <div id="output"><pre></pre></div>
             <script type="text/javascript">
                 var canvas = document.getElementById("canvas");
                 var result = document.getElementById("output");
@@ -49,21 +49,6 @@
                                 code.appendChild(document.createTextNode(msg.data));
                                 pre.appendChild(code);
                                 result.appendChild(pre);
-                                // disabled because too slow
-                                /*
-                                var css = document.createElement("link");
-                                css.href = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.5.1/themes/prism.min.css";
-                                css.rel = "stylesheet";
-                                css.type = "text/css";
-                                document.head.appendChild(css);
-                                var highlight = document.createElement("script");
-                                highlight.src = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.5.1/prism.min.js";
-                                highlight.type = "text/javascript";
-                                highlight.async = "async";
-                                highlight.setAttribute("data-manual", "");
-                                highlight.onload = function() { Prism.highlightAll(true); }
-                                document.body.appendChild(highlight);
-                                */
                             }
                             break;
                 }
