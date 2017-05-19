@@ -58,10 +58,13 @@ lazy val server = (project in file("server"))
     mappings in Universal := (mappings in Universal).value.filter {
       case (file, fileName) => !fileName.endsWith("local.conf")
     },
-    mappings in(Compile, packageDoc) := Seq(),
+    mappings in (Compile, packageDoc) := Seq(),
+    javaOptions in Universal ++= Seq(
+      "-Dpidfile.path=/dev/null"
+    ),
     dockerfile in docker := {
       val appDir: File = stage.value
-      val targetDir = "/app"
+      val targetDir    = "/app"
 
       new Dockerfile {
         from("openjdk:8")
