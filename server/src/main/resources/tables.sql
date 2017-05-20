@@ -1,3 +1,9 @@
+CREATE ROLE scalafiddle;
+
+CREATE DATABASE scalafiddle;
+
+-- log in to scalafiddle DB
+
 CREATE TABLE "fiddle" (
   "id"          VARCHAR NOT NULL,
   "version"     INTEGER NOT NULL,
@@ -27,3 +33,7 @@ ALTER TABLE "fiddle"
 
 ALTER TABLE "user"
   ADD CONSTRAINT "pk_user" PRIMARY KEY ("user_id");
+
+GRANT ALL ON TABLE "fiddle" TO scalafiddle;
+
+GRANT ALL ON TABLE "user" TO scalafiddle;
