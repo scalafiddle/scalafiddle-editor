@@ -26,7 +26,7 @@ object AppRouter {
         fiddleData(d => FiddleEditor(d, None, AppCircuit.zoom(_.outputData), AppCircuit.zoom(_.loginData))))
         | dynamicRouteCT("sf" / (string("\\w+") / int).caseClass[EditorPage]) ~> dynRender((p: EditorPage) => {
           val fid = FiddleId(p.id, p.version)
-          AppCircuit.dispatch(UpdateId(fid, true))
+          AppCircuit.dispatch(UpdateId(fid, silent = true))
           fiddleData(d => FiddleEditor(d, Some(fid), AppCircuit.zoom(_.outputData), AppCircuit.zoom(_.loginData)))
         }))
         .notFound(redirectToPage(Home)(Redirect.Replace))

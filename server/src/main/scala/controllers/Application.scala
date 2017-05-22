@@ -1,5 +1,8 @@
 package controllers
 
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
+import java.nio.charset.StandardCharsets
+import java.util.zip.GZIPInputStream
 import javax.inject.{Inject, Named}
 
 import akka.actor._
@@ -7,6 +10,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.mohiva.play.silhouette.api.{LogoutEvent, Silhouette}
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
+import kamon.Kamon
 import play.api.mvc._
 import play.api.{Configuration, Environment, Logger, Mode}
 import slick.basic.DatabaseConfig
@@ -42,6 +46,11 @@ class Application @Inject()(
   val log              = Logger(getClass)
   val libUri           = config.getString("scalafiddle.librariesURL").get
 
+  Kamon.start()
+
+  val indexCounter  = Kamon.metrics.counter("index-load")
+  val fiddleCounter = Kamon.metrics.counter("fiddle-load")
+
   def libSource() = {
     if (libUri.startsWith("file:")) {
       // load from file system
@@ -55,6 +64,7 @@ class Application @Inject()(
       env.resourceAsStream(libUri).map(s => scala.io.Source.fromInputStream(s, "UTF-8")).get
     }
   }
+
   val librarian = new Librarian(libSource)
   // refresh libraries every N minutes
   actorSystem.scheduler.schedule(config.getInt("scalafiddle.refreshLibraries").get.seconds,
@@ -64,8 +74,21 @@ class Application @Inject()(
   if (env.mode != Mode.Prod)
     createTables()
 
-  def index(fiddleId: String, version: String) = Action.async {
-    loadFiddle(fiddleId, version.toInt).map {
+  def index(fiddleId: String, version: String) = silhouette.UserAwareAction.async { implicit request =>
+    if (fiddleId.isEmpty) {
+      indexCounter.increment()
+    } else {
+      fiddleCounter.increment()
+      persistence ! AddAccess(fiddleId,
+                              version.toInt,
+                              request.identity.map(_.userID),
+                              embedded = false,
+                              Option(request.remoteAddress).getOrElse("unknown"))
+    }
+
+    val source = request.getQueryString("zrc").flatMap(decodeSource) orElse request.getQueryString("source")
+
+    loadFiddle(fiddleId, version.toInt, source).map {
       case Success(fd) =>
         val fdJson = write(fd)
         Ok(views.html.index("ScalaFiddle", fdJson)).withHeaders(CACHE_CONTROL -> "max-age=3600")
@@ -80,7 +103,14 @@ class Application @Inject()(
     silhouette.env.authenticatorService.discard(request.authenticator, result)
   }
 
-  def rawFiddle(fiddleId: String, version: String) = Action.async {
+  def rawFiddle(fiddleId: String, version: String) = Action.async { implicit request =>
+    if (fiddleId.nonEmpty)
+      persistence ! AddAccess(fiddleId,
+                              version.toInt,
+                              None,
+                              embedded = true,
+                              Option(request.remoteAddress).getOrElse("unknown"))
+
     loadFiddle(fiddleId, version.toInt).map {
       case Success(fd) =>
         // create a source code file for embedded ScalaFiddle
@@ -111,17 +141,6 @@ class Application @Inject()(
     Ok(views.html.resultframe()).withHeaders(CACHE_CONTROL -> "max-age=3600")
   }
 
-  def fiddleList = Action.async { implicit request =>
-    ask(persistence, GetFiddleInfo).mapTo[Try[Seq[FiddleInfo]]].map {
-      case Success(info) =>
-        // remove duplicates
-        val fiddles = info.groupBy(_.id.id).values.map(_.maxBy(_.id.version)).toVector
-        Ok(views.html.listfiddles(fiddles)).withHeaders(CACHE_CONTROL -> "max-age=10")
-      case Failure(ex) =>
-        NotFound
-    }
-  }
-
   val loginProviders = config.getStringSeq("scalafiddle.loginProviders").get.map(AllLoginProviders.providers)
 
   def autowireApi(path: String) = silhouette.UserAwareAction.async { implicit request =>
@@ -141,11 +160,18 @@ class Application @Inject()(
       })
   }
 
-  def loadFiddle(id: String, version: Int): Future[Try[FiddleData]] = {
+  def loadFiddle(id: String, version: Int, sourceOpt: Option[String] = None): Future[Try[FiddleData]] = {
     if (id == "") {
-      // build default fiddle data
-      val (source, libs) = parseFiddle(defaultSource)
-      Future.successful(Success(FiddleData("", "", source, libs, Seq.empty, librarian.libraries, None)))
+      val (source, libs) = parseFiddle(sourceOpt.fold(defaultSource)(identity))
+      Future.successful(
+        Success(
+          FiddleData("",
+            "",
+            source,
+            libs,
+            librarian.libraries,
+            config.getString("scalafiddle.defaultScalaVersion").get,
+            None)))
     } else {
       ask(persistence, FindFiddle(id, version)).mapTo[Try[Fiddle]].flatMap {
         case Success(f) if f.user == "anonymous" =>
@@ -156,8 +182,8 @@ class Application @Inject()(
                 f.description,
                 f.sourceCode,
                 f.libraries.flatMap(librarian.findLibrary),
-                Seq.empty,
                 librarian.libraries,
+                f.scalaVersion,
                 None
               )))
         case Success(f) =>
@@ -170,8 +196,8 @@ class Application @Inject()(
                   f.description,
                   f.sourceCode,
                   f.libraries.flatMap(librarian.findLibrary),
-                  Seq.empty,
                   librarian.libraries,
+                  f.scalaVersion,
                   Some(user)
                 ))
             case _ =>
@@ -181,8 +207,8 @@ class Application @Inject()(
                   f.description,
                   f.sourceCode,
                   f.libraries.flatMap(librarian.findLibrary),
-                  Seq.empty,
                   librarian.libraries,
+                  f.scalaVersion,
                   None
                 ))
           }
@@ -198,6 +224,30 @@ class Application @Inject()(
     val (libLines, codeLines) = lines.partition(_.matches(dependencyRE))
     val libs                  = libLines.flatMap(librarian.findLibrary)
     (codeLines.mkString("\n"), libs)
+  }
+
+  def decodeSource(b64: String): Option[String] = {
+    try {
+      import com.github.marklister.base64.Base64._
+      implicit def scheme: B64Scheme = base64Url
+      // decode base64 and gzip
+      val compressedSource = Decoder(b64).toByteArray
+      val bis = new ByteArrayInputStream(compressedSource)
+      val zis = new GZIPInputStream(bis)
+      val buf = new Array[Byte](1024)
+      val bos = new ByteArrayOutputStream()
+      var len = 0
+      while ( {len = zis.read(buf); len > 0}) {
+        bos.write(buf, 0, len)
+      }
+      zis.close()
+      bos.close()
+      Some(new String(bos.toByteArray, StandardCharsets.UTF_8))
+    } catch {
+      case e: Throwable =>
+        log.info(s"Invalid encoded source received: $e")
+        None
+    }
   }
 
   def createTables() = {
@@ -222,6 +272,6 @@ class Application @Inject()(
         })
       }
     }
-    Await.result(createTableIfNotExists(Seq(dal.fiddles, dal.users)), Duration.Inf)
+    Await.result(createTableIfNotExists(Seq(dal.fiddles, dal.users, dal.accesses)), Duration.Inf)
   }
 }

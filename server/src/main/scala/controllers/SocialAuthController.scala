@@ -4,8 +4,8 @@ import javax.inject.Inject
 
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
-import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.impl.providers._
+import kamon.Kamon
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc.{Action, Controller}
@@ -30,6 +30,8 @@ class SocialAuthController @Inject()(val messagesApi: MessagesApi,
     with I18nSupport
     with Logger {
 
+  val loginCount   = Kamon.metrics.counter("login")
+
   /**
     * Authenticates a user against a social provider.
     *
@@ -49,6 +51,7 @@ class SocialAuthController @Inject()(val messagesApi: MessagesApi,
               value         <- silhouette.env.authenticatorService.init(authenticator)
               result        <- silhouette.env.authenticatorService.embed(value, Redirect(routes.Application.index("", "0")))
             } yield {
+              loginCount.increment()
               silhouette.env.eventBus.publish(LoginEvent(user, request))
               result
             }

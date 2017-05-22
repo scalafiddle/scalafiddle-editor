@@ -32,6 +32,8 @@ object Settings {
     val upickle      = "0.4.4"
     val slick        = "3.2.0"
     val silhouette   = "4.0.0"
+    val kamon        = "0.6.3"
+    val base64        = "0.2.3"
 
     val jQuery   = "3.2.0"
     val semantic = "2.2.10"
@@ -56,21 +58,24 @@ object Settings {
   /** Dependencies only used by the JVM project */
   val jvmDependencies = Def.setting(
     Seq(
-      "com.typesafe.slick"   %% "slick"                           % versions.slick,
-      "com.typesafe.slick"   %% "slick-hikaricp"                  % versions.slick,
-      "ch.qos.logback"       % "logback-classic"                  % "1.1.10",
-      "net.logstash.logback" % "logstash-logback-encoder"         % "4.9",
-      "com.h2database"       % "h2"                               % "1.4.195",
-      "org.postgresql"       % "postgresql"                       % "9.4-1206-jdbc41",
-      "com.mohiva"           %% "play-silhouette"                 % versions.silhouette,
-      "com.mohiva"           %% "play-silhouette-password-bcrypt" % versions.silhouette,
-      "com.mohiva"           %% "play-silhouette-persistence"     % versions.silhouette,
-      "com.mohiva"           %% "play-silhouette-crypto-jca"      % versions.silhouette,
-      "net.codingwell"       %% "scala-guice"                     % "4.1.0",
-      "com.iheart"           %% "ficus"                           % "1.4.0",
-      "com.vmunier"          %% "scalajs-scripts"                 % versions.scalaJsScripts,
-      "org.webjars"          % "font-awesome"                     % "4.6.3" % Provided,
-      "org.webjars"          % "Semantic-UI"                      % versions.semantic % Provided
+      "com.typesafe.slick"    %% "slick"                           % versions.slick,
+      "com.typesafe.slick"    %% "slick-hikaricp"                  % versions.slick,
+      "ch.qos.logback"        % "logback-classic"                  % "1.1.10",
+      "net.logstash.logback"  % "logstash-logback-encoder"         % "4.9",
+      "com.h2database"        % "h2"                               % "1.4.195",
+      "org.postgresql"        % "postgresql"                       % "9.4-1206-jdbc41",
+      "com.mohiva"            %% "play-silhouette"                 % versions.silhouette,
+      "com.mohiva"            %% "play-silhouette-password-bcrypt" % versions.silhouette,
+      "com.mohiva"            %% "play-silhouette-persistence"     % versions.silhouette,
+      "com.mohiva"            %% "play-silhouette-crypto-jca"      % versions.silhouette,
+      "net.codingwell"        %% "scala-guice"                     % "4.1.0",
+      "com.iheart"            %% "ficus"                           % "1.4.0",
+      "com.github.marklister" %% "base64"                          % versions.base64,
+      "com.vmunier"           %% "scalajs-scripts"                 % versions.scalaJsScripts,
+      "io.kamon"              %% "kamon-core"                      % versions.kamon,
+      "io.kamon"              %% "kamon-statsd"                    % versions.kamon,
+      "org.webjars"           % "font-awesome"                     % "4.6.3" % Provided,
+      "org.webjars"           % "Semantic-UI"                      % versions.semantic % Provided
       //"org.webjars"        % "ace"                              % versions.ace % Provided
     ))
 
@@ -82,7 +87,7 @@ object Settings {
       "com.github.japgolly.scalacss"      %%% "ext-react"   % versions.scalaCSS,
       "io.suzaku"                         %%% "diode"       % versions.diode,
       "io.suzaku"                         %%% "diode-react" % versions.diode,
-      "com.github.marklister"             %%% "base64"      % "0.2.3",
+      "com.github.marklister"             %%% "base64"      % versions.base64,
       "org.scala-js"                      %%% "scalajs-dom" % versions.scalaDom
     ))
 

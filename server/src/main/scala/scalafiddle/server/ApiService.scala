@@ -3,6 +3,7 @@ package scalafiddle.server
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
+import kamon.Kamon
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
@@ -16,7 +17,12 @@ class ApiService(persistence: ActorRef, user: Option[User], _loginProviders: Seq
     extends Api {
   implicit val timeout = Timeout(15.seconds)
 
+  val saveCount   = Kamon.metrics.counter("fiddle-save")
+  val updateCount = Kamon.metrics.counter("fiddle-update")
+  val forkCount   = Kamon.metrics.counter("fiddle-fork")
+
   override def save(fiddle: FiddleData): Future[Either[String, FiddleId]] = {
+    saveCount.increment()
     ask(persistence, AddFiddle(fiddle, user.fold("anonymous")(_.userID))).mapTo[Try[FiddleId]].map {
       case Success(fid) => Right(fid)
       case Failure(ex)  => Left(ex.toString)
@@ -31,6 +37,7 @@ class ApiService(persistence: ActorRef, user: Option[User], _loginProviders: Seq
       case _                                                    => false
     }
     if (updateOk) {
+      updateCount.increment()
       ask(persistence, UpdateFiddle(fiddle, id)).mapTo[Try[FiddleId]].map {
         case Success(fid) => Right(fid)
         case Failure(ex)  => Left(ex.toString)
@@ -41,6 +48,7 @@ class ApiService(persistence: ActorRef, user: Option[User], _loginProviders: Seq
   }
 
   override def fork(fiddle: FiddleData, id: String, version: Int): Future[Either[String, FiddleId]] = {
+    forkCount.increment()
     ask(persistence, ForkFiddle(fiddle, id, version, user.fold("anonymous")(_.userID))).mapTo[Try[FiddleId]].map {
       case Success(fid) => Right(fid)
       case Failure(ex)  => Left(ex.toString)

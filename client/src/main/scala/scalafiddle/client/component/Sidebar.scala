@@ -18,8 +18,6 @@ object Sidebar {
 
   sealed trait LibMode
 
-  case object ForcedLib extends LibMode
-
   case object SelectedLib extends LibMode
 
   case object AvailableLib extends LibMode
@@ -35,7 +33,10 @@ object Sidebar {
     def render(props: Props, state: State) = {
       val fd = props.data()
       // filter the list of available libs
-      val availableVersions = fd.available.filterNot(lib => fd.libraries.exists(_.name == lib.name))
+      val availableVersions = fd.available
+        .filterNot(lib => fd.libraries.exists(_.name == lib.name))
+        .filter(lib => lib.scalaVersions.contains(fd.scalaVersion))
+
       // hide alternative versions, if requested
       val available =
         if (state.showAllVersions)
@@ -87,45 +88,70 @@ object Sidebar {
             div(cls := "ui horizontal divider header", "Selected"),
             div(cls := "liblist")(
               div(cls := "ui middle aligned divided list")(
-                TagMod(fd.forced.toTagMod(renderLibrary(_, ForcedLib, props.dispatch)),
-                       fd.libraries.toTagMod(renderLibrary(_, SelectedLib, props.dispatch))))
+                fd.libraries.toTagMod(renderLibrary(_, SelectedLib, fd.scalaVersion, props.dispatch)))
             ),
             div(cls := "ui horizontal divider header", "Available"),
+            div(cls := "ui checkbox")(
+              input.checkbox(name := "all-versions",
+                             checked := state.showAllVersions,
+                             onChange --> $.modState(s => s.copy(showAllVersions = !s.showAllVersions))),
+              label("Show all versions")
+            ),
             div(cls := "liblist")(
               libGroups.toTagMod {
                 case (group, libraries) =>
                   div(
                     h5(cls := "lib-group", group.replaceFirst("\\d+:", "")),
                     div(cls := "ui middle aligned divided list")(
-                      libraries.toTagMod(renderLibrary(_, AvailableLib, props.dispatch))
+                      libraries.toTagMod(renderLibrary(_, AvailableLib, fd.scalaVersion, props.dispatch))
                     )
                   )
               }
             ),
-            div(cls := "ui checkbox")(
-              input.checkbox(name := "all-versions",
-                             checked := state.showAllVersions,
-                             onChange --> $.modState(s => s.copy(showAllVersions = !s.showAllVersions))),
-              label("Show all versions")
+            div(cls := "ui grid")(
+              div(cls := "eight wide column")(
+                h4("Scala version")
+              ),
+              div(cls := "eight wide column right aligned")(
+                div(cls := "grouped fields")(
+                  ScalaFiddleConfig.scalaVersions.toTagMod { version =>
+                    div(cls := "field")(
+                      div(cls := "ui radio checkbox")(
+                        input.radio(
+                          name := "scalaversion",
+                          value := version,
+                          checked := props.data().scalaVersion == version,
+                          onChange ==> { (e: ReactEventFromInput) =>
+                            val newVersion = e.currentTarget.value
+                            props.dispatch(SelectScalaVersion(newVersion))
+                          }
+                        ),
+                        label(version)
+                      )
+                    )
+                  }
+                )
+              )
             )
           )
         )
       )
     }
 
-    def renderLibrary(lib: Library, mode: LibMode, dispatch: Action => Callback) = {
+    def renderLibrary(lib: Library, mode: LibMode, scalaVersion: String, dispatch: Action => Callback) = {
       val (action, icon) = mode match {
         case SelectedLib  => (DeselectLibrary(lib), i(cls := "remove red icon"))
         case AvailableLib => (SelectLibrary(lib), i(cls := "plus green icon"))
-        case ForcedLib    => (NoAction, i(cls := "remove grey icon"))
       }
       div(cls := "item")(
         div(cls := "right floated")(
-          button(cls := s"mini ui icon basic button ${if (mode == ForcedLib) "disabled" else ""}",
-                 onClick --> dispatch(action))(icon)
+          button(cls := s"mini ui icon basic button", onClick --> dispatch(action))(icon)
         ),
         a(href := lib.docUrl, target := "_blank")(
-          div(cls := "content left floated", b(lib.name), " ", span(cls := "text grey", lib.version))
+          div(cls := "content left floated")(
+            b(lib.name),
+            " ",
+            span(cls := (if (lib.scalaVersions.contains(scalaVersion)) "text grey" else "text red"), lib.version))
         )
       )
     }
@@ -133,9 +159,9 @@ object Sidebar {
 
   val component = ScalaComponent
     .builder[Props]("Sidebar")
-    .initialState(State(false))
+    .initialState(State(showAllVersions = false))
     .renderBackend[Backend]
-    .componentDidMount(scope =>
+    .componentDidMount(_ =>
       Callback {
         JQueryStatic(accordionRef).accordion(js.Dynamic.literal(exclusive = true))
     })

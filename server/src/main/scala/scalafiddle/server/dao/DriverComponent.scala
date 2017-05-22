@@ -1,6 +1,6 @@
 package scalafiddle.server.dao
 
-import slick.driver.JdbcProfile
+import slick.jdbc.JdbcProfile
 
 trait DriverComponent {
   val driver: JdbcProfile

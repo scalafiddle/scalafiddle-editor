@@ -7,6 +7,7 @@ case class Fiddle(
     description: String,
     sourceCode: String,
     libraries: List[String],
+    scalaVersion: String,
     user: String,
     parent: Option[String] = None,
     created: Long = System.currentTimeMillis(),
@@ -23,20 +24,21 @@ trait FiddleDAO { self: DriverComponent =>
   )
 
   class Fiddles(tag: Tag) extends Table[Fiddle](tag, "fiddle") {
-    def id          = column[String]("id")
-    def version     = column[Int]("version")
-    def name        = column[String]("name")
-    def description = column[String]("description")
-    def sourceCode  = column[String]("sourcecode")
-    def libraries   = column[List[String]]("libraries")
-    def user        = column[String]("user")
-    def parent      = column[Option[String]]("parent")
-    def created     = column[Long]("created")
-    def removed     = column[Boolean]("removed")
-    def pk          = primaryKey("pk_fiddle", (id, version))
+    def id           = column[String]("id")
+    def version      = column[Int]("version")
+    def name         = column[String]("name")
+    def description  = column[String]("description")
+    def sourceCode   = column[String]("sourcecode")
+    def libraries    = column[List[String]]("libraries")
+    def scalaVersion = column[String]("scala_version")
+    def user         = column[String]("user")
+    def parent       = column[Option[String]]("parent")
+    def created      = column[Long]("created")
+    def removed      = column[Boolean]("removed")
+    def pk           = primaryKey("pk_fiddle", (id, version))
 
     def * =
-      (id, version, name, description, sourceCode, libraries, user, parent, created, removed) <> (Fiddle.tupled, Fiddle.unapply)
+      (id, version, name, description, sourceCode, libraries, scalaVersion, user, parent, created, removed) <> (Fiddle.tupled, Fiddle.unapply)
   }
 
   val fiddles = TableQuery[Fiddles]

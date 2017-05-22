@@ -14,7 +14,7 @@ import slick.dbio.{DBIOAction, NoStream}
 import scala.util.{Failure, Success, Try}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scalafiddle.server.dao.{Fiddle, FiddleDAL}
+import scalafiddle.server.dao.{Fiddle, FiddleAccess, FiddleDAL}
 import scalafiddle.server.models.User
 import scalafiddle.shared.{FiddleData, FiddleId, Library}
 
@@ -43,6 +43,12 @@ case class FindUserLogin(loginInfo: LoginInfo)
 case class AddUser(user: User)
 
 case class UpdateUser(user: User)
+
+case class AddAccess(fiddleId: String, version: Int, userId: Option[String], embedded: Boolean, sourceIP: String)
+
+case class FindAccesses(fiddleId: String)
+
+case class FindAccessesBetween(startTime: Long, endTime: Long = System.currentTimeMillis())
 
 class Persistence @Inject()(config: Configuration) extends Actor with ActorLogging {
   val dbConfig = DatabaseConfig.forConfig[JdbcProfile](config.getString("scalafiddle.dbConfig").get)
@@ -79,8 +85,8 @@ class Persistence @Inject()(config: Configuration) extends Actor with ActorLoggi
                              fiddle.description,
                              fiddle.sourceCode,
                              fiddle.libraries.map(Library.stringify).toList,
+                             fiddle.scalaVersion,
                              user)
-      log.debug(s"Storing new fiddle: $newFiddle")
       runAndReply(dal.insertFiddle(newFiddle))(r => Success(FiddleId(id, 0))) pipeTo sender()
 
     case ForkFiddle(fiddle, id, version, user) =>
@@ -91,9 +97,9 @@ class Persistence @Inject()(config: Configuration) extends Actor with ActorLoggi
                              fiddle.description,
                              fiddle.sourceCode,
                              fiddle.libraries.map(Library.stringify).toList,
+                             fiddle.scalaVersion,
                              user,
                              Some(s"$id/$version"))
-      log.debug(s"Forking new fiddle: $newFiddle")
       runAndReply(dal.insertFiddle(newFiddle))(r => Success(FiddleId(id, 0))) pipeTo sender()
 
     case FindFiddle(id, version) =>
@@ -131,6 +137,7 @@ class Persistence @Inject()(config: Configuration) extends Actor with ActorLoggi
               fiddle.description,
               fiddle.sourceCode,
               fiddle.libraries.map(Library.stringify).toList,
+              fiddle.scalaVersion,
               latest.user,
               Some(s"${latest.id}/${latest.version}")
             )
@@ -207,5 +214,16 @@ class Persistence @Inject()(config: Configuration) extends Actor with ActorLoggi
 
     case UpdateUser(user) =>
       runAndReply(dal.update(user))(_ => Success(user)) pipeTo sender()
+
+    case AddAccess(fiddleId, version, userId, embedded, sourceIP) =>
+      runAndReply(
+        dal.insertAccess(FiddleAccess(0, fiddleId, version, System.currentTimeMillis(), userId, embedded, sourceIP)))(_ =>
+        Success(fiddleId)) pipeTo sender()
+
+    case FindAccesses(fiddleId) =>
+      runAndReply(dal.findAccesses(fiddleId))(Success(_)) pipeTo sender()
+
+    case FindAccessesBetween(startTime, endTime) =>
+      runAndReply(dal.findAccesses(startTime, endTime))(Success(_)) pipeTo sender()
   }
 }

@@ -27,7 +27,7 @@ case class FiddleData(
     description: String,
     sourceCode: String,
     libraries: Seq[Library],
-    forced: Seq[Library],
     available: Seq[Library],
+    scalaVersion: String,
     author: Option[UserInfo]
 )
