@@ -9,9 +9,9 @@ ScalaFiddle has two separate repositories, the editor (this one) and the [core](
 repos locally.
 
 ```bash
-$ git clone git@github.com:scalafiddle/scalafiddle-core.git
+$ git clone https://github.com/scalafiddle/scalafiddle-core.git
 
-$ git clone git@github.com:scalafiddle/scalafiddle-editor.git
+$ git clone https://github.com/scalafiddle/scalafiddle-editor.git
 ```
 
 Next start two separate `sbt` sessions in two terminal windows, one for each project.
