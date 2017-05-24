@@ -219,10 +219,10 @@ class Application @Inject()(
   }
 
   def parseFiddle(source: String): (String, Seq[Library]) = {
-    val dependencyRE          = """ *// \$FiddleDependency (.+)"""
+    val dependencyRE          = """ *// \$FiddleDependency (.+)""".r
     val lines                 = source.split("\n")
-    val (libLines, codeLines) = lines.partition(_.matches(dependencyRE))
-    val libs                  = libLines.flatMap(librarian.findLibrary)
+    val (libLines, codeLines) = lines.partition(line => dependencyRE.findFirstIn(line).isDefined)
+    val libs                  = libLines.flatMap(line => librarian.findLibrary(dependencyRE.findFirstMatchIn(line).get.group(1)))
     (codeLines.mkString("\n"), libs)
   }
 
