@@ -1,6 +1,7 @@
 package controllers
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
+import java.net.{URL, URLDecoder, URLEncoder}
 import java.nio.charset.StandardCharsets
 import java.util.zip.GZIPInputStream
 import javax.inject.{Inject, Named}
@@ -45,6 +46,8 @@ class Application @Inject()(
   implicit val timeout = Timeout(15.seconds)
   val log              = Logger(getClass)
   val libUri           = config.getString("scalafiddle.librariesURL").get
+  val scalafiddleUrl   = new URL(config.getString("scalafiddle.scalafiddleURL").get)
+  val compilerUrl      = config.getString("scalafiddle.compilerURL").get
 
   Kamon.start()
 
@@ -160,18 +163,108 @@ class Application @Inject()(
       })
   }
 
-  def loadFiddle(id: String, version: Int, sourceOpt: Option[String] = None): Future[Try[FiddleData]] = {
+  val passthroughParams = Seq(
+    "responsiveWidth",
+    "theme",
+    "style",
+    "fullOpt",
+    "layout",
+    "hideButtons",
+    "referrer"
+  )
+  def oembed(url: String, maxwidth: Option[Int], maxheight: Option[Int], format: Option[String]) = Action.async {
+    implicit request =>
+      // parse URL
+      Try(new URL(url)).toOption match {
+        case None =>
+          log.debug(s"Invalid URL $url")
+          Future.successful(NotFound)
+        case Some(fiddleUrl) =>
+          val params = Option(fiddleUrl.getQuery)
+            .map { query =>
+              query
+                .split("&")
+                .map { param =>
+                  param.split("=") match {
+                    case Array(key, value) => URLDecoder.decode(key, "UTF-8") -> Some(URLDecoder.decode(value, "UTF-8"))
+                    case Array(key)        => URLDecoder.decode(key, "UTF-8") -> None
+                  }
+                }
+                .toMap
+            }
+            .getOrElse(Map.empty)
+          // validate URL and parameters
+          val pathRE = """/sf/(\w{4,8})/(\d{1,6}).*""".r
+          if (format.getOrElse("json").toLowerCase != "json") {
+            Future.successful(NotImplemented)
+          } else if (fiddleUrl.getHost != scalafiddleUrl.getHost) {
+            log.debug(s"Invalid host ${fiddleUrl.getHost}")
+            Future.successful(NotFound)
+          } else {
+            // load fiddle metadata
+            fiddleUrl.getPath match {
+              case pathRE(fiddleId, version) =>
+                ask(persistence, FindFiddle(fiddleId, version.toInt)).mapTo[Try[Fiddle]].flatMap {
+                  case Success(fiddle) =>
+                    ask(persistence, FindUser(fiddle.user))
+                      .mapTo[Try[User]]
+                      .map {
+                        case Success(user) =>
+                          user.fullName
+                        case Failure(e) =>
+                          None
+                      }
+                      .map { userName =>
+                        // create response
+                        val embedParams = params
+                          .filterKeys(passthroughParams.contains)
+                          .map {
+                            case (key, value) =>
+                              s"${URLEncoder.encode(key, "UTF-8")}${value.map(v => "=" + URLEncoder.encode(v, "UTF-8")).getOrElse("")}"
+                          }
+                          .mkString("&", "&", "")
+                        val height   = maxheight.getOrElse(300) min 300
+                        val width    = maxwidth.getOrElse(960) min 960
+                        val embedUrl = s"$compilerUrl/embed?sfid=$fiddleId/$version&passive$embedParams"
+                        val iframe =
+                          s"""<iframe height="$height" width="$width" frameborder="0" style="width: 100%; overflow: hidden;" src="$embedUrl"></iframe>"""
+                        val response = Map[String, Js.Value](
+                          "type"          -> Js.Str("rich"),
+                          "version"       -> Js.Str("1.0"),
+                          "title"         -> Js.Str(s"ScalaFiddle - ${fiddle.name}"),
+                          "provider_name" -> Js.Str("ScalaFiddle"),
+                          "provider_url"  -> Js.Str(scalafiddleUrl.toString),
+                          "cache_age"     -> Js.Num(3600 * 24),
+                          "height"        -> Js.Num(height),
+                          "width"         -> Js.Num(width),
+                          "html"          -> Js.Str(iframe)
+                        ) ++ userName.map(name => "author_name" -> Js.Str(name))
+                        Ok(write(response)).as("application/json").withHeaders(CACHE_CONTROL -> "max-age=3600")
+                      }
+                  case Failure(e) =>
+                    log.debug(s"Fiddle $fiddleId/$version not found")
+                    Future.successful(NotFound)
+                }
+              case _ =>
+                log.debug(s"Path not found")
+                Future.successful(NotFound)
+            }
+          }
+      }
+  }
+
+  private def loadFiddle(id: String, version: Int, sourceOpt: Option[String] = None): Future[Try[FiddleData]] = {
     if (id == "") {
       val (source, libs) = parseFiddle(sourceOpt.fold(defaultSource)(identity))
       Future.successful(
         Success(
           FiddleData("",
-            "",
-            source,
-            libs,
-            librarian.libraries,
-            config.getString("scalafiddle.defaultScalaVersion").get,
-            None)))
+                     "",
+                     source,
+                     libs,
+                     librarian.libraries,
+                     config.getString("scalafiddle.defaultScalaVersion").get,
+                     None)))
     } else {
       ask(persistence, FindFiddle(id, version)).mapTo[Try[Fiddle]].flatMap {
         case Success(f) if f.user == "anonymous" =>
@@ -218,7 +311,7 @@ class Application @Inject()(
     }
   }
 
-  def parseFiddle(source: String): (String, Seq[Library]) = {
+  private def parseFiddle(source: String): (String, Seq[Library]) = {
     val dependencyRE          = """ *// \$FiddleDependency (.+)""".r
     val lines                 = source.split("\n")
     val (libLines, codeLines) = lines.partition(line => dependencyRE.findFirstIn(line).isDefined)
@@ -226,18 +319,18 @@ class Application @Inject()(
     (codeLines.mkString("\n"), libs)
   }
 
-  def decodeSource(b64: String): Option[String] = {
+  private def decodeSource(b64: String): Option[String] = {
     try {
       import com.github.marklister.base64.Base64._
       implicit def scheme: B64Scheme = base64Url
       // decode base64 and gzip
       val compressedSource = Decoder(b64).toByteArray
-      val bis = new ByteArrayInputStream(compressedSource)
-      val zis = new GZIPInputStream(bis)
-      val buf = new Array[Byte](1024)
-      val bos = new ByteArrayOutputStream()
-      var len = 0
-      while ( {len = zis.read(buf); len > 0}) {
+      val bis              = new ByteArrayInputStream(compressedSource)
+      val zis              = new GZIPInputStream(bis)
+      val buf              = new Array[Byte](1024)
+      val bos              = new ByteArrayOutputStream()
+      var len              = 0
+      while ({ len = zis.read(buf); len > 0 }) {
         bos.write(buf, 0, len)
       }
       zis.close()
@@ -250,7 +343,7 @@ class Application @Inject()(
     }
   }
 
-  def createTables() = {
+  private def createTables() = {
     log.debug(s"Creating missing tables")
     // create tables
     val dbConfig = DatabaseConfig.forConfig[JdbcProfile](config.getString("scalafiddle.dbConfig").get)

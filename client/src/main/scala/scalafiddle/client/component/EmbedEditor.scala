@@ -95,7 +95,8 @@ object EmbedEditor {
               div(cls := "header", "Embed code"),
               textarea(
                 cls := "embed-code",
-                defaultValue := createEmbedCode,
+                value := createEmbedCode,
+                readOnly := true,
                 onClick ==> { (e: ReactEventFromHtml) =>
                   e.target.focus(); e.target.asInstanceOf[HTMLTextAreaElement].select(); Callback.empty
                 }

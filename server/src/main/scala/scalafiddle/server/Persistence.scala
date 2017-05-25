@@ -210,7 +210,14 @@ class Persistence @Inject()(config: Configuration) extends Actor with ActorLoggi
       res pipeTo sender()
 
     case AddUser(user) =>
-      runAndReply(dal.insert(user))(_ => Success(user)) pipeTo sender()
+      db.run(dal.findUser(user.loginInfo))
+        .flatMap {
+          case Some(u) =>
+            // do not add the same user again
+            Future.successful(Success(u))
+          case None =>
+            runAndReply(dal.insert(user))(_ => Success(user))
+        } pipeTo sender()
 
     case UpdateUser(user) =>
       runAndReply(dal.update(user))(_ => Success(user)) pipeTo sender()
