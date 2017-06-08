@@ -62,6 +62,17 @@
         "doc": "http://udash.io",
         "versions": [
           {
+            "version": "0.5.0",
+            "scalaVersions": ["2.11", "2.12"],
+            "extraDeps": [
+              "io.udash %%% udash-bootstrap % 0.5.0",
+              "io.udash %%% udash-charts % 0.5.0",
+              "io.udash %%% udash-i18n-frontend % 0.5.0",
+              "io.udash %%% udash-rpc-frontend % 0.5.0",
+              "io.udash %%% udash-rest-shared % 0.5.0"
+            ]
+          },
+          {
             "version": "0.4.0",
             "scalaVersions": ["2.11"],
             "extraDeps": [
