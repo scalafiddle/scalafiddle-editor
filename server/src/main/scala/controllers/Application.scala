@@ -127,7 +127,24 @@ class Application @Inject()(
         sourceCode.append(allLibs.map(lib => s"// $$FiddleDependency $lib").mkString("\n", "\n", "\n"))
         nameOpt.foreach(name => sourceCode.append(s"// $$FiddleName $name\n"))
 
-        Ok(sourceCode.toString).withHeaders(CACHE_CONTROL -> "max-age=3600")
+        Ok(sourceCode.toString).withHeaders(CACHE_CONTROL -> "max-age=7200")
+      case Failure(ex) =>
+        NotFound
+    }
+  }
+
+  def htmlFiddle(fiddleId: String, version: String) = Action.async { implicit request =>
+    if (fiddleId.nonEmpty)
+      persistence ! AddAccess(fiddleId,
+                              version.toInt,
+                              None,
+                              embedded = true,
+                              Option(request.remoteAddress).getOrElse("unknown"))
+
+    loadFiddle(fiddleId, version.toInt).map {
+      case Success(fd) =>
+        val html = HTMLFiddle.process(fd, s"$scalafiddleUrl/sf/$fiddleId/$version")
+        Ok(html).as("text/html").withHeaders(CACHE_CONTROL -> "max-age=86400")
       case Failure(ex) =>
         NotFound
     }
@@ -172,7 +189,8 @@ class Application @Inject()(
     "hideButtons",
     "referrer"
   )
-  def oembed(url: String, maxwidth: Option[Int], maxheight: Option[Int], format: Option[String]) = Action.async {
+
+  def oembed(url: String, maxwidth: Option[Int], maxheight: Option[Int], format: Option[String], isStatic: Boolean) = Action.async {
     implicit request =>
       // parse URL
       Try(new URL(url)).toOption match {
@@ -216,16 +234,20 @@ class Application @Inject()(
                       }
                       .map { userName =>
                         // create response
-                        val embedParams = params
-                          .filterKeys(passthroughParams.contains)
-                          .map {
-                            case (key, value) =>
-                              s"${URLEncoder.encode(key, "UTF-8")}${value.map(v => "=" + URLEncoder.encode(v, "UTF-8")).getOrElse("")}"
-                          }
-                          .mkString("&", "&", "")
                         val height   = maxheight.getOrElse(300) min 300
                         val width    = maxwidth.getOrElse(960) min 960
-                        val embedUrl = s"$compilerUrl/embed?sfid=$fiddleId/$version&passive$embedParams"
+                        val embedUrl = if(isStatic) {
+                          s"$scalafiddleUrl/html/$fiddleId/$version"
+                        } else {
+                          val embedParams = params
+                            .filterKeys(passthroughParams.contains)
+                            .map {
+                              case (key, value) =>
+                                s"${URLEncoder.encode(key, "UTF-8")}${value.map(v => "=" + URLEncoder.encode(v, "UTF-8")).getOrElse("")}"
+                            }
+                            .mkString("&", "&", "")
+                          s"$compilerUrl/embed?sfid=$fiddleId/$version&passive$embedParams"
+                        }
                         val iframe =
                           s"""<iframe height="$height" width="$width" frameborder="0" style="width: 100%; overflow: hidden;" src="$embedUrl"></iframe>"""
                         val response = Map[String, Js.Value](

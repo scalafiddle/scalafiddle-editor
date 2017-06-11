@@ -9,9 +9,11 @@ GET     /signout                          controllers.Application.signOut
 GET     /sf/:id                           controllers.Application.index(id, version = "0")
 GET     /sf/:id/$version<\d+>             controllers.Application.index(id, version)
 GET     /raw/:id/$version<\d+>            controllers.Application.rawFiddle(id, version)
+GET     /html/:id/$version<\d+>           controllers.Application.htmlFiddle(id, version)
 GET     /resultframe                      controllers.Application.resultFrame
 GET     /libraries/:scalaVersion          controllers.Application.libraryListing(scalaVersion)
-GET     /oembed.json                      controllers.Application.oembed(url, maxwidth: Option[Int], maxheight: Option[Int], format: Option[String])
+GET     /oembed.json                      controllers.Application.oembed(url, maxwidth: Option[Int], maxheight: Option[Int], format: Option[String], isStatic: Boolean = false)
+GET     /oembedstatic.json                controllers.Application.oembed(url, maxwidth: Option[Int], maxheight: Option[Int], format: Option[String], isStatic: Boolean = true)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/fonts/*file               controllers.Assets.at(path="/public/lib/font-awesome/fonts", file)

@@ -8,7 +8,7 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 object Settings {
 
   /** The version of your application */
-  val version = "1.0.7"
+  val version = "1.0.8"
 
   /** Options for the scala compiler */
   val scalacOptions = Seq(
@@ -33,7 +33,9 @@ object Settings {
     val slick        = "3.2.0"
     val silhouette   = "4.0.0"
     val kamon        = "0.6.3"
-    val base64        = "0.2.3"
+    val base64       = "0.2.3"
+    val scalaParse   = "0.4.3"
+    val scalatags    = "0.6.5"
 
     val jQuery   = "3.2.0"
     val semantic = "2.2.10"
@@ -71,6 +73,8 @@ object Settings {
       "net.codingwell"        %% "scala-guice"                     % "4.1.0",
       "com.iheart"            %% "ficus"                           % "1.4.0",
       "com.github.marklister" %% "base64"                          % versions.base64,
+      "com.lihaoyi"           %% "scalaparse"                      % versions.scalaParse,
+      "com.lihaoyi"           %% "scalatags"                       % versions.scalatags,
       "com.vmunier"           %% "scalajs-scripts"                 % versions.scalaJsScripts,
       "io.kamon"              %% "kamon-core"                      % versions.kamon,
       "io.kamon"              %% "kamon-statsd"                    % versions.kamon,
