@@ -427,6 +427,10 @@
         "doc": "akka-js/akka.js",
         "versions": [
           {
+            "version": "1.2.5.2",
+            "scalaVersions": ["2.11", "2.12"]
+          },
+          {
             "version": "1.2.5.1",
             "scalaVersions": ["2.11", "2.12"]
           },
@@ -469,6 +473,10 @@
         "artifact": "akkajsactorstream",
         "doc": "akka-js/akka.js",
         "versions": [
+          {
+            "version": "1.2.5.2",
+            "scalaVersions": ["2.11", "2.12"]
+          },
           {
             "version": "1.2.5.1",
             "scalaVersions": ["2.11", "2.12"]
