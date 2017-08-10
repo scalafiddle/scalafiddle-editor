@@ -261,6 +261,16 @@
         "doc": "ThoughtWorksInc/Binding.scala",
         "versions": [
           {
+            "version": "10.0.3",
+            "scalaVersions": ["2.11", "2.12"],
+            "extraDeps": [
+              "com.thoughtworks.binding %%% route % 10.0.3",
+              "com.thoughtworks.binding %%% dom % 10.0.3",
+              "com.thoughtworks.binding %%% futurebinding % 10.0.3",
+              "com.thoughtworks.binding %%% jspromisebinding % 10.0.3"
+            ]
+          },
+          {
             "version": "10.0.2",
             "scalaVersions": ["2.11", "2.12"],
             "extraDeps": [
