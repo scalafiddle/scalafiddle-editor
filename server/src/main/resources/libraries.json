@@ -548,6 +548,10 @@
         "doc": "http://getquill.io/",
         "versions": [
           {
+            "version": "1.4.0",
+            "scalaVersions": ["2.11", "2.12"]
+          },
+          {
             "version": "1.3.0",
             "scalaVersions": ["2.11", "2.12"]
           },
