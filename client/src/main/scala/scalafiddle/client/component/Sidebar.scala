@@ -139,12 +139,11 @@ object Sidebar {
           )
         ),
         div(cls := "bottom")(
-          div(cls := "ui basic button toggle", onClick ==> { (e: ReactEventFromHtml) =>
+          div(cls := "ui icon basic button toggle", onClick ==> { (e: ReactEventFromHtml) =>
             Callback {
-              e.target.textContent = if (state.isOpen) "Show" else "Hide"
               sideBarRef.classList.toggle("folded")
             } >> $.modState(s => s.copy(isOpen = !state.isOpen))
-          })("Hide")
+          })(if (state.isOpen) Icon.angleDoubleLeft else Icon.angleDoubleRight)
         )
       )
     }
