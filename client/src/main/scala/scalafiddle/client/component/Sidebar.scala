@@ -1,7 +1,7 @@
 package scalafiddle.client.component
 
+import diode.Action
 import diode.react.ModelProxy
-import diode.{Action, NoAction}
 import japgolly.scalajs.react._
 import org.scalajs.dom.raw.HTMLDivElement
 
@@ -85,8 +85,10 @@ object Sidebar {
           ),
           div(cls := "title", "Libraries", i(cls := "icon dropdown")),
           div(cls := "content")(
-            div(cls := "ui horizontal divider header", "Selected"),
-            div(cls := "liblist")(
+            div(cls := "ui horizontal divider header",
+                (style := js.Dynamic.literal(display = "none")).when(fd.libraries.isEmpty),
+                "Selected"),
+            div(cls := "liblist", (style := js.Dynamic.literal(display = "none")).when(fd.libraries.isEmpty))(
               div(cls := "ui middle aligned divided list")(
                 fd.libraries.toTagMod(renderLibrary(_, SelectedLib, fd.scalaVersion, props.dispatch)))
             ),
@@ -163,7 +165,7 @@ object Sidebar {
     .renderBackend[Backend]
     .componentDidMount(_ =>
       Callback {
-        JQueryStatic(accordionRef).accordion(js.Dynamic.literal(exclusive = true))
+        JQueryStatic(accordionRef).accordion(js.Dynamic.literal(exclusive = true, animateChildren = false))
     })
     .build
 

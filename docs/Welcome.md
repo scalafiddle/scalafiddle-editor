@@ -32,9 +32,11 @@ To make sure you can later find your fiddle, remember to add a **Name** and **De
 
 You can experiment with different supported Scala libraries by selecting them from the **Libraries** section on the left
 sidebar. Just press the **+** button to add a library to your fiddle, and **X** to remove it. The latest version is shown by
-default but you can also **Show all versions** if you need to work with an older one.
+default, but you can also **Show all versions** if you need to work with an older one.
 
 ![libraries](libraries.png)
+
+By default new fiddles use Scala 2.12, but you can also select another Scala version.
 
 ## Editing code
 
