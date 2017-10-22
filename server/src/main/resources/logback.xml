@@ -21,6 +21,7 @@
     <logger name="com.mohiva" level="WARN" />
     <logger name="slick" level="INFO" />
     <logger name="slick.compiler" level="INFO" />
+    <logger name="play.shaded" level="INFO" />
     <logger name="com.zaxxer.hikari" level="INFO" />
     <logger name="com.google.inject" level="INFO" />
     <logger name="org.asynchttpclient" level="INFO" />
