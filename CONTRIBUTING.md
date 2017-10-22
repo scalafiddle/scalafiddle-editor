@@ -45,7 +45,7 @@ By far the most common contribution is adding support for a new library (or a ve
 file under the `editor` project (server/src/main/resources/libraries.json).
 
 Although the editor (and router) automatically reload library information, because it's packaged inside resources you'll need to restart the editor (and router)
-to be able to use the new libraries. Press `Ctrl`+`D` to stop the editor and start it again with `run`. The router you can simply restart with `router/reStart`
+to be able to use the new libraries. Press `Enter` to stop the editor and start it again with `run`. The router you can simply restart with `router/reStart`
 and there is no need to restart the compiler server as it will automatically reconnect to the router.
 
 Please follow these rules for adding a new library:

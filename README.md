@@ -5,7 +5,7 @@ browser).
 
 ## Usage
 
-For documentation on how to use the ScalaFiddle editor, see the [Usage doc](USAGE.md).
+For documentation on how to use the ScalaFiddle editor, see the [Welcome](docs/Welcome.md).
 
 ## Hosting your own ScalaFiddle editor
 
@@ -14,5 +14,5 @@ ScalaFiddle has been designed to be easy to host on your own. It's published as 
 
 ## Contributing
 
-If you'd like to contribute to the ScalaFiddle project, read the [contribution guide](CONTRIBUTING.md) for more instructions on how to set up a local dev env
-for ScalaFiddle etc.
+If you'd like to contribute to the ScalaFiddle project, for example to add a new library dependency, read the [contribution guide](CONTRIBUTING.md) 
+for more instructions on how to set up a local dev env for ScalaFiddle editor and core.

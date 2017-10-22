@@ -101,22 +101,115 @@
     "group": "Functional & type-level",
     "libraries": [
       {
-        "name": "Cats",
-        "organization": "org.typelevel",
-        "artifact": "cats",
-        "doc": "http://typelevel.org/cats/",
+        "name": "Quicklens",
+        "organization": "com.softwaremill.quicklens",
+        "artifact": "quicklens",
+        "doc": "adamw/quicklens",
         "versions": [
           {
-            "version": "0.9.0",
+            "version": "1.4.11",
+            "scalaVersions": ["2.11", "2.12"]
+          }
+        ],
+        "compileTimeOnly": false
+      },
+      {
+        "name": "Matryoshka",
+        "organization": "com.slamdata",
+        "artifact": "matryoshka-core",
+        "doc": "slamdata/matryoshka",
+        "versions": [
+          {
+            "version": "0.18.3",
+            "scalaVersions": ["2.11", "2.12"]
+          }
+        ],
+        "compileTimeOnly": false
+      },
+      {
+        "name": "Squants",
+        "organization": "org.typelevel",
+        "artifact": "squants",
+        "doc": "http://www.squants.com/",
+        "versions": [
+          {
+            "version": "1.3.0",
+            "scalaVersions": ["2.11", "2.12"]
+          }
+        ],
+        "compileTimeOnly": false
+      },
+      {
+        "name": "Refined",
+        "organization": "eu.timepit",
+        "artifact": "refined",
+        "doc": "fthomas/refined",
+        "versions": [
+          {
+            "version": "0.8.4",
+            "scalaVersions": ["2.11", "2.12"]
+          }
+        ],
+        "compileTimeOnly": false
+      },
+      {
+        "name": "Simulacrum",
+        "organization": "com.github.mpilquist",
+        "artifact": "simulacrum",
+        "doc": "mpilquist/simulacrum",
+        "versions": [
+          {
+            "version": "0.11.0",
+            "scalaVersions": ["2.11", "2.12"]
+          }
+        ],
+        "compileTimeOnly": false
+      },
+      {
+        "name": "Spire",
+        "organization": "org.typelevel",
+        "artifact": "spire",
+        "doc": "non/spire",
+        "versions": [
+          {
+            "version": "0.14.1",
+            "scalaVersions": ["2.11", "2.12"]
+          }
+        ],
+        "compileTimeOnly": false
+      },
+      {
+        "name": "Cats",
+        "organization": "org.typelevel",
+        "artifact": "cats-core",
+        "doc": "https://typelevel.org/cats/",
+        "versions": [
+          {
+            "version": "1.0.0-MF",
             "scalaVersions": ["2.11", "2.12"]
           },
           {
             "version": "0.7.2",
+            "artifact": "cats",
             "scalaVersions": ["2.11"]
           },
           {
             "version": "0.6.1",
+            "artifact": "cats",
             "scalaVersions": ["2.11"]
+          }
+        ],
+        "compileTimeOnly": false
+      },
+      {
+        "name": "Cats Effect",
+        "organization": "org.typelevel",
+        "artifact": "cats-effect",
+        "doc": "typelevel/cats-effect",
+        "versions": [
+          {
+            "version": "0.4",
+            "scalaVersions": ["2.11", "2.12"]
           }
         ],
         "compileTimeOnly": false
@@ -127,6 +220,10 @@
         "artifact": "scalaz-core",
         "doc": "scalaz/scalaz",
         "versions": [
+          {
+            "version": "7.2.16",
+            "scalaVersions": ["2.11", "2.12"]
+          },
           {
             "version": "7.2.12",
             "scalaVersions": ["2.11", "2.12"]
@@ -144,6 +241,10 @@
         "artifact": "each",
         "doc": "ThoughtWorksInc/each",
         "versions": [
+          {
+            "version": "3.3.1",
+            "scalaVersions": ["2.11", "2.12"]
+          },
           {
             "version": "3.0.1",
             "scalaVersions": ["2.11"]
@@ -175,6 +276,14 @@
         "doc": "functional-streams-for-scala/fs2",
         "versions": [
           {
+            "version": "0.10.0-M7",
+            "scalaVersions": ["2.11", "2.12"]
+          },
+          {
+            "version": "0.9.7",
+            "scalaVersions": ["2.11", "2.12"]
+          },
+          {
             "version": "0.9.5",
             "scalaVersions": ["2.11", "2.12"]
           },
@@ -192,12 +301,41 @@
         "doc": "https://monix.io/",
         "versions": [
           {
+            "version": "3.0.0-M1",
+            "scalaVersions": ["2.11", "2.12"]
+          },
+          {
             "version": "2.3.0",
-            "scalaVersions": ["2.11"]
+            "scalaVersions": ["2.11", "2.12"]
           },
           {
             "version": "2.0.0",
             "scalaVersions": ["2.11"]
+          }
+        ],
+        "compileTimeOnly": false
+      },
+      {
+        "name": "Monocle",
+        "organization": "com.github.julien-truffaut",
+        "artifact": "monocle-core",
+        "doc": "https://julien-truffaut.github.io/Monocle/",
+        "versions": [
+          {
+            "version": "1.5.0-cats-M1",
+            "scalaVersions": ["2.11", "2.12"],
+            "extraDeps": [
+              "com.github.julien-truffaut %%% monocle-macro % 1.5.0-cats-M1",
+              "com.github.julien-truffaut %%% monocle-law % 1.5.0-cats-M1"
+            ]
+          },
+          {
+            "version": "1.4.0",
+            "scalaVersions": ["2.11", "2.12"],
+            "extraDeps": [
+              "com.github.julien-truffaut %%% monocle-macro % 1.4.0",
+              "com.github.julien-truffaut %%% monocle-law % 1.4.0"
+            ]
           }
         ],
         "compileTimeOnly": false
@@ -243,6 +381,10 @@
         "artifact": "outwatch",
         "doc": "https://outwatch.github.io/?lang=scala",
         "versions": [
+          {
+            "version": "0.10.2",
+            "scalaVersions": ["2.11", "2.12"]
+          },
           {
             "version": "0.9.4",
             "scalaVersions": ["2.11", "2.12"]
@@ -374,8 +516,12 @@
         "doc": "lihaoyi/upickle-pprint",
         "versions": [
           {
-            "version": "0.4.3",
+            "version": "0.4.4",
             "scalaVersions": ["2.11", "2.12"]
+          },
+          {
+            "version": "0.4.3",
+            "scalaVersions": ["2.11"]
           },
           {
             "version": "0.4.1",
@@ -390,6 +536,11 @@
         "artifact": "circe-core",
         "doc": "https://circe.github.io/circe",
         "versions": [
+          {
+            "version": "0.9.0-M1",
+            "scalaVersions": ["2.11", "2.12"],
+            "extraDeps": ["io.circe %%% circe-generic % 0.9.0-M1", "io.circe %%% circe-parser % 0.9.0-M1"]
+          },
           {
             "version": "0.8.0",
             "scalaVersions": ["2.11", "2.12"],
@@ -414,11 +565,41 @@
     "group": "Miscellaneous",
     "libraries": [
       {
+        "name": "Collection Strawman",
+        "organization": "ch.epfl.scala",
+        "artifact": "collection-strawman",
+        "doc": "scala/collection-strawman",
+        "versions": [
+          {
+            "version": "0.5.0",
+            "scalaVersions": ["2.12"]
+          }
+        ],
+        "compileTimeOnly": false
+      },
+      {
+        "name": "FastParse",
+        "organization": "com.lihaoyi",
+        "artifact": "fastparse",
+        "doc": "http://www.lihaoyi.com/fastparse/",
+        "versions": [
+          {
+            "version": "1.0.0",
+            "scalaVersions": ["2.11", "2.12"]
+          }
+        ],
+        "compileTimeOnly": false
+      },
+      {
         "name": "Accord",
         "organization": "com.wix",
         "artifact": "accord-core",
         "doc": "http://wix.github.io/accord/",
         "versions": [
+          {
+            "version": "0.7.1",
+            "scalaVersions": ["2.11", "2.12"]
+          },
           {
             "version": "0.6.1",
             "scalaVersions": ["2.11", "2.12"]
@@ -436,6 +617,10 @@
         "artifact": "akkajsactor",
         "doc": "akka-js/akka.js",
         "versions": [
+          {
+            "version": "1.2.5.6",
+            "scalaVersions": ["2.11", "2.12"]
+          },
           {
             "version": "1.2.5.2",
             "scalaVersions": ["2.11", "2.12"]
@@ -484,6 +669,10 @@
         "doc": "akka-js/akka.js",
         "versions": [
           {
+            "version": "1.2.5.6",
+            "scalaVersions": ["2.11", "2.12"]
+          },
+          {
             "version": "1.2.5.2",
             "scalaVersions": ["2.11", "2.12"]
           },
@@ -531,6 +720,10 @@
         "doc": "scala-js/scala-js-java-time",
         "versions": [
           {
+            "version": "0.2.2",
+            "scalaVersions": ["2.11", "2.12"]
+          },
+          {
             "version": "0.2.1",
             "scalaVersions": ["2.11", "2.12"]
           },
@@ -547,6 +740,10 @@
         "artifact": "quill-sql",
         "doc": "http://getquill.io/",
         "versions": [
+          {
+            "version": "2.0.0",
+            "scalaVersions": ["2.11", "2.12"]
+          },
           {
             "version": "1.4.0",
             "scalaVersions": ["2.11", "2.12"]
