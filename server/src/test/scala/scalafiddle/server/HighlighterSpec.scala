@@ -68,5 +68,45 @@ class HighlighterSpec extends WordSpec with Matchers {
       val res = Highlighter.defaultHighlightIndices(code.toCharArray)
       println(res)
     }
+
+    "highlight long text" in {
+      val code =
+    s"""|import fiddle.Fiddle, Fiddle.println
+       |import scalajs.js
+       |
+       |@js.annotation.JSExportTopLevel("ScalaFiddle")
+       |object ScalaFiddle {
+       |  // $$FiddleStart
+       |  // Start writing your ScalaFiddle code here
+       |def libraryListing(scalaVersion: String) = Action {
+       |  val libStrings = librarian.libraries
+       |    .filter(_.scalaVersions.contains(scalaVersion))
+       |    .flatMap(lib => Library.stringify(lib) +: lib.extraDeps)
+       |  Ok(write(libStrings)).as("application/json").withHeaders(CACHE_CONTROL -> "max-age=60")
+       |}
+       |def libraryListing(scalaVersion: String) = Action {
+       |  val libStrings = librarian.libraries
+       |    .filter(_.scalaVersions.contains(scalaVersion))
+       |    .flatMap(lib => Library.stringify(lib) +: lib.extraDeps)
+       |  Ok(write(libStrings)).as("application/json").withHeaders(CACHE_CONTROL -> "max-age=60")
+       |}
+       |def libraryListing(scalaVersion: String) = Action {
+       |  val libStrings = librarian.libraries
+       |    .filter(_.scalaVersions.contains(scalaVersion))
+       |    .flatMap(lib => Library.stringify(lib) +: lib.extraDeps)
+       |  Ok(write(libStrings)).as("application/json").withHeaders(CACHE_CONTROL -> "max-age=60")
+       |}
+       |def libraryListing(scalaVersion: String) = Action {
+       |  val libStrings = librarian.libraries
+       |    .filter(_.scalaVersions.contains(scalaVersion))
+       |    .flatMap(lib => Library.stringify(lib) +: lib.extraDeps)
+       |  Ok(write(libStrings)).as("application/json").withHeaders(CACHE_CONTROL -> "max-age=60")
+       |}
+       |// $$FiddleEnd
+       |}
+     """.stripMargin
+      val res = Highlighter.defaultHighlightIndices(code.toCharArray)
+      println(res)
+    }
   }
 }

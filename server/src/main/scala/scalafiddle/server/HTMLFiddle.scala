@@ -48,26 +48,31 @@ object HTMLFiddle {
     |    width: 100%;
     |    background: white;
     |    color: white;
+    |    box-sizing: border-box;
     |}
     |body {
     |    position: relative;
-    |    overflow: hidden;
     |    font-size: 16px;
     |    color: #333;
     |    text-align: left;
     |    direction: ltr;
     |}
     |.sf-file {
+    |    height: 100%;
     |    margin-bottom: 1em;
     |    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
     |    border: 1px solid #ddd;
     |    border-bottom: 1px solid #ccc;
     |    border-radius: 3px;
+    |    display: flex;
+    |    flex-direction: column;
+    |    box-sizing: border-box;
     |}
     |.sf-data {
-    |    overflow: auto;
     |    word-wrap: normal;
     |    background-color: #fff;
+    |    flex: 1;
+    |    overflow: auto;
     |}
     |.sf-data table {
     |    border-collapse: collapse;
@@ -87,6 +92,9 @@ object HTMLFiddle {
     |    color: #586069;
     |    background-color: #f7f7f7;
     |    border-radius: 0 0 2px 2px;
+    |    box-shadow: 0 2px 4px 0px rgba(199, 199, 222, 0.5);
+    |    z-index: 1;
+    |    flex-shrink: 1;
     |}
     |.sf-meta a {
     |    font-weight: 600;
@@ -147,7 +155,7 @@ object HTMLFiddle {
     |}
     """.stripMargin
 
-  def process(fd: FiddleData, fiddleURL: String): String = {
+  def process(fd: FiddleData, fiddleURL: String, fiddleId: String): String = {
     import scalatags.Text.all._
     import scalatags.Text.tags2.{style => styleTag, title => titleTag}
 
@@ -195,7 +203,15 @@ object HTMLFiddle {
               tbody(codeHtml)
             )
           )
-        )
+        ),
+        script(raw(
+          s"""setTimeout(function() {
+            |  var dataDiv = document.querySelector(".sf-data table");
+            |  var metaDiv = document.querySelector(".sf-meta");
+            |  var data = {height:Math.min(dataDiv.scrollHeight + metaDiv.scrollHeight + 2, 600), fiddleId:"$fiddleId"};
+            |  window.parent.postMessage(["embedHeight", data], "*");
+            |}, 10);
+          """.stripMargin))
       )
     ).render
   }

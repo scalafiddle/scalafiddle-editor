@@ -48,7 +48,7 @@ object EmbedEditor {
       }
 
       def createEmbedCode: String = {
-        s"""<iframe height="300" frameborder="0" style="width: 100%; overflow: hidden;" src="$createIframeSource"></iframe>"""
+        s"""<iframe height="400px" frameborder="0" style="width: 100%" src="$createIframeSource"></iframe>"""
       }
 
       div(cls := "embed-editor")(
@@ -107,7 +107,7 @@ object EmbedEditor {
         div(cls := "preview")(
           div(cls := "header", "Preview"),
           iframe(
-            height := "300px",
+            height := "400px",
             width := "100%",
             frameBorder := 0,
             style := js.Dictionary("width" -> "100%", "overflow" -> "hidden"),

@@ -2,35 +2,32 @@ package scalafiddle.server.modules
 
 import com.google.inject.name.Named
 import com.google.inject.{AbstractModule, Provides}
-import com.mohiva.play.silhouette.api.actions.{SecuredErrorHandler, UnsecuredErrorHandler}
 import com.mohiva.play.silhouette.api.crypto._
-import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.services._
 import com.mohiva.play.silhouette.api.util._
 import com.mohiva.play.silhouette.api.{Environment, EventBus, Silhouette, SilhouetteProvider}
-import com.mohiva.play.silhouette.crypto.{JcaCookieSigner, JcaCookieSignerSettings, JcaCrypter, JcaCrypterSettings}
+import com.mohiva.play.silhouette.crypto.{JcaCrypter, JcaCrypterSettings, JcaSigner, JcaSignerSettings}
 import com.mohiva.play.silhouette.impl.authenticators._
 import com.mohiva.play.silhouette.impl.providers._
 import com.mohiva.play.silhouette.impl.providers.oauth1._
 import com.mohiva.play.silhouette.impl.providers.oauth1.secrets.{CookieSecretProvider, CookieSecretSettings}
 import com.mohiva.play.silhouette.impl.providers.oauth1.services.PlayOAuth1Service
 import com.mohiva.play.silhouette.impl.providers.oauth2._
-import com.mohiva.play.silhouette.impl.providers.oauth2.state.{CookieStateProvider, CookieStateSettings, DummyStateProvider}
 import com.mohiva.play.silhouette.impl.providers.openid.YahooProvider
 import com.mohiva.play.silhouette.impl.providers.openid.services.PlayOpenIDService
+import com.mohiva.play.silhouette.impl.providers.state.{CsrfStateItemHandler, CsrfStateSettings}
 import com.mohiva.play.silhouette.impl.services._
 import com.mohiva.play.silhouette.impl.util._
 import com.mohiva.play.silhouette.password.BCryptPasswordHasher
-import com.mohiva.play.silhouette.persistence.daos.{DelegableAuthInfoDAO, InMemoryAuthInfoDAO}
-import com.mohiva.play.silhouette.persistence.repositories.DelegableAuthInfoRepository
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.codingwell.scalaguice.ScalaModule
 import play.api.Configuration
+import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.openid.OpenIdClient
 import play.api.libs.ws.WSClient
-import play.api.libs.concurrent.AkkaGuiceSupport
+import play.api.mvc.CookieHeaderEncoding
 
 import scalafiddle.server.Persistence
 import scalafiddle.server.models.services.{UserService, UserServiceImpl}
@@ -128,10 +125,10 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
     */
   @Provides
   @Named("oauth1-token-secret-cookie-signer")
-  def provideOAuth1TokenSecretCookieSigner(configuration: Configuration): CookieSigner = {
-    val config = configuration.underlying.as[JcaCookieSignerSettings]("silhouette.oauth1TokenSecretProvider.cookie.signer")
+  def provideOAuth1TokenSecretCookieSigner(configuration: Configuration): Signer = {
+    val config = configuration.underlying.as[JcaSignerSettings]("silhouette.oauth1TokenSecretProvider.cookie.signer")
 
-    new JcaCookieSigner(config)
+    new JcaSigner(config)
   }
 
   /**
@@ -149,17 +146,16 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
   }
 
   /**
-    * Provides the cookie signer for the OAuth2 state provider.
+    * Provides the signer for the CSRF state item handler.
     *
     * @param configuration The Play configuration.
-    * @return The cookie signer for the OAuth2 state provider.
+    * @return The signer for the CSRF state item handler.
     */
-  @Provides
-  @Named("oauth2-state-cookie-signer")
-  def provideOAuth2StageCookieSigner(configuration: Configuration): CookieSigner = {
-    val config = configuration.underlying.as[JcaCookieSignerSettings]("silhouette.oauth2StateProvider.cookie.signer")
+  @Provides @Named("csrf-state-item-signer")
+  def provideCSRFStateItemSigner(configuration: Configuration): Signer = {
+    val config = configuration.underlying.as[JcaSignerSettings]("silhouette.csrfStateItemHandler.signer")
 
-    new JcaCookieSigner(config)
+    new JcaSigner(config)
   }
 
   /**
@@ -169,11 +165,11 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
     * @return The cookie signer for the authenticator.
     */
   @Provides
-  @Named("authenticator-cookie-signer")
-  def provideAuthenticatorCookieSigner(configuration: Configuration): CookieSigner = {
-    val config = configuration.underlying.as[JcaCookieSignerSettings]("silhouette.authenticator.cookie.signer")
+  @Named("authenticator-signer")
+  def provideAuthenticatorSigner(configuration: Configuration): Signer = {
+    val config = configuration.underlying.as[JcaSignerSettings]("silhouette.authenticator.signer")
 
-    new JcaCookieSigner(config)
+    new JcaSigner(config)
   }
 
   /**
@@ -202,8 +198,9 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
     * @return The authenticator service.
     */
   @Provides
-  def provideAuthenticatorService(@Named("authenticator-cookie-signer") cookieSigner: CookieSigner,
+  def provideAuthenticatorService(@Named("authenticator-signer") cookieSigner: Signer,
                                   @Named("authenticator-crypter") crypter: Crypter,
+                                  cookieHeaderEncoding: CookieHeaderEncoding,
                                   fingerprintGenerator: FingerprintGenerator,
                                   idGenerator: IDGenerator,
                                   configuration: Configuration,
@@ -212,7 +209,14 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
     val config  = configuration.underlying.as[CookieAuthenticatorSettings]("silhouette.authenticator")
     val encoder = new CrypterAuthenticatorEncoder(crypter)
 
-    new CookieAuthenticatorService(config, None, cookieSigner, encoder, fingerprintGenerator, idGenerator, clock)
+    new CookieAuthenticatorService(config,
+                                   None,
+                                   cookieSigner,
+                                   cookieHeaderEncoding,
+                                   encoder,
+                                   fingerprintGenerator,
+                                   idGenerator,
+                                   clock)
   }
 
   /**
@@ -234,32 +238,13 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
     * @return The OAuth1 token secret provider implementation.
     */
   @Provides
-  def provideOAuth1TokenSecretProvider(@Named("oauth1-token-secret-cookie-signer") cookieSigner: CookieSigner,
+  def provideOAuth1TokenSecretProvider(@Named("oauth1-token-secret-cookie-signer") cookieSigner: Signer,
                                        @Named("oauth1-token-secret-crypter") crypter: Crypter,
                                        configuration: Configuration,
                                        clock: Clock): OAuth1TokenSecretProvider = {
 
     val settings = configuration.underlying.as[CookieSecretSettings]("silhouette.oauth1TokenSecretProvider")
     new CookieSecretProvider(settings, cookieSigner, crypter, clock)
-  }
-
-  /**
-    * Provides the OAuth2 state provider.
-    *
-    * @param idGenerator The ID generator implementation.
-    * @param cookieSigner The cookie signer implementation.
-    * @param configuration The Play configuration.
-    * @param clock The clock instance.
-    * @return The OAuth2 state provider implementation.
-    */
-  @Provides
-  def provideOAuth2StateProvider(idGenerator: IDGenerator,
-                                 @Named("oauth2-state-cookie-signer") cookieSigner: CookieSigner,
-                                 configuration: Configuration,
-                                 clock: Clock): OAuth2StateProvider = {
-
-    val settings = configuration.underlying.as[CookieStateSettings]("silhouette.oauth2StateProvider")
-    new CookieStateProvider(settings, idGenerator, cookieSigner, clock)
   }
 
   /**
@@ -274,83 +259,125 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
   }
 
   /**
+    * Provides the CSRF state item handler.
+    *
+    * @param idGenerator The ID generator implementation.
+    * @param signer The signer implementation.
+    * @param configuration The Play configuration.
+    * @return The CSRF state item implementation.
+    */
+  @Provides
+  def provideCsrfStateItemHandler(
+    idGenerator: IDGenerator,
+    @Named("csrf-state-item-signer") signer: Signer,
+    configuration: Configuration): CsrfStateItemHandler = {
+    val settings = configuration.underlying.as[CsrfStateSettings]("silhouette.csrfStateItemHandler")
+    new CsrfStateItemHandler(settings, idGenerator, signer)
+  }
+
+  /**
+    * Provides the signer for the social state handler.
+    *
+    * @param configuration The Play configuration.
+    * @return The signer for the social state handler.
+    */
+  @Provides @Named("social-state-signer")
+  def provideSocialStateSigner(configuration: Configuration): Signer = {
+    val config = configuration.underlying.as[JcaSignerSettings]("silhouette.socialStateHandler.signer")
+
+    new JcaSigner(config)
+  }
+
+  /**
+    * Provides the social state handler.
+    *
+    * @param signer The signer implementation.
+    * @return The social state handler implementation.
+    */
+  @Provides
+  def provideSocialStateHandler(@Named("social-state-signer") signer: Signer,
+                                csrfStateItemHandler: CsrfStateItemHandler): SocialStateHandler = {
+
+    new DefaultSocialStateHandler(Set(csrfStateItemHandler), signer)
+  }
+
+  /**
+    * Provides the Github provider.
+    *
+    * @param httpLayer The HTTP layer implementation.
+    * @param socialStateHandler The OAuth2 state provider implementation.
+    * @param configuration The Play configuration.
+    * @return The Github provider.
+    */
+  @Provides
+  def provideGitHubProvider(httpLayer: HTTPLayer,
+    socialStateHandler: SocialStateHandler,
+    configuration: Configuration): GitHubProvider = {
+
+    new GitHubProvider(httpLayer, socialStateHandler, configuration.underlying.as[OAuth2Settings]("silhouette.github"))
+  }
+
+  /**
+    * Provides the Github provider.
+    *
+    * @param httpLayer The HTTP layer implementation.
+    * @param socialStateHandler The OAuth2 state provider implementation.
+    * @param configuration The Play configuration.
+    * @return The Github provider.
+    */
+  @Provides
+  def provideGitLabProvider(httpLayer: HTTPLayer,
+    socialStateHandler: SocialStateHandler,
+    configuration: Configuration): GitLabProvider = {
+
+    new GitLabProvider(httpLayer, socialStateHandler, configuration.underlying.as[OAuth2Settings]("silhouette.gitlab"))
+  }
+  /**
     * Provides the Facebook provider.
     *
     * @param httpLayer The HTTP layer implementation.
-    * @param stateProvider The OAuth2 state provider implementation.
+    * @param socialStateHandler The social state handler implementation.
     * @param configuration The Play configuration.
     * @return The Facebook provider.
     */
   @Provides
   def provideFacebookProvider(httpLayer: HTTPLayer,
-                              stateProvider: OAuth2StateProvider,
+                              socialStateHandler: SocialStateHandler,
                               configuration: Configuration): FacebookProvider = {
 
-    new FacebookProvider(httpLayer, stateProvider, configuration.underlying.as[OAuth2Settings]("silhouette.facebook"))
+    new FacebookProvider(httpLayer, socialStateHandler, configuration.underlying.as[OAuth2Settings]("silhouette.facebook"))
   }
 
   /**
     * Provides the Google provider.
     *
     * @param httpLayer The HTTP layer implementation.
-    * @param stateProvider The OAuth2 state provider implementation.
+    * @param socialStateHandler The social state handler implementation.
     * @param configuration The Play configuration.
     * @return The Google provider.
     */
   @Provides
   def provideGoogleProvider(httpLayer: HTTPLayer,
-                            stateProvider: OAuth2StateProvider,
+                            socialStateHandler: SocialStateHandler,
                             configuration: Configuration): GoogleProvider = {
 
-    new GoogleProvider(httpLayer, stateProvider, configuration.underlying.as[OAuth2Settings]("silhouette.google"))
-  }
-
-  /**
-    * Provides the Github provider.
-    *
-    * @param httpLayer The HTTP layer implementation.
-    * @param stateProvider The OAuth2 state provider implementation.
-    * @param configuration The Play configuration.
-    * @return The Github provider.
-    */
-  @Provides
-  def provideGitHubProvider(httpLayer: HTTPLayer,
-                            stateProvider: OAuth2StateProvider,
-                            configuration: Configuration): GitHubProvider = {
-
-    new GitHubProvider(httpLayer, stateProvider, configuration.underlying.as[OAuth2Settings]("silhouette.github"))
-  }
-
-  /**
-    * Provides the Github provider.
-    *
-    * @param httpLayer The HTTP layer implementation.
-    * @param stateProvider The OAuth2 state provider implementation.
-    * @param configuration The Play configuration.
-    * @return The Github provider.
-    */
-  @Provides
-  def provideGitLabProvider(httpLayer: HTTPLayer,
-                            stateProvider: OAuth2StateProvider,
-                            configuration: Configuration): GitLabProvider = {
-
-    new GitLabProvider(httpLayer, stateProvider, configuration.underlying.as[OAuth2Settings]("silhouette.gitlab"))
+    new GoogleProvider(httpLayer, socialStateHandler, configuration.underlying.as[OAuth2Settings]("silhouette.google"))
   }
 
   /**
     * Provides the VK provider.
     *
     * @param httpLayer The HTTP layer implementation.
-    * @param stateProvider The OAuth2 state provider implementation.
+    * @param socialStateHandler The social state handler implementation.
     * @param configuration The Play configuration.
     * @return The VK provider.
     */
   @Provides
   def provideVKProvider(httpLayer: HTTPLayer,
-                        stateProvider: OAuth2StateProvider,
+                        socialStateHandler: SocialStateHandler,
                         configuration: Configuration): VKProvider = {
 
-    new VKProvider(httpLayer, stateProvider, configuration.underlying.as[OAuth2Settings]("silhouette.vk"))
+    new VKProvider(httpLayer, socialStateHandler, configuration.underlying.as[OAuth2Settings]("silhouette.vk"))
   }
 
   /**
@@ -390,17 +417,13 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
   /**
     * Provides the Yahoo provider.
     *
-    * @param cacheLayer The cache layer implementation.
     * @param httpLayer The HTTP layer implementation.
     * @param client The OpenID client implementation.
     * @param configuration The Play configuration.
     * @return The Yahoo provider.
     */
   @Provides
-  def provideYahooProvider(cacheLayer: CacheLayer,
-                           httpLayer: HTTPLayer,
-                           client: OpenIdClient,
-                           configuration: Configuration): YahooProvider = {
+  def provideYahooProvider(httpLayer: HTTPLayer, client: OpenIdClient, configuration: Configuration): YahooProvider = {
 
     val settings = configuration.underlying.as[OpenIDSettings]("silhouette.yahoo")
     new YahooProvider(httpLayer, new PlayOpenIDService(client, settings), settings)

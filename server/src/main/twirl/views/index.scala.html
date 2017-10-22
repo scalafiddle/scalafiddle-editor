@@ -1,4 +1,4 @@
-@(title: String, fiddleData: String)(implicit config: play.api.Configuration, env: play.api.Environment)
+@(title: String, fiddleData: String, fiddleId: Option[String])(implicit config: play.api.Configuration, env: play.api.Environment)
 
 <!DOCTYPE html>
 
@@ -29,15 +29,19 @@
         <link rel="apple-touch-icon" sizes="76x76" href=@routes.Assets.versioned("images/favicon-76.png")>
         <link rel="apple-touch-icon" sizes="152x152" href=@routes.Assets.versioned("images/favicon-152.png")>
         <link href="https://fonts.googleapis.com/css?family=Raleway:200,300,400,500,700" rel="stylesheet">
+        @if(fiddleId.isDefined) {
+            <link rel="alternate" type="application/json+oembed"
+              href="@config.get[String]("scalafiddle.scalafiddleURL")/oembedstatic.json?url=@helper.urlEncode(config.get[String]("scalafiddle.scalafiddleURL")+"/sf/"+fiddleId.get)">
+        }
     </head>
     <body>
         <div id="root"></div>
         <script>
           // store configuration data in a global variable
           var cfg = {};
-          cfg.compilerURL = "@config.getString("scalafiddle.compilerURL").get";
-          cfg.helpURL = "@config.getString("scalafiddle.helpURL").get";
-          cfg.scalaVersions = @Html(config.getStringList("scalafiddle.scalaVersions").get.mkString("[\"","\",\"","\"]"));
+          cfg.compilerURL = "@config.get[String]("scalafiddle.compilerURL")";
+          cfg.helpURL = "@config.get[String]("scalafiddle.helpURL")";
+          cfg.scalaVersions = @Html(config.get[Seq[String]]("scalafiddle.scalaVersions").mkString("[\"","\",\"","\"]"));
           window.ScalaFiddleConfig = cfg;
           window.ScalaFiddleData = @Html(fiddleData);
         </script>
@@ -47,7 +51,7 @@
                             (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
                         m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
                 })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-                ga('create', '@config.getString("scalafiddle.analyticsID")', 'auto');
+                ga('create', '@config.get[String]("scalafiddle.analyticsID")', 'auto');
                 ga('send', 'pageview');
         </script>
         </body>

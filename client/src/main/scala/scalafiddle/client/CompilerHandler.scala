@@ -77,20 +77,25 @@ class CompilerHandler[M](modelRW: ModelRW[M, OutputData]) extends ActionHandler(
           }
         } recover {
         case e: dom.ext.AjaxException =>
-          ServerError(s"Network error: ${e.xhr.responseText}")
+          e.xhr.status match {
+            case 400 =>
+              ServerError(e.xhr.responseText)
+            case x =>
+              ServerError(s"Server responded with $x: ${e.xhr.responseText}")
+          }
         case e: Throwable =>
           ServerError(s"Unknown error while compiling")
       }
       updated(CompilerData(CompilerStatus.Compiling, None, Nil, None, ""), Effect(effect))
 
     case CompilerResult(Right(jsCode), log) =>
-      updated(CompilerData(CompilerStatus.Compiled, Some(jsCode), Seq.empty, None, log))
+      updated(CompilerData(CompilerStatus.Compiled, Some(jsCode), Nil, None, log))
 
     case CompilerResult(Left(annotations), log) =>
       updated(CompilerData(CompilerStatus.Error, None, annotations, None, log))
 
     case ServerError(message) =>
-      updated(CompilerData(CompilerStatus.Error, None, Seq.empty, Some(message), ""))
+      updated(CompilerData(CompilerStatus.Error, None, Nil, Some(message), ""))
 
     case LoadUserFiddles =>
       effectOnly(Effect(AjaxClient[Api].listFiddles().call().map(UserFiddlesUpdated)))

@@ -8,7 +8,7 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 object Settings {
 
   /** The version of your application */
-  val version = "1.0.8"
+  val version = "1.1.0"
 
   /** Options for the scala compiler */
   val scalacOptions = Seq(
@@ -20,7 +20,7 @@ object Settings {
 
   /** Declare global dependency versions here to avoid mismatches in multi part dependencies */
   object versions {
-    val scala        = "2.11.11"
+    val scala        = "2.12.3"
     val scalatest    = "3.0.3"
     val scalaDom     = "0.9.2"
     val scalajsReact = "1.0.0"
@@ -31,8 +31,8 @@ object Settings {
     val uTest        = "0.4.3"
     val upickle      = "0.4.4"
     val slick        = "3.2.0"
-    val silhouette   = "4.0.0"
-    val kamon        = "0.6.3"
+    val silhouette   = "5.0.1"
+    val kamon        = "0.6.7"
     val base64       = "0.2.3"
     val scalaParse   = "0.4.3"
     val scalatags    = "0.6.5"
@@ -71,7 +71,7 @@ object Settings {
       "com.mohiva"            %% "play-silhouette-persistence"     % versions.silhouette,
       "com.mohiva"            %% "play-silhouette-crypto-jca"      % versions.silhouette,
       "net.codingwell"        %% "scala-guice"                     % "4.1.0",
-      "com.iheart"            %% "ficus"                           % "1.4.0",
+      "com.iheart"            %% "ficus"                           % "1.4.1",
       "com.github.marklister" %% "base64"                          % versions.base64,
       "com.lihaoyi"           %% "scalaparse"                      % versions.scalaParse,
       "com.lihaoyi"           %% "scalatags"                       % versions.scalatags,

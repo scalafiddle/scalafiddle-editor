@@ -7,30 +7,28 @@ import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.impl.providers._
 import kamon.Kamon
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.concurrent.Execution.Implicits._
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.InjectedController
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scalafiddle.server.models.services.UserService
 import scalafiddle.server.utils.auth.DefaultEnv
 
 /**
   * The social auth controller.
   *
-  * @param messagesApi The Play messages API.
   * @param silhouette The Silhouette stack.
   * @param userService The user service implementation.
   * @param socialProviderRegistry The social provider registry.
   */
-class SocialAuthController @Inject()(val messagesApi: MessagesApi,
-                                     silhouette: Silhouette[DefaultEnv],
+class SocialAuthController @Inject()(implicit val silhouette: Silhouette[DefaultEnv],
+                                     ec: ExecutionContext,
                                      userService: UserService,
                                      socialProviderRegistry: SocialProviderRegistry)
-    extends Controller
+    extends InjectedController
     with I18nSupport
     with Logger {
 
-  val loginCount   = Kamon.metrics.counter("login")
+  val loginCount = Kamon.metrics.counter("login")
 
   /**
     * Authenticates a user against a social provider.

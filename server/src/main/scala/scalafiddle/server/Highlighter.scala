@@ -5,6 +5,7 @@ package scalafiddle.server
   */
 import fastparse.all._
 
+import scala.annotation.tailrec
 import scalaparse.Scala._
 import scalaparse.syntax.Identifiers._
 
@@ -45,10 +46,11 @@ object Highlighter {
     Reset
   )
 
+  type HighlightLine = Vector[(String, HighlightCode)]
   def highlightIndices(parser: Parser[_],
                        buffer: Array[Char],
                        ruleColors: PartialFunction[Parser[_], HighlightCode],
-                       endColor: HighlightCode): Vector[Vector[(String, HighlightCode)]] = {
+                       endColor: HighlightCode): Vector[HighlightLine] = {
     var indices = collection.mutable.Buffer((0, endColor))
     var done    = false
     val input   = buffer.mkString
@@ -101,18 +103,22 @@ object Highlighter {
       .toVector
     // split lines
     val (sourceLines, lastLine) =
-      spans.foldLeft((Vector.empty[Vector[(String, HighlightCode)]], Vector.empty[(String, HighlightCode)])) {
+      spans.foldLeft((Vector.empty[HighlightLine], Vector.empty[(String, HighlightCode)])) {
         case ((lines, line), (str, code)) =>
           if (str.contains('\n')) {
-            val split = str.split('\n').map(s => (s, code))
-            if (split.length == 0)
-              (lines :+ line, Vector.empty)
-            else if (split.length == 1)
-              (lines :+ (line :+ split.head), Vector.empty)
-            else if (split.length == 2)
-              (lines :+ (line :+ split.head), Vector(split.last))
-            else
-              ((lines :+ (line :+ split.head)) ++ split.drop(1).dropRight(1).map(l => Vector(l)), Vector(split.last))
+            @tailrec def splitLine(lines: Vector[HighlightLine] = lines, line: HighlightLine = line, str: String = str)
+              : (Vector[HighlightLine], HighlightLine) = {
+              if (str.isEmpty) {
+                (lines, line)
+              } else if (str.contains('\n')) {
+                val pre = str.substring(0, str.indexOf('\n'))
+                val rem = str.substring(str.indexOf('\n') + 1)
+                splitLine(lines :+ (line :+ ((pre, code))), Vector.empty, rem)
+              } else {
+                (lines, line :+ ((str, code)))
+              }
+            }
+            splitLine()
           } else {
             (lines, line :+ ((str, code)))
           }

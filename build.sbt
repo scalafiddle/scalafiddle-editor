@@ -26,7 +26,7 @@ lazy val client = (project in file("client"))
     scalacOptions ++= Settings.scalacOptions,
     libraryDependencies ++= Settings.sharedDependencies.value ++ Settings.scalajsDependencies.value,
     jsDependencies ++= Settings.jsDependencies.value,
-    jsEnv := new org.scalajs.jsenv.nodejs.JSDOMNodeJSEnv(),
+    jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
     // yes, we want to package JS dependencies
     skip in packageJSDependencies := false,
     // use Scala.js provided launcher code to start the client app
@@ -46,7 +46,7 @@ lazy val server = (project in file("server"))
     scalaVersion := Settings.versions.scala,
     scalacOptions ++= Settings.scalacOptions,
     libraryDependencies ++= Settings.sharedDependencies.value ++ Settings.jvmDependencies.value ++ Seq(
-      filters
+      filters, guice, ehcache
     ),
     // connect to the client project
     scalaJSProjects := clients,

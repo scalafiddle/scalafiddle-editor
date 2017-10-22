@@ -10,7 +10,6 @@ import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
 import com.mohiva.play.silhouette.api.{LogoutEvent, Silhouette}
-import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import kamon.Kamon
 import play.api.mvc._
 import play.api.{Configuration, Environment, Logger, Mode}
@@ -20,14 +19,13 @@ import slick.jdbc.meta.MTable
 import upickle.default._
 import upickle.{Js, json}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 import scalafiddle.server._
 import scalafiddle.server.dao.{Fiddle, FiddleDAL}
 import scalafiddle.server.models.User
-import utils.auth.{AllLoginProviders, DefaultEnv}
+import scalafiddle.server.utils.auth.{AllLoginProviders, DefaultEnv}
 import scalafiddle.shared.{Api, FiddleData, Library, UserInfo}
 
 object Router extends autowire.Server[Js.Value, Reader, Writer] {
@@ -38,23 +36,23 @@ object Router extends autowire.Server[Js.Value, Reader, Writer] {
 class Application @Inject()(
     implicit val config: Configuration,
     env: Environment,
+    ec: ExecutionContext,
     silhouette: Silhouette[DefaultEnv],
-    socialProviderRegistry: SocialProviderRegistry,
     actorSystem: ActorSystem,
     @Named("persistence") persistence: ActorRef
-) extends Controller {
+) extends InjectedController {
   implicit val timeout = Timeout(15.seconds)
   val log              = Logger(getClass)
-  val libUri           = config.getString("scalafiddle.librariesURL").get
-  val scalafiddleUrl   = new URL(config.getString("scalafiddle.scalafiddleURL").get)
-  val compilerUrl      = config.getString("scalafiddle.compilerURL").get
+  val libUri           = config.get[String]("scalafiddle.librariesURL")
+  val scalafiddleUrl   = new URL(config.get[String]("scalafiddle.scalafiddleURL"))
+  val compilerUrl      = config.get[String]("scalafiddle.compilerURL")
 
   Kamon.start()
 
   val indexCounter  = Kamon.metrics.counter("index-load")
   val fiddleCounter = Kamon.metrics.counter("fiddle-load")
 
-  def libSource() = {
+  private def libSource = {
     if (libUri.startsWith("file:")) {
       // load from file system
       scala.io.Source.fromFile(libUri.drop(5), "UTF-8")
@@ -68,11 +66,11 @@ class Application @Inject()(
     }
   }
 
-  val librarian = new Librarian(libSource)
+  val librarian = new Librarian(libSource _)
   // refresh libraries every N minutes
-  actorSystem.scheduler.schedule(config.getInt("scalafiddle.refreshLibraries").get.seconds,
-                                 config.getInt("scalafiddle.refreshLibraries").get.seconds)(librarian.refresh())
-  val defaultSource = config.getString("scalafiddle.defaultSource").get
+  actorSystem.scheduler.schedule(config.get[Int]("scalafiddle.refreshLibraries").seconds,
+                                 config.get[Int]("scalafiddle.refreshLibraries").seconds)(librarian.refresh())
+  val defaultSource = config.get[String]("scalafiddle.defaultSource")
 
   if (env.mode != Mode.Prod)
     createTables()
@@ -94,7 +92,8 @@ class Application @Inject()(
     loadFiddle(fiddleId, version.toInt, source).map {
       case Success(fd) =>
         val fdJson = write(fd)
-        Ok(views.html.index("ScalaFiddle", fdJson)).withHeaders(CACHE_CONTROL -> "max-age=3600")
+        Ok(views.html.index("ScalaFiddle", fdJson, if (fiddleId.nonEmpty) Some(s"$fiddleId/$version") else None))
+          .withHeaders(CACHE_CONTROL -> "max-age=3600")
       case Failure(ex) =>
         NotFound
     }
@@ -125,6 +124,7 @@ class Application @Inject()(
         sourceCode.append(fd.sourceCode)
         val allLibs = fd.libraries.flatMap(lib => Library.stringify(lib) +: lib.extraDeps)
         sourceCode.append(allLibs.map(lib => s"// $$FiddleDependency $lib").mkString("\n", "\n", "\n"))
+        sourceCode.append(s"// $$ScalaVersion ${fd.scalaVersion}\n")
         nameOpt.foreach(name => sourceCode.append(s"// $$FiddleName $name\n"))
 
         Ok(sourceCode.toString).withHeaders(CACHE_CONTROL -> "max-age=7200")
@@ -143,11 +143,32 @@ class Application @Inject()(
 
     loadFiddle(fiddleId, version.toInt).map {
       case Success(fd) =>
-        val html = HTMLFiddle.process(fd, s"$scalafiddleUrl/sf/$fiddleId/$version")
+        val html = HTMLFiddle.process(fd, s"$scalafiddleUrl/sf/$fiddleId/$version", s"$fiddleId/$version")
         Ok(html).as("text/html").withHeaders(CACHE_CONTROL -> "max-age=86400")
       case Failure(ex) =>
         NotFound
     }
+  }
+
+  def htmlScript(fiddleId: String, version: String) = Action { implicit request =>
+    val js =
+      s"""(function() {
+        |var listener = function(event) {
+        |  console.dir(event);
+        |  if(event.data.length != 2) return;
+        |  var data, eventName;
+        |  eventName = event.data[0];
+        |  data = event.data[1];
+        |  if(eventName === "embedHeight" && data.fiddleId === "$fiddleId/$version") {
+        |    var iframe = document.querySelector("#sf$fiddleId$version");
+        |    iframe.style.height = data.height + "px";
+        |    window.removeEventListener("message", listener);
+        |  }
+        |}
+        |window.addEventListener("message", listener, false);
+        |}).call(this);
+      """.stripMargin
+    Ok(js).as("application/javascript").withHeaders(CACHE_CONTROL -> "max-age=86400")
   }
 
   def libraryListing(scalaVersion: String) = Action {
@@ -161,7 +182,7 @@ class Application @Inject()(
     Ok(views.html.resultframe()).withHeaders(CACHE_CONTROL -> "max-age=3600")
   }
 
-  val loginProviders = config.getStringSeq("scalafiddle.loginProviders").get.map(AllLoginProviders.providers)
+  val loginProviders = config.get[Seq[String]]("scalafiddle.loginProviders").map(AllLoginProviders.providers)
 
   def autowireApi(path: String) = silhouette.UserAwareAction.async { implicit request =>
     val apiService: Api = new ApiService(persistence, request.identity, loginProviders)
@@ -190,8 +211,15 @@ class Application @Inject()(
     "referrer"
   )
 
-  def oembed(url: String, maxwidth: Option[Int], maxheight: Option[Int], format: Option[String], isStatic: Boolean) = Action.async {
-    implicit request =>
+  def oembed(url: String, maxwidth: Option[Int], maxheight: Option[Int], format: Option[String]) = {
+    oembedBase(url, maxwidth, maxheight, format, url.contains("static=true"))
+  }
+
+  def oembedStatic(url: String, maxwidth: Option[Int], maxheight: Option[Int], format: Option[String]) =
+    oembedBase(url, maxwidth, maxheight, format, isStatic = true)
+
+  def oembedBase(url: String, maxwidth: Option[Int], maxheight: Option[Int], format: Option[String], isStatic: Boolean) =
+    Action.async { implicit request =>
       // parse URL
       Try(new URL(url)).toOption match {
         case None =>
@@ -234,10 +262,13 @@ class Application @Inject()(
                       }
                       .map { userName =>
                         // create response
-                        val height   = maxheight.getOrElse(300) min 300
-                        val width    = maxwidth.getOrElse(960) min 960
-                        val embedUrl = if(isStatic) {
-                          s"$scalafiddleUrl/html/$fiddleId/$version"
+                        val height = maxheight.getOrElse(400) min 400
+                        val width  = maxwidth.getOrElse(960) min 960
+                        val html = if (isStatic) {
+                          val embedUrl  = s"$scalafiddleUrl/html/$fiddleId/$version"
+                          val scriptUrl = s"$scalafiddleUrl/htmlscript/$fiddleId/$version"
+                          s"""<iframe id="sf$fiddleId$version" height="$height" width="$width" frameborder="0" style="width: 100%; height: 100%;" scrolling="no" src="$embedUrl"></iframe>
+                             |<script async src="$scriptUrl"></script>""".stripMargin
                         } else {
                           val embedParams = params
                             .filterKeys(passthroughParams.contains)
@@ -246,10 +277,9 @@ class Application @Inject()(
                                 s"${URLEncoder.encode(key, "UTF-8")}${value.map(v => "=" + URLEncoder.encode(v, "UTF-8")).getOrElse("")}"
                             }
                             .mkString("&", "&", "")
-                          s"$compilerUrl/embed?sfid=$fiddleId/$version&passive$embedParams"
+                          val embedUrl = s"$compilerUrl/embed?sfid=$fiddleId/$version&passive$embedParams"
+                          s"""<iframe id="sf$fiddleId$version" height="$height" width="$width" frameborder="0" style="width: 100%; overflow: hidden;" scrolling="no" src="$embedUrl"></iframe>"""
                         }
-                        val iframe =
-                          s"""<iframe height="$height" width="$width" frameborder="0" style="width: 100%; overflow: hidden;" src="$embedUrl"></iframe>"""
                         val response = Map[String, Js.Value](
                           "type"          -> Js.Str("rich"),
                           "version"       -> Js.Str("1.0"),
@@ -259,7 +289,7 @@ class Application @Inject()(
                           "cache_age"     -> Js.Num(3600 * 24),
                           "height"        -> Js.Num(height),
                           "width"         -> Js.Num(width),
-                          "html"          -> Js.Str(iframe)
+                          "html"          -> Js.Str(html)
                         ) ++ userName.map(name => "author_name" -> Js.Str(name))
                         Ok(write(response)).as("application/json").withHeaders(CACHE_CONTROL -> "max-age=3600")
                       }
@@ -273,7 +303,7 @@ class Application @Inject()(
             }
           }
       }
-  }
+    }
 
   private def loadFiddle(id: String, version: Int, sourceOpt: Option[String] = None): Future[Try[FiddleData]] = {
     if (id == "") {
@@ -285,7 +315,7 @@ class Application @Inject()(
                      source,
                      libs,
                      librarian.libraries,
-                     config.getString("scalafiddle.defaultScalaVersion").get,
+                     config.get[String]("scalafiddle.defaultScalaVersion"),
                      None)))
     } else {
       ask(persistence, FindFiddle(id, version)).mapTo[Try[Fiddle]].flatMap {
@@ -368,7 +398,7 @@ class Application @Inject()(
   private def createTables() = {
     log.debug(s"Creating missing tables")
     // create tables
-    val dbConfig = DatabaseConfig.forConfig[JdbcProfile](config.getString("scalafiddle.dbConfig").get)
+    val dbConfig = DatabaseConfig.forConfig[JdbcProfile](config.get[String]("scalafiddle.dbConfig"))
     val db       = dbConfig.db
     val dal      = new FiddleDAL(dbConfig.profile)
     import dal.driver.api._

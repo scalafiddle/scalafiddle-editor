@@ -286,10 +286,12 @@ object FiddleEditor {
       source
     }
 
-    def addDeps(source: String, deps: Seq[Library]): String = {
+    def addDeps(source: String, deps: Seq[Library], scalaVersion: String): String = {
       val extraDeps = deps.flatMap(_.extraDeps)
       val allDeps   = extraDeps ++ deps.map(Library.stringify)
-      source + "\n" + allDeps.map(dep => s"// $$FiddleDependency $dep\n").mkString
+      source + "\n" +
+        allDeps.map(dep => s"// $$FiddleDependency $dep\n").mkString +
+        s"// $$ScalaVersion $scalaVersion\n"
     }
 
     def buildFullSource: CallbackTo[String] = {
@@ -298,7 +300,7 @@ object FiddleEditor {
         state <- $.state
       } yield {
         val source = reconstructSource(state)
-        addDeps(source, props.data().libraries)
+        addDeps(source, props.data().libraries, props.data().scalaVersion)
       }
     }
 
@@ -469,7 +471,8 @@ object FiddleEditor {
         props.dispatch(UpdateLoginInfo) >>
         updateFiddle(props.data()) >>
         Callback.when(props.fiddleId.isDefined)(
-          props.dispatch(compile(addDeps(props.data().sourceCode, props.data().libraries), FastOpt)))
+          props.dispatch(
+            compile(addDeps(props.data().sourceCode, props.data().libraries, props.data().scalaVersion), FastOpt)))
     }
 
     val fiddleStart = """\s*// \$FiddleStart\s*$""".r
@@ -571,9 +574,16 @@ object FiddleEditor {
               }
               .mkString("\n")
 
-            // start running the code after a short delay, to allow DOM to update in case the code is slow to complete
+            // update after a short delay, to allow DOM to update in case the code is slow to complete
             js.timers.setTimeout(50) {
               sendFrameCmd("print", s"""<pre class="error">$allErrors</pre>""")
+            }
+
+          }
+
+          compilerData.errorMessage.foreach { error =>
+            js.timers.setTimeout(50) {
+              sendFrameCmd("print", s"""<pre class="error">$error</pre>""")
             }
           }
 
