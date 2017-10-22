@@ -14,6 +14,7 @@ object Sidebar {
 
   import SemanticUI._
 
+  private var sideBarRef: HTMLDivElement = _
   private var accordionRef: HTMLDivElement = _
 
   sealed trait LibMode
@@ -26,7 +27,7 @@ object Sidebar {
     def dispatch(a: Action) = data.dispatchCB(a)
   }
 
-  case class State(showAllVersions: Boolean)
+  case class State(showAllVersions: Boolean, isOpen: Boolean = true)
 
   case class Backend($ : BackendScope[Props, State]) {
 
@@ -53,7 +54,7 @@ object Sidebar {
         case _ =>
           ("Anonymous", "/assets/images/anon.png")
       }
-      div(cls := "sidebar")(
+      div.ref(sideBarRef = _)(cls := "sidebar")(
         div.ref(accordionRef = _)(cls := "ui accordion")(
           div(cls := "title large active", "Info", i(cls := "icon dropdown")),
           div(cls := "content active")(
@@ -136,6 +137,14 @@ object Sidebar {
               )
             )
           )
+        ),
+        div(cls := "bottom")(
+          div(cls := "ui basic button toggle", onClick ==> { (e: ReactEventFromHtml) =>
+            Callback {
+              e.target.textContent = if (state.isOpen) "Show" else "Hide"
+              sideBarRef.classList.toggle("folded")
+            } >> $.modState(s => s.copy(isOpen = !state.isOpen))
+          })("Hide")
         )
       )
     }
