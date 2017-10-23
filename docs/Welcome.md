@@ -96,7 +96,7 @@ Fiddle.draw.rect(10, 10, 50, 50)
 Fiddle.draw.stroke
 ```
 
-For a more complex example, check out the <a href="https://scalafiddle.io/sf/UbLKYAK/1" target="_top">Hilbert curve demonstration</a>
+For a more complex example, check out the <a href="https://scalafiddle.io/sf/UbLKYAK/6" target="_top">Hilbert curve demonstration</a>
 
 ## Embedding
 

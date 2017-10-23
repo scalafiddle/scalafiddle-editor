@@ -67,7 +67,7 @@ lazy val server = (project in file("server"))
       val targetDir    = "/app"
 
       new Dockerfile {
-        from("openjdk:8-jdk-alpine")
+        from("anapsix/alpine-java:8_jdk")
         run("apk", "add", "--update", "bash")
         entryPoint(s"$targetDir/bin/${executableScriptName.value}")
         copy(appDir, targetDir)
