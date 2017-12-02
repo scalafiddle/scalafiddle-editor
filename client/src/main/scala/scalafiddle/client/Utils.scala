@@ -1,12 +1,12 @@
 package scalafiddle.client
 
-import scala.scalajs.js
-import scala.language.implicitConversions
-import js.JSConverters._
-import scala.scalajs.js.annotation.{JSGlobal, JSName}
-import scala.scalajs.js.typedarray.Uint8Array
 import org.scalajs.dom
 
+import scala.language.implicitConversions
+import scala.scalajs.js
+import scala.scalajs.js.JSConverters._
+import scala.scalajs.js.annotation.JSGlobal
+import scala.scalajs.js.typedarray.Uint8Array
 import scala.scalajs.js.|
 
 class JsVal(val value: js.Dynamic) {
@@ -65,6 +65,12 @@ class Gzip(data: js.Array[Byte]) extends js.Object {
 @js.native
 class Gunzip(data: js.Array[Byte]) extends js.Object {
   def decompress(): Uint8Array = js.native
+}
+
+@JSGlobal("sha1")
+@js.native
+object SHA1 extends js.Object {
+  def apply(s: String): String = js.native
 }
 
 @js.native

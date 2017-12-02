@@ -8,7 +8,7 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 object Settings {
 
   /** The version of your application */
-  val version = "1.1.0"
+  val version = "1.2.0"
 
   /** Options for the scala compiler */
   val scalacOptions = Seq(
@@ -20,9 +20,9 @@ object Settings {
 
   /** Declare global dependency versions here to avoid mismatches in multi part dependencies */
   object versions {
-    val scala        = "2.12.3"
+    val scala        = "2.12.4"
     val scalatest    = "3.0.3"
-    val scalaDom     = "0.9.2"
+    val scalaDom     = "0.9.4"
     val scalajsReact = "1.0.0"
     val scalaCSS     = "0.5.3"
     val autowire     = "0.2.6"
@@ -35,7 +35,7 @@ object Settings {
     val kamon        = "0.6.7"
     val base64       = "0.2.3"
     val scalaParse   = "0.4.3"
-    val scalatags    = "0.6.5"
+    val scalatags    = "0.6.7"
 
     val jQuery   = "3.2.0"
     val semantic = "2.2.10"
@@ -62,8 +62,8 @@ object Settings {
     Seq(
       "com.typesafe.slick"    %% "slick"                           % versions.slick,
       "com.typesafe.slick"    %% "slick-hikaricp"                  % versions.slick,
-      "ch.qos.logback"        % "logback-classic"                  % "1.1.10",
-      "net.logstash.logback"  % "logstash-logback-encoder"         % "4.9",
+      "ch.qos.logback"        % "logback-classic"                  % "1.2.3",
+      "net.logstash.logback"  % "logstash-logback-encoder"         % "4.11",
       "com.h2database"        % "h2"                               % "1.4.195",
       "org.postgresql"        % "postgresql"                       % "9.4-1206-jdbc41",
       "com.mohiva"            %% "play-silhouette"                 % versions.silhouette,

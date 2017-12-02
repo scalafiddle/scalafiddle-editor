@@ -27,12 +27,11 @@ object AppRouter {
         fiddleData(d => FiddleEditor(d, None, AppCircuit.zoom(_.outputData), AppCircuit.zoom(_.loginData))))
         | dynamicRouteF(("sf" / string("\\w+") / string(".+")).pmap[EditorPage] { path =>
           Some(EditorPage(path._1, Try(path._2.takeWhile(_.isDigit).toInt).getOrElse(0)))
-        }(page => (page.id, page.version.toString)))(p => Some(p.asInstanceOf[EditorPage])) ~> dynRender(
-          (p: EditorPage) => {
-            val fid = FiddleId(p.id, p.version)
-            AppCircuit.dispatch(UpdateId(fid, silent = true))
-            fiddleData(d => FiddleEditor(d, Some(fid), AppCircuit.zoom(_.outputData), AppCircuit.zoom(_.loginData)))
-          }))
+        }(page => (page.id, page.version.toString)))(p => Some(p.asInstanceOf[EditorPage])) ~> dynRender((p: EditorPage) => {
+          val fid = FiddleId(p.id, p.version)
+          AppCircuit.dispatch(UpdateId(fid, silent = true))
+          fiddleData(d => FiddleEditor(d, Some(fid), AppCircuit.zoom(_.outputData), AppCircuit.zoom(_.loginData)))
+        }))
         .notFound(p => redirectToPage(Home)(Redirect.Replace))
     }
     .renderWith(layout)

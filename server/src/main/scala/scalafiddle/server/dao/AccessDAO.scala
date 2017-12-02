@@ -1,13 +1,13 @@
 package scalafiddle.server.dao
 
 case class FiddleAccess(
-  id: Int,
-  fiddleId: String,
-  version: Int,
-  timeStamp: Long,
-  userId: Option[String],
-  embedded: Boolean,
-  sourceIP: String
+    id: Int,
+    fiddleId: String,
+    version: Int,
+    timeStamp: Long,
+    userId: Option[String],
+    embedded: Boolean,
+    sourceIP: String
 )
 
 trait AccessDAO {
@@ -16,13 +16,13 @@ trait AccessDAO {
   import driver.api._
 
   class Accesses(tag: Tag) extends Table[FiddleAccess](tag, "access") {
-    def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
-    def fiddleId = column[String]("fiddle_id")
-    def version = column[Int]("version")
+    def id        = column[Int]("id", O.PrimaryKey, O.AutoInc)
+    def fiddleId  = column[String]("fiddle_id")
+    def version   = column[Int]("version")
     def timeStamp = column[Long]("timestamp")
-    def userId = column[Option[String]]("user_id")
-    def embedded = column[Boolean]("embedded")
-    def sourceIP = column[String]("source_ip")
+    def userId    = column[Option[String]]("user_id")
+    def embedded  = column[Boolean]("embedded")
+    def sourceIP  = column[String]("source_ip")
 
     def * = (id, fiddleId, version, timeStamp, userId, embedded, sourceIP) <> (FiddleAccess.tupled, FiddleAccess.unapply)
   }

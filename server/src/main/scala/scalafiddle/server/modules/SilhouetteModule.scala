@@ -24,7 +24,6 @@ import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.codingwell.scalaguice.ScalaModule
 import play.api.Configuration
 import play.api.libs.concurrent.AkkaGuiceSupport
-import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.openid.OpenIdClient
 import play.api.libs.ws.WSClient
 import play.api.mvc.CookieHeaderEncoding
@@ -32,6 +31,8 @@ import play.api.mvc.CookieHeaderEncoding
 import scalafiddle.server.Persistence
 import scalafiddle.server.models.services.{UserService, UserServiceImpl}
 import scalafiddle.server.utils.auth.DefaultEnv
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * The Guice module which wires all Silhouette dependencies.
@@ -267,10 +268,9 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
     * @return The CSRF state item implementation.
     */
   @Provides
-  def provideCsrfStateItemHandler(
-    idGenerator: IDGenerator,
-    @Named("csrf-state-item-signer") signer: Signer,
-    configuration: Configuration): CsrfStateItemHandler = {
+  def provideCsrfStateItemHandler(idGenerator: IDGenerator,
+                                  @Named("csrf-state-item-signer") signer: Signer,
+                                  configuration: Configuration): CsrfStateItemHandler = {
     val settings = configuration.underlying.as[CsrfStateSettings]("silhouette.csrfStateItemHandler")
     new CsrfStateItemHandler(settings, idGenerator, signer)
   }
@@ -311,8 +311,8 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
     */
   @Provides
   def provideGitHubProvider(httpLayer: HTTPLayer,
-    socialStateHandler: SocialStateHandler,
-    configuration: Configuration): GitHubProvider = {
+                            socialStateHandler: SocialStateHandler,
+                            configuration: Configuration): GitHubProvider = {
 
     new GitHubProvider(httpLayer, socialStateHandler, configuration.underlying.as[OAuth2Settings]("silhouette.github"))
   }
@@ -327,11 +327,12 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
     */
   @Provides
   def provideGitLabProvider(httpLayer: HTTPLayer,
-    socialStateHandler: SocialStateHandler,
-    configuration: Configuration): GitLabProvider = {
+                            socialStateHandler: SocialStateHandler,
+                            configuration: Configuration): GitLabProvider = {
 
     new GitLabProvider(httpLayer, socialStateHandler, configuration.underlying.as[OAuth2Settings]("silhouette.gitlab"))
   }
+
   /**
     * Provides the Facebook provider.
     *

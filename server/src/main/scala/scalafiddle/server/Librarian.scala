@@ -4,23 +4,22 @@ import org.slf4j.LoggerFactory
 import upickle.Js
 import upickle.default._
 
-import scala.collection.mutable
 import scala.io.BufferedSource
 import scalafiddle.shared._
 
 class Librarian(libSource: () => BufferedSource) {
 
   case class LibraryVersion(
-    version: String,
-    scalaVersions: Seq[String],
-    extraDeps: Seq[String],
-    organization: Option[String],
-    artifact: Option[String],
-    doc: Option[String]
+      version: String,
+      scalaVersions: Seq[String],
+      extraDeps: Seq[String],
+      organization: Option[String],
+      artifact: Option[String],
+      doc: Option[String]
   )
 
   implicit val libraryVersionReader = upickle.default.Reader[LibraryVersion] {
-    case Js.Obj(valueSeq@_*) =>
+    case Js.Obj(valueSeq @ _*) =>
       val values = valueSeq.toMap
       LibraryVersion(
         readJs[String](values("version")),
@@ -33,22 +32,22 @@ class Librarian(libSource: () => BufferedSource) {
   }
 
   case class LibraryDef(
-    name: String,
-    organization: String,
-    artifact: String,
-    doc: String,
-    versions: Seq[LibraryVersion],
-    compileTimeOnly: Boolean
+      name: String,
+      organization: String,
+      artifact: String,
+      doc: String,
+      versions: Seq[LibraryVersion],
+      compileTimeOnly: Boolean
   )
 
   case class LibraryGroup(
-    group: String,
-    libraries: Seq[LibraryDef]
+      group: String,
+      libraries: Seq[LibraryDef]
   )
 
   val repoSJSRE = """([^ %]+) *%%% *([^ %]+) *% *([^ %]+)""".r
-  val repoRE = """([^ %]+) *%% *([^ %]+) *% *([^ %]+)""".r
-  val log = LoggerFactory.getLogger(getClass)
+  val repoRE    = """([^ %]+) *%% *([^ %]+) *% *([^ %]+)""".r
+  val log       = LoggerFactory.getLogger(getClass)
   var libraries = Seq.empty[Library]
   refresh()
 
@@ -65,12 +64,12 @@ class Librarian(libSource: () => BufferedSource) {
   }
 
   def loadLibraries: Seq[Library] = {
-    val data = libSource().mkString
+    val data      = libSource().mkString
     val libGroups = read[Seq[LibraryGroup]](data)
     for {
       (group, idx) <- libGroups.zipWithIndex
-      lib <- group.libraries
-      versionDef <- lib.versions
+      lib          <- group.libraries
+      versionDef   <- lib.versions
     } yield {
       Library(
         lib.name,
@@ -99,7 +98,7 @@ class Librarian(libSource: () => BufferedSource) {
     val githubRef = """([^/]+)/([^/]+)""".r
     doc match {
       case githubRef(org, lib) => s"https://github.com/$org/$lib"
-      case _ => doc
+      case _                   => doc
     }
   }
 }

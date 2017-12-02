@@ -3,7 +3,7 @@ package scalafiddle.client.component
 import org.scalajs.dom._
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.{JSGlobal, JSName}
+import scala.scalajs.js.annotation.JSGlobal
 
 /**
   * Minimal facade for JQuery. Use https://github.com/scala-js/scala-js-jquery or

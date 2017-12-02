@@ -17,7 +17,7 @@ import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 import slick.jdbc.meta.MTable
 import upickle.default._
-import upickle.{Js, json}
+import upickle.{json, Js}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -308,15 +308,8 @@ class Application @Inject()(
   private def loadFiddle(id: String, version: Int, sourceOpt: Option[String] = None): Future[Try[FiddleData]] = {
     if (id == "") {
       val (source, libs) = parseFiddle(sourceOpt.fold(defaultSource)(identity))
-      Future.successful(
-        Success(
-          FiddleData("",
-                     "",
-                     source,
-                     libs,
-                     librarian.libraries,
-                     config.get[String]("scalafiddle.defaultScalaVersion"),
-                     None)))
+      Future.successful(Success(
+        FiddleData("", "", source, libs, librarian.libraries, config.get[String]("scalafiddle.defaultScalaVersion"), None)))
     } else {
       ask(persistence, FindFiddle(id, version)).mapTo[Try[Fiddle]].flatMap {
         case Success(f) if f.user == "anonymous" =>

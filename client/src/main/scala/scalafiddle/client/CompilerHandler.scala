@@ -51,8 +51,9 @@ class CompilerHandler[M](modelRW: ModelRW[M, OutputData]) extends ActionHandler(
           .sum
         // call the ScalaFiddle compiler to perform completion
         Ajax
-          .get(
-            url = s"${ScalaFiddleConfig.compilerURL}/complete?offset=$intOffset&source=${encodeSource(source)}"
+          .post(
+            url = s"${ScalaFiddleConfig.compilerURL}/complete?offset=$intOffset",
+            data = source
           )
           .map { request =>
             val results = read[CompletionResponse](request.responseText)
@@ -65,8 +66,9 @@ class CompilerHandler[M](modelRW: ModelRW[M, OutputData]) extends ActionHandler(
 
     case CompileFiddle(source, optimization) =>
       val effect = Ajax
-        .get(
-          url = s"${ScalaFiddleConfig.compilerURL}/compile?opt=${optimization.flag}&source=${encodeSource(source)}"
+        .post(
+          url = s"${ScalaFiddleConfig.compilerURL}/compile?opt=${optimization.flag}",
+          data = source
         )
         .map { request =>
           read[CompilationResponse](request.responseText) match {

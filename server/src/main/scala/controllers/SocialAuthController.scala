@@ -6,7 +6,7 @@ import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.impl.providers._
 import kamon.Kamon
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.I18nSupport
 import play.api.mvc.InjectedController
 
 import scala.concurrent.{ExecutionContext, Future}

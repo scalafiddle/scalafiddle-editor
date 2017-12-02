@@ -2,7 +2,7 @@ package scalafiddle.client
 
 import diode.ActionResult.{ModelUpdate, ModelUpdateSilent}
 import diode._
-import diode.data.{Empty, Ready}
+import diode.data.Empty
 import diode.react.ReactConnector
 import upickle.default._
 
@@ -16,11 +16,7 @@ object AppCircuit extends Circuit[AppModel] with ReactConnector[AppModel] {
   def fiddleData = read[FiddleData](JSON.stringify(js.Dynamic.global.ScalaFiddleData))
 
   override protected def initialModel =
-    AppModel(Home,
-             None,
-             fiddleData,
-             ScalaFiddleHelp(ScalaFiddleConfig.helpURL),
-             LoginData(Empty, Empty))
+    AppModel(Home, None, fiddleData, ScalaFiddleHelp(ScalaFiddleConfig.helpURL), LoginData(Empty, Empty))
 
   override protected def actionHandler = composeHandlers(
     new FiddleHandler(zoomRW(_.fiddleData)((m, v) => m.copy(fiddleData = v)),

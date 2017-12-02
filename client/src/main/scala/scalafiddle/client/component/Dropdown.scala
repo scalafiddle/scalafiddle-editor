@@ -19,7 +19,7 @@ object Dropdown {
           dropdownClicked(e, state.isOpen)
       })(
         props.buttonContent,
-        props.content(closeDropdown).when(state.isOpen)
+        props.content(() => closeDropdown()).when(state.isOpen)
       )
     }
 

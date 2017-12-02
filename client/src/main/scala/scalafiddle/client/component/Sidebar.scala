@@ -14,7 +14,7 @@ object Sidebar {
 
   import SemanticUI._
 
-  private var sideBarRef: HTMLDivElement = _
+  private var sideBarRef: HTMLDivElement   = _
   private var accordionRef: HTMLDivElement = _
 
   sealed trait LibMode
@@ -139,11 +139,14 @@ object Sidebar {
           )
         ),
         div(cls := "bottom")(
-          div(cls := "ui icon basic button toggle", onClick ==> { (e: ReactEventFromHtml) =>
-            Callback {
-              sideBarRef.classList.toggle("folded")
-            } >> $.modState(s => s.copy(isOpen = !state.isOpen))
-          })(if (state.isOpen) Icon.angleDoubleLeft else Icon.angleDoubleRight)
+          div(
+            cls := "ui icon basic button toggle",
+            onClick ==> { (e: ReactEventFromHtml) =>
+              Callback {
+                sideBarRef.classList.toggle("folded")
+              } >> $.modState(s => s.copy(isOpen = !state.isOpen))
+            }
+          )(if (state.isOpen) Icon.angleDoubleLeft else Icon.angleDoubleRight)
         )
       )
     }

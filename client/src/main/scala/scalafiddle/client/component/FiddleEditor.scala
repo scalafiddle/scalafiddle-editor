@@ -13,7 +13,7 @@ import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic._
 import scala.scalajs.js.{Dynamic => Dyn}
-import scala.util.{Random, Success}
+import scala.util.Success
 import scalafiddle.client._
 import scalafiddle.shared._
 

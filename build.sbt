@@ -1,6 +1,9 @@
 import sbt.Keys._
 import sbt.Project.projectToRef
 
+scalafmtOnCompile in ThisBuild := true
+scalafmtVersion in ThisBuild := "1.3.0"
+
 resolvers in ThisBuild += Resolver.jcenterRepo
 
 // a special crossProject for configuring a JS/JVM/shared structure
@@ -46,7 +49,9 @@ lazy val server = (project in file("server"))
     scalaVersion := Settings.versions.scala,
     scalacOptions ++= Settings.scalacOptions,
     libraryDependencies ++= Settings.sharedDependencies.value ++ Settings.jvmDependencies.value ++ Seq(
-      filters, guice, ehcache
+      filters,
+      guice,
+      ehcache
     ),
     // connect to the client project
     scalaJSProjects := clients,

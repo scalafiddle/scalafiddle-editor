@@ -51,7 +51,7 @@ case class FindAccesses(fiddleId: String)
 case class FindAccessesBetween(startTime: Long, endTime: Long = System.currentTimeMillis())
 
 class Persistence @Inject()(config: Configuration) extends Actor with ActorLogging {
-  val dbConfig = DatabaseConfig.forConfig[JdbcProfile](config.getString("scalafiddle.dbConfig").get)
+  val dbConfig = DatabaseConfig.forConfig[JdbcProfile](config.get[String]("scalafiddle.dbConfig"))
   val db       = dbConfig.db
   val dal      = new FiddleDAL(dbConfig.profile)
 

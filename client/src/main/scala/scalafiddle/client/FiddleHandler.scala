@@ -28,8 +28,7 @@ case class UpdateId(fiddleId: FiddleId, silent: Boolean = false) extends Action
 
 case class ShowHelp(url: String) extends Action
 
-class FiddleHandler[M](modelRW: ModelRW[M, FiddleData], fidRW: ModelRW[M, Option[FiddleId]])
-    extends ActionHandler(modelRW) {
+class FiddleHandler[M](modelRW: ModelRW[M, FiddleData], fidRW: ModelRW[M, Option[FiddleId]]) extends ActionHandler(modelRW) {
 
   override def handle = {
     case SelectLibrary(lib) =>
