@@ -46,6 +46,7 @@ class Application @Inject()(
   val libUri           = config.get[String]("scalafiddle.librariesURL")
   val scalafiddleUrl   = new URL(config.get[String]("scalafiddle.scalafiddleURL"))
   val compilerUrl      = config.get[String]("scalafiddle.compilerURL")
+  val scalaVersions    = config.get[Seq[String]]("scalafiddle.scalaVersions")
 
   Kamon.start()
 
@@ -307,9 +308,20 @@ class Application @Inject()(
 
   private def loadFiddle(id: String, version: Int, sourceOpt: Option[String] = None): Future[Try[FiddleData]] = {
     if (id == "") {
-      val (source, libs) = parseFiddle(sourceOpt.fold(defaultSource)(identity))
-      Future.successful(Success(
-        FiddleData("", "", source, libs, librarian.libraries, config.get[String]("scalafiddle.defaultScalaVersion"), None)))
+      val (source, libs, scalaVersion) = parseFiddle(sourceOpt.fold(defaultSource)(identity))
+      Future.successful(
+        Success(
+          FiddleData(
+            "",
+            "",
+            source,
+            libs,
+            librarian.libraries,
+            scalaVersion
+              .flatMap(v => scalaVersions.find(_ == v))
+              .getOrElse(config.get[String]("scalafiddle.defaultScalaVersion")),
+            None
+          )))
     } else {
       ask(persistence, FindFiddle(id, version)).mapTo[Try[Fiddle]].flatMap {
         case Success(f) if f.user == "anonymous" =>
@@ -356,12 +368,16 @@ class Application @Inject()(
     }
   }
 
-  private def parseFiddle(source: String): (String, Seq[Library]) = {
-    val dependencyRE          = """ *// \$FiddleDependency (.+)""".r
-    val lines                 = source.split("\n")
-    val (libLines, codeLines) = lines.partition(line => dependencyRE.findFirstIn(line).isDefined)
-    val libs                  = libLines.flatMap(line => librarian.findLibrary(dependencyRE.findFirstMatchIn(line).get.group(1)))
-    (codeLines.mkString("\n"), libs)
+  private def parseFiddle(source: String): (String, Seq[Library], Option[String]) = {
+    val dependencyRE = """ *// \$FiddleDependency +(.+)""".r
+    val versionRE    = """ *// \$ScalaVersion +([0-9]+\.[0-9]+)""".r
+    val lines        = source.split("\n")
+    val (libLines, codeLines) = lines.partition { line =>
+      dependencyRE.findFirstIn(line).isDefined || versionRE.findFirstIn(line).isDefined
+    }
+    val libs    = libLines.flatMap(line => dependencyRE.findFirstMatchIn(line).flatMap(d => librarian.findLibrary(d.group(1))))
+    val version = libLines.flatMap(line => versionRE.findFirstMatchIn(line).map(_.group(1))).headOption
+    (codeLines.mkString("\n"), libs, version)
   }
 
   private def decodeSource(b64: String): Option[String] = {
