@@ -343,6 +343,19 @@
           }
         ],
         "compileTimeOnly": false
+      },
+      {
+        "name": "Hamsters",
+        "organization": "io.github.scala-hamsters",
+        "artifact": "hamsters",
+        "doc": "scala-hamsters/hamsters",
+        "versions": [
+          {
+            "version": "2.5.0",
+            "scalaVersions": ["2.11", "2.12"]
+          }
+        ],
+        "compileTimeOnly": false
       }
     ]
   },
