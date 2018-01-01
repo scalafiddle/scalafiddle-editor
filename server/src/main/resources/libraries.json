@@ -189,6 +189,10 @@
         "doc": "https://typelevel.org/cats/",
         "versions": [
           {
+            "version": "1.0.1",
+            "scalaVersions": ["2.11", "2.12"]
+          },
+          {
             "version": "1.0.0-MF",
             "scalaVersions": ["2.11", "2.12"]
           },
@@ -211,6 +215,10 @@
         "artifact": "cats-effect",
         "doc": "typelevel/cats-effect",
         "versions": [
+          {
+            "version": "0.5",
+            "scalaVersions": ["2.11", "2.12"]
+          },
           {
             "version": "0.4",
             "scalaVersions": ["2.11", "2.12"]
@@ -262,6 +270,10 @@
         "artifact": "shapeless",
         "doc": "milessabin/shapeless",
         "versions": [
+          {
+            "version": "2.3.3",
+            "scalaVersions": ["2.11", "2.12"]
+          },
           {
             "version": "2.3.2",
             "scalaVersions": ["2.11", "2.12"]
@@ -407,6 +419,16 @@
         "doc": "ThoughtWorksInc/Binding.scala",
         "versions": [
           {
+            "version": "11.0.0",
+            "scalaVersions": ["2.11", "2.12"],
+            "extraDeps": [
+              "com.thoughtworks.binding %%% route % 11.0.0",
+              "com.thoughtworks.binding %%% dom % 11.0.0",
+              "com.thoughtworks.binding %%% futurebinding % 11.0.0",
+              "com.thoughtworks.binding %%% jspromisebinding % 11.0.0"
+            ]
+          },
+          {
             "version": "10.0.3",
             "scalaVersions": ["2.11", "2.12"],
             "extraDeps": [
@@ -517,8 +539,12 @@
         "name": "uPickle",
         "organization": "com.lihaoyi",
         "artifact": "upickle",
-        "doc": "lihaoyi/upickle-pprint",
+        "doc": "lihaoyi/upickle",
         "versions": [
+          {
+            "version": "0.5.1",
+            "scalaVersions": ["2.11", "2.12"]
+          },
           {
             "version": "0.4.4",
             "scalaVersions": ["2.11", "2.12"]
@@ -540,6 +566,11 @@
         "artifact": "circe-core",
         "doc": "https://circe.github.io/circe",
         "versions": [
+          {
+            "version": "0.9.0",
+            "scalaVersions": ["2.11", "2.12"],
+            "extraDeps": ["io.circe %%% circe-generic % 0.9.0", "io.circe %%% circe-parser % 0.9.0"]
+          },
           {
             "version": "0.9.0-M1",
             "scalaVersions": ["2.11", "2.12"],
@@ -724,6 +755,10 @@
         "doc": "scala-js/scala-js-java-time",
         "versions": [
           {
+            "version": "0.2.3",
+            "scalaVersions": ["2.11", "2.12"]
+          },
+          {
             "version": "0.2.2",
             "scalaVersions": ["2.11", "2.12"]
           },
@@ -744,6 +779,10 @@
         "artifact": "quill-sql",
         "doc": "http://getquill.io/",
         "versions": [
+          {
+            "version": "2.3.1",
+            "scalaVersions": ["2.11", "2.12"]
+          },
           {
             "version": "2.0.0",
             "scalaVersions": ["2.11", "2.12"]
