@@ -569,17 +569,17 @@
           {
             "version": "0.9.0",
             "scalaVersions": ["2.11", "2.12"],
-            "extraDeps": ["io.circe %%% circe-generic % 0.9.0", "io.circe" %%% "circe-generic-extras" % "0.9.0" , "io.circe %%% circe-parser % 0.9.0"]
+            "extraDeps": ["io.circe %%% circe-generic % 0.9.0", "io.circe %%% circe-generic-extras % 0.9.0" , "io.circe %%% circe-parser % 0.9.0"]
           },
           {
             "version": "0.9.0-M1",
             "scalaVersions": ["2.11", "2.12"],
-            "extraDeps": ["io.circe %%% circe-generic % 0.9.0-M1", "io.circe" %%% "circe-generic-extras" % "0.9.0-M1", "io.circe %%% circe-parser % 0.9.0-M1"]
+            "extraDeps": ["io.circe %%% circe-generic % 0.9.0-M1", "io.circe %%% circe-generic-extras % 0.9.0-M1", "io.circe %%% circe-parser % 0.9.0-M1"]
           },
           {
             "version": "0.8.0",
             "scalaVersions": ["2.11", "2.12"],
-            "extraDeps": ["io.circe %%% circe-generic % 0.8.0", "io.circe" %%% "circe-generic-extras" % "0.8.0", "io.circe %%% circe-parser % 0.8.0"]
+            "extraDeps": ["io.circe %%% circe-generic % 0.8.0", "io.circe %%% circe-generic-extras % 0.8.0", "io.circe %%% circe-parser % 0.8.0"]
           },
           {
             "version": "0.5.1",
