@@ -666,6 +666,10 @@
         "doc": "akka-js/akka.js",
         "versions": [
           {
+            "version": "1.2.5.9",
+            "scalaVersions": ["2.11", "2.12"]
+          },
+          {
             "version": "1.2.5.6",
             "scalaVersions": ["2.11", "2.12"]
           },
@@ -717,6 +721,10 @@
         "doc": "akka-js/akka.js",
         "versions": [
           {
+            "version": "1.2.5.9",
+            "scalaVersions": ["2.11", "2.12"]
+          },
+          {
             "version": "1.2.5.6",
             "scalaVersions": ["2.11", "2.12"]
           },
@@ -757,6 +765,19 @@
             "version": "0.2.0",
             "organization": "eu.unicredit",
             "scalaVersions": ["2.11"]
+          }
+        ],
+        "compileTimeOnly": false
+      },
+      {
+        "name": "AkkaTyped.Js",
+        "organization": "org.akka-js",
+        "artifact": "akkajsactortyped",
+        "doc": "akka-js/akka.js",
+        "versions": [
+          {
+            "version": "1.2.5.9",
+            "scalaVersions": ["2.11", "2.12"]
           }
         ],
         "compileTimeOnly": false
