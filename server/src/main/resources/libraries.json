@@ -853,6 +853,45 @@
         "compileTimeOnly": false
       },
       {
+        "name": "Scalameta",
+        "organization": "org.scalameta",
+        "artifact": "scalameta",
+        "doc": "http://scalameta.org/tutorial/",
+        "versions": [
+          {
+            "version": "2.1.7",
+            "scalaVersions": ["2.12"]
+          }
+        ],
+        "compileTimeOnly": false
+      },
+      {
+        "name": "Scalafix",
+        "organization": "ch.epfl.scala",
+        "artifact": "scalafix-core",
+        "doc": "https://scalacenter.github.io/scalafix/",
+        "versions": [
+          {
+            "version": "0.5.10",
+            "scalaVersions": ["2.12"]
+          }
+        ],
+        "compileTimeOnly": false
+      },
+      {
+        "name": "Scalafmt",
+        "organization": "com.geirsson",
+        "artifact": "scalafmt-core",
+        "doc": "http://scalameta.org/scalafmt/",
+        "versions": [
+          {
+            "version": "1.4.0",
+            "scalaVersions": ["2.12"]
+          }
+        ],
+        "compileTimeOnly": false
+      },
+      {
         "name": "Rapture",
         "organization": "com.propensive",
         "artifact": "rapture",
