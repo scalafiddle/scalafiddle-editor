@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width,maximum-scale=2">
+    <meta name="description" content="scalafiddle-editor : Web user interface for ScalaFiddle">
+
+    <link rel="stylesheet" type="text/css" media="screen"
+          href="/scalafiddle-editor/assets/css/style.css?v=39755165b1e97a425d17ea29d3f563dfb07295ec">
+
+    <title>scalafiddle-editor</title>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<!--
+<div id="header_wrap" class="outer">
+    <header class="inner">
+        <a id="forkme_banner" href="https://github.com/scalafiddle/scalafiddle-editor">View on GitHub</a>
+
+        <h1 id="project_title">scalafiddle-editor</h1>
+        <h2 id="project_tagline">Web user interface for ScalaFiddle</h2>
+
+
+    </header>
+</div>
+-->
+
+<!-- MAIN CONTENT -->
+<div id="main_content_wrap" class="outer">
+    <section id="main_content" class="inner">
+        <h1 id="welcome-to-scalafiddle">Welcome to ScalaFiddle</h1>
+
+        <p>ScalaFiddle is an online playground for creating, sharing and embedding Scala fiddles (little Scala programs that
+            run
+            directly in your browser).</p>
+
+        <h2 id="quick-start">Quick start</h2>
+
+        <p>Just write some Scala code in the editor on the left and click the <strong>Run</strong> button (or press <code
+                class="highlighter-rouge">Ctrl-Enter</code> on Windows/Linux, or
+            <code class="highlighter-rouge">Cmd-Enter</code> on macos) to compile and run your code. The result will be shown
+            here, replacing this documentation. You can
+            always get this page back by clicking the <strong>Help</strong> button.</p>
+
+        <p>A truly simple example to get you started:</p>
+
+        <div class="language-scala highlighter-rouge">
+            <div class="highlight"><pre class="highlight"><code><span class="n">println</span><span class="o">(</span><span
+                    class="s">"Hello world!"</span><span class="o">)</span>
+</code></pre>
+            </div>
+        </div>
+
+        <h2 id="saving-your-masterpiece">Saving your masterpiece</h2>
+
+        <p>To make the fruit of your labors immortal, click the <strong>Save</strong> button. This will assign a random
+            identifier to your fiddle and
+            update the page URL to something like <code class="highlighter-rouge">https://scalafiddle.io/sf/S0mXhH9/0</code>.
+            The last part of the URL is a <em>version number</em>,
+            which is incremented every time you updated the fiddle. This means that once a fiddle is saved, it cannot be
+            modified, but a
+            new version can be created.</p>
+
+        <p>By default, all fiddles are <em>anonymous</em>, but if you want to keep them under your own control, you should
+            create an account
+            via <strong>Sign in with GitHub</strong>. This way no one else but you can update the saved fiddle. Others can
+            only <strong>Fork</strong> it to
+            continue work under their own account.</p>
+
+        <p>To make sure you can later find your fiddle, remember to add a <strong>Name</strong> and
+            <strong>Description</strong> to your fiddle before saving.</p>
+
+        <h2 id="using-libraries">Using libraries</h2>
+
+        <p>You can experiment with different supported Scala libraries by selecting them from the <strong>Libraries</strong>
+            section on the left
+            sidebar. Just press the <strong>+</strong> button to add a library to your fiddle, and <strong>X</strong> to
+            remove it. The latest version is shown by
+            default, but you can also <strong>Show all versions</strong> if you need to work with an older one.</p>
+
+        <p><img src="/scalafiddle-editor/libraries.png" alt="libraries"/></p>
+
+        <p>By default new fiddles use Scala 2.12, but you can also select another Scala version.</p>
+
+        <h2 id="editing-code">Editing code</h2>
+
+        <p>Although the editor in ScalaFiddle is no match for a full IDE, it’s quite adequate for small fiddles. It provides
+            rudimentary
+            syntax highlighting and things like <em>search</em> (<code class="highlighter-rouge">Ctrl/Cmd-F</code>). You can
+            also access code completion by pressing <code class="highlighter-rouge">Ctrl/Cmd-Space</code>
+            to get a list of potential completions suitable for that location. Note that this feature actually calls the
+            remote compiler
+            to perform the code completion, so there might be a slight delay.</p>
+
+        <p>Your fiddle code is actually contained in a template, which you can show by clicking the <strong>SCALA</strong>
+            button in the top-right
+            corner of the editor.</p>
+
+        <p><img src="/scalafiddle-editor/showtemplate.png" alt="showtemplate"/></p>
+
+        <p>This template makes sure your code is contained in a single <em>object</em> that is exposed to JavaScript so that
+            it can be
+            executed. Normally you don’t need to deal with the template, but sometimes you need to take things outside this
+            object and
+            then it’s necessary to edit the code on the outside.</p>
+
+        <h2 id="special-features">Special features</h2>
+
+        <p>Because ScalaFiddle runs in the browser, you can access browser features like the DOM and Canvas in your fiddle.
+            There is a
+            helper object called <code class="highlighter-rouge">Fiddle</code> that contains methods for accessing the DOM
+            and the built-in canvas.</p>
+
+        <h3 id="using-the-dom">Using the DOM</h3>
+
+        <p>The simplest way for using the DOM is to generate your DOM elements using the included <strong>Scalatags</strong>
+            library. For this you
+            need to <code class="highlighter-rouge">import scalatags.JsDom.all._</code> and use <code
+                    class="highlighter-rouge">Fiddle.print</code> to show the DOM, as in the example below.</p>
+
+        <div class="language-scala highlighter-rouge">
+            <div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">scalatags.JsDom.all._</span>
+
+<span class="k">val</span> <span class="n">h</span> <span class="k">=</span> <span class="n">h1</span><span
+                        class="o">(</span><span class="s">"Hello world"</span><span class="o">).</span><span
+                        class="n">render</span>
+<span class="nc">Fiddle</span><span class="o">.</span><span class="n">print</span><span class="o">(</span><span
+                        class="n">h</span><span class="o">)</span>
+</code></pre>
+            </div>
+        </div>
+
+        <p>You can also make the DOM interactive as demonstrated by the simple fiddle below:</p>
+
+        <div class="language-scala highlighter-rouge">
+            <div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">scalatags.JsDom.all._</span>
+
+<span class="k">val</span> <span class="n">textInput</span> <span class="k">=</span> <span class="n">input</span><span
+                        class="o">(</span><span class="n">placeholder</span> <span class="o">:=</span> <span class="s">"write text here"</span><span
+                        class="o">).</span><span class="n">render</span>
+<span class="k">val</span> <span class="n">lengthButton</span> <span class="k">=</span> <span class="n">button</span><span
+                        class="o">(</span><span class="s">"Length"</span><span class="o">).</span><span
+                        class="n">render</span>
+<span class="k">val</span> <span class="n">result</span> <span class="k">=</span> <span class="n">p</span><span
+                        class="o">.</span><span class="n">render</span>
+<span class="n">lengthButton</span><span class="o">.</span><span class="n">onclick</span> <span class="k">=</span> <span
+                        class="o">(</span><span class="n">e</span><span class="k">:</span> <span class="kt">Any</span><span
+                        class="o">)</span> <span class="k">=&gt;</span> <span class="n">result</span><span class="o">.</span><span
+                        class="n">innerHTML</span> <span class="k">=</span> <span class="n">textInput</span><span
+                        class="o">.</span><span class="n">value</span><span class="o">.</span><span
+                        class="n">length</span><span class="o">.</span><span class="n">toString</span>
+
+<span class="nc">Fiddle</span><span class="o">.</span><span class="n">print</span><span class="o">(</span><span
+                        class="n">div</span><span class="o">(</span><span class="n">textInput</span><span class="o">,</span> <span
+                        class="n">lengthButton</span><span class="o">),</span> <span class="n">result</span><span
+                        class="o">)</span>
+</code></pre>
+            </div>
+        </div>
+
+        <h3 id="drawing-to-canvas">Drawing to canvas</h3>
+
+        <p>ScalaFiddle automatically provides a rectangular canvas in the output panel that you can use for drawing. The
+            canvas drawing
+            context is accessible via <code class="highlighter-rouge">Fiddle.draw</code> and represents a
+            <a target="_blank" href="https://developer.mozilla.org/en/docs/Web/API/CanvasRenderingContext2D"><code class="highlighter-rouge">CanvasRenderingContext2D</code></a>
+        </p>
+
+        <p>To draw a small 50 by 50 pixel rectangle at position 10,10:</p>
+        <div class="language-scala highlighter-rouge">
+            <div class="highlight"><pre class="highlight"><code><span class="nc">Fiddle</span><span class="o">.</span><span
+                    class="n">draw</span><span class="o">.</span><span class="n">rect</span><span class="o">(</span><span
+                    class="mi">10</span><span class="o">,</span> <span class="mi">10</span><span class="o">,</span> <span
+                    class="mi">50</span><span class="o">,</span> <span class="mi">50</span><span class="o">)</span>
+<span class="nc">Fiddle</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">stroke</span>
+</code></pre>
+            </div>
+        </div>
+
+        <p>For a more complex example, check out the <a href="https://scalafiddle.io/sf/UbLKYAK/6" target="_top">Hilbert
+            curve demonstration</a></p>
+
+        <h2 id="embedding">Embedding</h2>
+
+        <p>While editing and sharing fiddles on scalafiddle.io website is great, you can also embed your fiddles to any web
+            page you
+            like. The embedded fiddle provides interactive editing, so you could for example include a short example on your
+            documentation site or in your blog and have viewers play with it right there, on your own page.</p>
+
+        <p>To create an embedded fiddle, just click the <strong>Embed</strong> button, which will present you with some
+            options, the HTML code you
+            need to copy paste, and a preview of what the embedded fiddle will look like.</p>
+
+        <p><img src="/scalafiddle-editor/embed.png" alt="embed"/></p>
+
+        <p>Embedding instructive fiddles to your library documentation is a great way to let your library users try out
+            features without
+            installing anything.</p>
+
+        <h2 id="integration-to-documentation">Integration to documentation</h2>
+
+        <p>ScalaFiddle can also be integrated directly into documentation without embedding from the editor. See the section
+            on
+            <a target="_blank" href="https://github.com/scalafiddle/scalafiddle-core/blob/master/integrations/README.md">ScalaFiddle
+                integration</a> for more information.</p>
+
+        <h2 id="source">Source</h2>
+
+        <p>ScalaFiddle is open source and you can find all the source code <a target="_blank"
+                                                                              href="https://github.com/scalafiddle">in GitHub
+            repositories</a>.</p>
+
+    </section>
+</div>
+
+<!-- FOOTER  -->
+<!--
+<div id="footer_wrap" class="outer">
+    <footer class="inner">
+
+        <p class="copyright">scalafiddle-editor maintained by <a href="https://github.com/scalafiddle">scalafiddle</a></p>
+
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+    </footer>
+</div>
+
+
+-->
+</body>
+</html>

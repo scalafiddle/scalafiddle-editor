@@ -111,3 +111,12 @@ need to copy paste, and a preview of what the embedded fiddle will look like.
 
 Embedding instructive fiddles to your library documentation is a great way to let your library users try out features without
 installing anything.
+
+## Integration to documentation
+
+ScalaFiddle can also be integrated directly into documentation without embedding from the editor. See the section on 
+[ScalaFiddle integration](https://github.com/scalafiddle/scalafiddle-core/blob/master/integrations/README.md) for more information.
+
+## Source
+
+ScalaFiddle is open source and you can find all the source code [in GitHub repositories](https://github.com/scalafiddle)
