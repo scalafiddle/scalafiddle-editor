@@ -71,7 +71,7 @@ class HighlighterSpec extends WordSpec with Matchers {
 
     "highlight long text" in {
       val code =
-    s"""|import fiddle.Fiddle, Fiddle.println
+        s"""|import fiddle.Fiddle, Fiddle.println
        |import scalajs.js
        |
        |@js.annotation.JSExportTopLevel("ScalaFiddle")
