@@ -32,7 +32,7 @@ so you can run them in the background with
 > compilerServer/reStart
 ```
 
-The `router` will load library information from the `editor`, so that one must be running first. `compilerServer` connects to the `router` over a web-socket and
+The `router` will load library information from the same place as `editor` does. `compilerServer` connects to the `router` over a web-socket and
 received commands from the `router`. On the first run the compiler server will download all libraries and build a large _flat file_ containing classes and sjsir
 files from those libraries. This will take some time, but is only done once. Afterwards the _flat file_ is reused and new libraries are only appended to it.
 
@@ -41,12 +41,12 @@ stopped, as by default they are stored in an in-memory H2 database.
 
 ## Supporting new libraries
 
-By far the most common contribution is adding support for a new library (or a version of a library). To do this you simply need to edit the `libraries.json`
-file under the `editor` project (server/src/main/resources/libraries.json).
+By far the most common contribution is adding support for a new library (or a version of a library). To do this you simply need to edit the 
+[libraries.json](https://github.com/scalafiddle/scalafiddle-io/blob/master/libraries.json) file under the 
+[scalafiddle-io](https://github.com/scalafiddle/scalafiddle-io) repo.
 
-Although the editor (and router) automatically reload library information, because it's packaged inside resources you'll need to restart the editor (and router)
-to be able to use the new libraries. Press `Enter` to stop the editor and start it again with `run`. The router you can simply restart with `router/reStart`
-and there is no need to restart the compiler server as it will automatically reconnect to the router.
+To test new libraries locally, override the default library URL configuration via environment variable `SCALAFIDDLE_LIBRARIES_URL` 
+to point to a local file using `file:/path/to/local/libraries.json` syntax.
 
 Please follow these rules for adding a new library:
 
