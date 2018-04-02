@@ -17,7 +17,7 @@ GET     /oembed.json                      controllers.Application.oembed(url, ma
 GET     /oembedstatic.json                controllers.Application.oembedStatic(url, maxwidth: Option[Int], maxheight: Option[Int], format: Option[String])
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/fonts/*file               controllers.Assets.at(path="/public/lib/font-awesome/fonts", file)
+GET     /assets/stylesheets/themes/default/assets/fonts/*file               controllers.Assets.at(path="/public/lib/Semantic-UI/themes/default/assets/fonts", file)
 GET     /assets/*file                     controllers.Assets.versioned(path="/public", file: Asset)
 
 # Autowire calls

@@ -38,7 +38,7 @@ object Settings {
     val scalatags    = "0.6.7"
 
     val jQuery   = "3.2.0"
-    val semantic = "2.2.10"
+    val semantic = "2.3.1"
     val ace      = "1.2.2"
 
     val react = "15.5.4"
@@ -78,7 +78,6 @@ object Settings {
       "com.vmunier"           %% "scalajs-scripts"                 % versions.scalaJsScripts,
       "io.kamon"              %% "kamon-core"                      % versions.kamon,
       "io.kamon"              %% "kamon-statsd"                    % versions.kamon,
-      "org.webjars"           % "font-awesome"                     % "4.6.3" % Provided,
       "org.webjars"           % "Semantic-UI"                      % versions.semantic % Provided
       //"org.webjars"        % "ace"                              % versions.ace % Provided
     ))

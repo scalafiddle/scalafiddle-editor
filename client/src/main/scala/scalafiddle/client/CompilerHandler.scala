@@ -27,7 +27,17 @@ case class CompileFiddle(source: String, optimization: SJSOptimization) extends 
 
 case class AutoCompleteFiddle(source: String, row: Int, col: Int, callback: (Seq[(String, String)]) => Unit) extends Action
 
-case class CompilerResult(result: Either[Seq[EditorAnnotation], String], log: String) extends Action
+case class CompilerSuccess(
+    jsCode: String,
+    jsDeps: Seq[String],
+    cssDeps: Seq[String],
+    log: String
+) extends Action
+
+case class CompilerFailed(
+    annotations: Seq[EditorAnnotation],
+    log: String
+) extends Action
 
 case class ServerError(message: String) extends Action
 
@@ -37,7 +47,13 @@ case class UserFiddlesUpdated(fiddles: Seq[FiddleVersions]) extends Action
 
 class CompilerHandler[M](modelRW: ModelRW[M, OutputData]) extends ActionHandler(modelRW) {
 
-  case class CompilationResponse(jsCode: Option[String], annotations: Seq[EditorAnnotation], log: String)
+  case class CompilationResponse(
+      jsCode: Option[String],
+      jsDeps: Seq[String],
+      cssDeps: Seq[String],
+      annotations: Seq[EditorAnnotation],
+      log: String
+  )
 
   case class CompletionResponse(completions: List[(String, String)])
 
@@ -72,10 +88,10 @@ class CompilerHandler[M](modelRW: ModelRW[M, OutputData]) extends ActionHandler(
         )
         .map { request =>
           read[CompilationResponse](request.responseText) match {
-            case CompilationResponse(Some(jsCode), _, log) =>
-              CompilerResult(Right(jsCode), log)
-            case CompilationResponse(None, annotations, log) =>
-              CompilerResult(Left(annotations), log)
+            case CompilationResponse(Some(jsCode), jsDeps, cssDeps, _, log) =>
+              CompilerSuccess(jsCode, jsDeps, cssDeps, log)
+            case CompilationResponse(None, _, _, annotations, log) =>
+              CompilerFailed(annotations, log)
           }
         } recover {
         case e: dom.ext.AjaxException =>
@@ -88,16 +104,16 @@ class CompilerHandler[M](modelRW: ModelRW[M, OutputData]) extends ActionHandler(
         case e: Throwable =>
           ServerError(s"Unknown error while compiling")
       }
-      updated(CompilerData(CompilerStatus.Compiling, None, Nil, None, ""), Effect(effect))
+      updated(CompilerData(CompilerStatus.Compiling, None, Nil, Nil, Nil, None, ""), Effect(effect))
 
-    case CompilerResult(Right(jsCode), log) =>
-      updated(CompilerData(CompilerStatus.Compiled, Some(jsCode), Nil, None, log))
+    case CompilerSuccess(jsCode, jsDeps, cssDeps, log) =>
+      updated(CompilerData(CompilerStatus.Compiled, Some(jsCode), jsDeps, cssDeps, Nil, None, log))
 
-    case CompilerResult(Left(annotations), log) =>
-      updated(CompilerData(CompilerStatus.Error, None, annotations, None, log))
+    case CompilerFailed(annotations, log) =>
+      updated(CompilerData(CompilerStatus.Error, None, Nil, Nil, annotations, None, log))
 
     case ServerError(message) =>
-      updated(CompilerData(CompilerStatus.Error, None, Nil, Some(message), ""))
+      updated(CompilerData(CompilerStatus.Error, None, Nil, Nil, Nil, Some(message), ""))
 
     case LoadUserFiddles =>
       effectOnly(Effect(AjaxClient[Api].listFiddles().call().map(UserFiddlesUpdated)))

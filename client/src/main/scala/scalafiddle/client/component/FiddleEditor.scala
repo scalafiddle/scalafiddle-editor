@@ -241,7 +241,7 @@ object FiddleEditor {
       }
     }
 
-    def sendFrameCmd(cmd: String, data: String = "") = {
+    def sendFrameCmd(cmd: String, data: js.Any = "") = {
       val msg = js.Dynamic.literal(cmd = cmd, data = data)
       if (frameReady) {
         resultFrame.contentWindow.postMessage(msg, "*")
@@ -590,8 +590,12 @@ object FiddleEditor {
           compilerData.jsCode.foreach { jsCode =>
             $.modState(s => s.copy(status = CompilerStatus.Running)).runNow()
             // start running the code after a short delay, to allow DOM to update in case the code is slow to complete
-            js.timers.setTimeout(50) {
-              sendFrameCmd("code", jsCode)
+            js.timers.setTimeout(30) {
+              // pass compiled data to the iframe
+              val data = js.Dynamic.literal(code = jsCode,
+                                            jsDeps = compilerData.jsDeps.toJSArray,
+                                            cssDeps = compilerData.cssDeps.toJSArray)
+              sendFrameCmd("code", data)
             }
           }
           $.modState(s => s.copy(outputData = compilerData, status = compilerData.status)).runNow()

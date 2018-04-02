@@ -1,5 +1,5 @@
 @import (inline) "lib/Semantic-UI/semantic.min.css";
-@import "lib/font-awesome/less/font-awesome.less";
+// @import "lib/font-awesome/web-fonts-with-css/less/fontawesome.less";
 
 @mobile: ~"(max-width: 1280px)";
 
@@ -204,6 +204,12 @@ body {
   }
 }
 
+.monospace {
+  font-family: Monaco, Menlo, 'Ubuntu Mono', Consolas, source-code-pro, monospace;
+  text-rendering: optimizeLegibility;
+  white-space: pre;
+}
+
 .button.login {
   background-color: #f400a1;
   color: #ffffff;
@@ -218,7 +224,7 @@ img.author {
 
 /* Override Semantic defaults */
 i.icon {
-  font-family: FontAwesome;
+  // font-family: FontAwesome;
 }
 
 .ui.button:not(.icon) > .icon:not(.button) {
@@ -279,9 +285,6 @@ i.icon {
   padding-top: 0.2em;
   box-sizing: border-box;
   font-size: 14px;
-  font-family: Monaco, Menlo, 'Ubuntu Mono', Consolas, source-code-pro, monospace;
-  text-rendering: optimizeLegibility;
-  white-space: pre;
 }
 
 .liblist {

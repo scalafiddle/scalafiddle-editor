@@ -34,6 +34,8 @@ sealed trait OutputData
 case class CompilerData(
     status: CompilerStatus,
     jsCode: Option[String],
+    jsDeps: Seq[String],
+    cssDeps: Seq[String],
     annotations: Seq[EditorAnnotation],
     errorMessage: Option[String],
     log: String
