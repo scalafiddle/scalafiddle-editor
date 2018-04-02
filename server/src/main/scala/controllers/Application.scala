@@ -320,7 +320,8 @@ class Application @Inject()(
             scalaVersion
               .flatMap(v => scalaVersions.find(_ == v))
               .getOrElse(config.get[String]("scalafiddle.defaultScalaVersion")),
-            None
+            None,
+            System.currentTimeMillis()
           )))
     } else {
       ask(persistence, FindFiddle(id, version)).mapTo[Try[Fiddle]].flatMap {
@@ -334,7 +335,8 @@ class Application @Inject()(
                 f.libraries.flatMap(librarian.findLibrary),
                 librarian.libraries,
                 f.scalaVersion,
-                None
+                None,
+                f.created
               )))
         case Success(f) =>
           ask(persistence, FindUser(f.user)).mapTo[Try[User]].map {
@@ -348,7 +350,8 @@ class Application @Inject()(
                   f.libraries.flatMap(librarian.findLibrary),
                   librarian.libraries,
                   f.scalaVersion,
-                  Some(user)
+                  Some(user),
+                  f.created
                 ))
             case _ =>
               Success(
@@ -359,7 +362,8 @@ class Application @Inject()(
                   f.libraries.flatMap(librarian.findLibrary),
                   librarian.libraries,
                   f.scalaVersion,
-                  None
+                  None,
+                  f.created
                 ))
           }
         case Failure(e) =>

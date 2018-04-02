@@ -158,6 +158,14 @@ object Sidebar {
       }
       div(cls := "item")(
         div(cls := "right floated")(
+          lib.exampleUrl
+            .map(
+              url =>
+                button(cls := s"mini ui icon basic button",
+                       title := s"Load example fiddle for ${lib.name}",
+                       onClick --> dispatch(LoadFiddle(url)))(i(cls := "file code outline icon codeicon")))
+            .whenDefined
+            .when(mode == SelectedLib),
           button(cls := s"mini ui icon basic button", onClick --> dispatch(action))(icon)
         ),
         a(href := lib.docUrl, target := "_blank")(

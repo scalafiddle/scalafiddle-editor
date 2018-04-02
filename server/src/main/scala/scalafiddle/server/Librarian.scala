@@ -15,7 +15,8 @@ class Librarian(libSource: () => BufferedSource) {
       extraDeps: Seq[String],
       organization: Option[String],
       artifact: Option[String],
-      doc: Option[String]
+      doc: Option[String],
+      example: Option[String]
   )
 
   implicit val libraryVersionReader = upickle.default.Reader[LibraryVersion] {
@@ -27,7 +28,8 @@ class Librarian(libSource: () => BufferedSource) {
         readJs[Seq[String]](values.getOrElse("extraDeps", Js.Arr())),
         values.get("organization").map(readJs[String]),
         values.get("artifact").map(readJs[String]),
-        values.get("doc").map(readJs[String])
+        values.get("doc").map(readJs[String]),
+        values.get("example").map(readJs[String])
       )
   }
 
@@ -80,7 +82,8 @@ class Librarian(libSource: () => BufferedSource) {
         versionDef.scalaVersions,
         versionDef.extraDeps,
         f"$idx%02d:${group.group}",
-        createDocURL(versionDef.doc.getOrElse(lib.doc))
+        createDocURL(versionDef.doc.getOrElse(lib.doc)),
+        versionDef.example
       )
     }
   }

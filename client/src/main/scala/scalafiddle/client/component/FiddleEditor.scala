@@ -39,17 +39,18 @@ object FiddleEditor {
       preCode: List[String] = Nil,
       mainCode: List[String] = Nil,
       postCode: List[String] = Nil,
-      indent: Int = 0
+      indent: Int = 0,
+      lastModified: Long = 0
   )
 
   case class Backend($ : BackendScope[Props, State]) {
-    var unsubscribe: () => Unit          = () => ()
-    var unsubscribeLoginData: () => Unit = () => ()
-    var editor: Dyn                      = _
-    def resultFrame                      = dom.document.getElementById("resultframe").asInstanceOf[HTMLIFrameElement]
-    @volatile var frameReady: Boolean    = false
-    var pendingMessages: List[js.Object] = Nil
-    var prevFrame                        = ""
+    var unsubscribeOutputData: () => Unit = () => ()
+    var unsubscribeLoginData: () => Unit  = () => ()
+    var editor: Dyn                       = _
+    def resultFrame                       = dom.document.getElementById("resultframe").asInstanceOf[HTMLIFrameElement]
+    @volatile var frameReady: Boolean     = false
+    var pendingMessages: List[js.Object]  = Nil
+    var prevFrame                         = ""
 
     def render(props: Props, state: State) = {
       import japgolly.scalajs.react.vdom.all._
@@ -444,14 +445,6 @@ object FiddleEditor {
             )
             .value)
 
-        // listen for changes in source code
-        editor.on("input",
-                  () =>
-                    $.state
-                      .flatMap { state =>
-                        props.dispatch(UpdateSource(reconstructSource(state)))
-                      }
-                      .runNow())
         // focus to the editor
         editor.focus()
 
@@ -465,7 +458,7 @@ object FiddleEditor {
         })
 
         // subscribe to changes in compiler data
-        unsubscribe = AppCircuit.subscribe(props.outputData)(outputDataUpdated)
+        unsubscribeOutputData = AppCircuit.subscribe(props.outputData)(outputDataUpdated)
         unsubscribeLoginData = AppCircuit.subscribe(props.loginData)(_ => $.forceUpdate.runNow())
       } >>
         props.dispatch(UpdateLoginInfo) >>
@@ -502,20 +495,29 @@ object FiddleEditor {
       $.state.flatMap { state =>
         if (state.showTemplate) {
           editor.getSession().setValue((pre ++ main ++ post).mkString("\n"))
-          $.setState(state.copy(preCode = pre, mainCode = main, postCode = post, indent = 0))
+          $.setState(state.copy(preCode = pre, mainCode = main, postCode = post, indent = 0, lastModified = fiddle.modified))
         } else {
           // figure out indentation
           val indent = main.filter(_.nonEmpty).map(_.takeWhile(_ == ' ').length).min
           editor.getSession().setValue(main.map(_.drop(indent)).mkString("\n"))
-          $.setState(state.copy(preCode = pre, mainCode = main, postCode = post, indent = indent))
+          $.setState(
+            state.copy(preCode = pre, mainCode = main, postCode = post, indent = indent, lastModified = fiddle.modified))
         }
+      }
+    }
+
+    def updateProps(nextProps: Props, state: State): Callback = {
+      if (nextProps.data().modified != state.lastModified) {
+        updateFiddle(nextProps.data())
+      } else {
+        Callback.empty
       }
     }
 
     def unmounted: Callback = {
       Callback {
         Mousetrap.reset()
-        unsubscribe()
+        unsubscribeOutputData()
         unsubscribeLoginData()
       }
     }
@@ -616,6 +618,7 @@ object FiddleEditor {
     .componentDidMount(scope => scope.backend.mounted(scope.props))
     .componentWillUnmount(scope => scope.backend.unmounted)
     .componentDidUpdate(scope => scope.backend.updated)
+    .componentWillReceiveProps(scope => scope.backend.updateProps(scope.nextProps, scope.state))
     .build
 
   def apply(data: ModelProxy[FiddleData],

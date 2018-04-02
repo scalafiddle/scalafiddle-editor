@@ -12,7 +12,8 @@ case class Library(name: String,
                    scalaVersions: Seq[String],
                    extraDeps: Seq[String],
                    group: String,
-                   docUrl: String)
+                   docUrl: String,
+                   exampleUrl: Option[String])
 
 object Library {
   def stringify(lib: Library) =
@@ -29,5 +30,6 @@ case class FiddleData(
     libraries: Seq[Library],
     available: Seq[Library],
     scalaVersion: String,
-    author: Option[UserInfo]
+    author: Option[UserInfo],
+    modified: Long
 )

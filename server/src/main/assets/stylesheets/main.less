@@ -223,10 +223,6 @@ img.author {
 }
 
 /* Override Semantic defaults */
-i.icon {
-  // font-family: FontAwesome;
-}
-
 .ui.button:not(.icon) > .icon:not(.button) {
   margin: 0 0.25em 0 0;
 }
@@ -301,14 +297,21 @@ i.icon {
     color: #888;
   }
 
-  * > .button, .button:hover {
+  * > .ui.basic.button, .ui.basic.button:hover {
     box-shadow: none !important;
     vertical-align: middle !important;
     padding-top: .9rem !important;
     padding-bottom: 0.3rem !important;
+    padding-right: 0;
+    padding-left: 4px;
   }
   * > .icon {
     font-size: 1.8em;
+  }
+
+  * > .ui.icon.button > .codeicon {
+    font-size: 1.4em !important;
+    margin-bottom: 5px !important;
   }
 }
 

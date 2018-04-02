@@ -3,6 +3,7 @@ package scalafiddle.client
 import autowire._
 import diode.ActionResult.{ModelUpdate, ModelUpdateEffect}
 import diode._
+import org.scalajs.dom
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -24,6 +25,8 @@ case class UpdateFiddle(source: String) extends Action
 
 case class ForkFiddle(source: String) extends Action
 
+case class LoadFiddle(url: String) extends Action
+
 case class UpdateId(fiddleId: FiddleId, silent: Boolean = false) extends Action
 
 case class ShowHelp(url: String) extends Action
@@ -44,7 +47,7 @@ class FiddleHandler[M](modelRW: ModelRW[M, FiddleData], fidRW: ModelRW[M, Option
       updated(value.copy(name = name, description = description))
 
     case UpdateSource(source) =>
-      updated(value.copy(sourceCode = source))
+      updated(value.copy(sourceCode = source, modified = System.currentTimeMillis()))
 
     case SaveFiddle(source) =>
       val newFiddle = value.copy(sourceCode = source, available = Seq.empty)
@@ -69,6 +72,10 @@ class FiddleHandler[M](modelRW: ModelRW[M, FiddleData], fidRW: ModelRW[M, Option
       } else {
         noChange
       }
+
+    case LoadFiddle(url) =>
+      val loadF = dom.ext.Ajax.get(url).map(r => UpdateSource(r.responseText))
+      effectOnly(Effect(loadF))
 
     case ForkFiddle(source) =>
       if (fidRW().isDefined) {
