@@ -171,7 +171,7 @@ object FiddleEditor {
                           )
                         ),
                         tbody(
-                          fiddles.toTagMod {
+                          fiddles.sortBy(-_.updated).toTagMod {
                             fiddle =>
                               def fLink(version: Int)(content: TagMod*) =
                                 a(href := s"/sf/${fiddle.id}/$version")(content: _*)
