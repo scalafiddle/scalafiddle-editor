@@ -7,7 +7,7 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.raw.SyntheticEvent
 import org.scalajs.dom
 import org.scalajs.dom.raw.{Event, HTMLIFrameElement, MessageEvent}
-
+import chandu0101.scalajs.react.components.ReactTable
 import scala.concurrent.ExecutionContext.Implicits.{global => ecGlobal}
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
@@ -19,6 +19,7 @@ import scalafiddle.shared._
 
 object FiddleEditor {
   import japgolly.scalajs.react.vdom.Implicits._
+  import ReactTable._
 
   private var editorRef: dom.raw.HTMLDivElement    = _
   private var resultRef: dom.raw.HTMLIFrameElement = _
@@ -160,36 +161,33 @@ object FiddleEditor {
                     if (fiddles.isEmpty) {
                       p("No fiddles stored")
                     } else {
-                      table(cls := "ui celled table fiddle-list")(
-                        thead(
-                          tr(
-                            th("Id", width := "10%"),
-                            th("Name"),
-                            th("Versions"),
-                            th("Latest update"),
-                            th("Libs", width := "20%")
-                          )
-                        ),
-                        tbody(
-                          fiddles.sortBy(-_.updated).toTagMod {
-                            fiddle =>
-                              def fLink(version: Int)(content: TagMod*) =
-                                a(href := s"/sf/${fiddle.id}/$version")(content: _*)
-                              val versions = (0 to fiddle.latestVersion)
-                                .flatMap(v => Seq[TagMod](fLink(v)(v.toString), span(" | ")))
-                                .init
-                                .toTagMod
 
-                              tr(
-                                td(fLink(fiddle.latestVersion)(fiddle.id)),
-                                td(fLink(fiddle.latestVersion)(if (fiddle.name.isEmpty) "<no name>" else fiddle.name)),
-                                td(versions),
-                                td(new js.Date(fiddle.updated).toLocaleString()),
-                                td(fiddle.libraries.flatMap(libMap.get).mkString(", "))
-                              )
-                          }
-                        )
+                      def fLink(f: FiddleVersions)(content: TagMod*) =
+                        a(href := s"/sf/${f.id}/${f.latestVersion}")(content: _*)
+                      def versions(f: FiddleVersions) =
+                        (0 to f.latestVersion)
+                          .flatMap(v => Seq[TagMod](fLink(f)(v.toString), span(" | ")))
+                          .init
+
+                      def config[B: Ordering](name: String,
+                                              renderer: CellRenderer[FiddleVersions],
+                                              order: FiddleVersions => B) =
+                        ColumnConfig[FiddleVersions](name, renderer)(DefaultOrdering[FiddleVersions, B](order))
+
+                      val configs = List(
+                        config("Id", fiddle => fLink(fiddle)(fiddle.id), _.id),
+                        config("Name",
+                               fiddle => fLink(fiddle)(if (fiddle.name.isEmpty) "<no name>" else fiddle.name),
+                               _.name),
+                        config("Versions", fiddle => span(versions(fiddle).toTagMod), _.latestVersion),
+                        config("Latest update", fiddle => new js.Date(fiddle.updated).toLocaleString(), -_.updated),
+                        SimpleStringConfig[FiddleVersions]("Library", _.libraries.flatMap(libMap.get).mkString(", "))
                       )
+
+                      div(cls := "ui form celled striped table fiddle-list")(
+                        ReactTable(data = fiddles, configs = configs, rowsPerPage = 20)()
+                      )
+
                     }
                   ),
                   iframe.ref(resultRef = _)(
