@@ -85,13 +85,14 @@ object Settings {
   /** Dependencies only used by the JS project (note the use of %%% instead of %%) */
   val scalajsDependencies = Def.setting(
     Seq(
-      "com.github.japgolly.scalajs-react" %%% "core"        % versions.scalajsReact,
-      "com.github.japgolly.scalajs-react" %%% "extra"       % versions.scalajsReact,
-      "com.github.japgolly.scalacss"      %%% "ext-react"   % versions.scalaCSS,
-      "io.suzaku"                         %%% "diode"       % versions.diode,
-      "io.suzaku"                         %%% "diode-react" % versions.diode,
-      "com.github.marklister"             %%% "base64"      % versions.base64,
-      "org.scala-js"                      %%% "scalajs-dom" % versions.scalaDom
+      "com.github.japgolly.scalajs-react" %%% "core"                     % versions.scalajsReact,
+      "com.github.japgolly.scalajs-react" %%% "extra"                    % versions.scalajsReact,
+      "com.olvind"                        %%% "scalajs-react-components" % "1.0.0-M2",
+      "com.github.japgolly.scalacss"      %%% "ext-react"                % versions.scalaCSS,
+      "io.suzaku"                         %%% "diode"                    % versions.diode,
+      "io.suzaku"                         %%% "diode-react"              % versions.diode,
+      "com.github.marklister"             %%% "base64"                   % versions.base64,
+      "org.scala-js"                      %%% "scalajs-dom"              % versions.scalaDom
     ))
 
   /** Dependencies for external JS libs that are bundled into a single .js file according to dependency order */
