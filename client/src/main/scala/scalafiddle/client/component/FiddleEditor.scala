@@ -162,11 +162,11 @@ object FiddleEditor {
                       p("No fiddles stored")
                     } else {
 
-                      def fLink(f: FiddleVersions)(content: TagMod*) =
-                        a(href := s"/sf/${f.id}/${f.latestVersion}")(content: _*)
+                      def fLink(f: FiddleVersions)(version: Int)(content: TagMod*) =
+                        a(href := s"/sf/${f.id}/$version")(content: _*)
                       def versions(f: FiddleVersions) =
                         (0 to f.latestVersion)
-                          .flatMap(v => Seq[TagMod](fLink(f)(v.toString), span(" | ")))
+                          .flatMap(version => Seq[TagMod](fLink(f)(version)(version.toString), span(" | ")))
                           .init
 
                       def config[B: Ordering](name: String,
@@ -175,13 +175,11 @@ object FiddleEditor {
                         ColumnConfig[FiddleVersions](name, renderer)(DefaultOrdering[FiddleVersions, B](order))
 
                       val configs = List(
-                        config("Id", fiddle => fLink(fiddle)(fiddle.id), _.id),
-                        config("Name",
-                               fiddle => fLink(fiddle)(if (fiddle.name.isEmpty) "<no name>" else fiddle.name),
-                               _.name),
+                        config("Id", f => fLink(f)(f.latestVersion)(f.id), _.id),
+                        config("Name", f => fLink(f)(f.latestVersion)(if (f.name.isEmpty) "<no name>" else f.name), _.name),
                         config("Versions", fiddle => span(versions(fiddle).toTagMod), _.latestVersion),
                         config("Latest update", fiddle => new js.Date(fiddle.updated).toLocaleString(), -_.updated),
-                        SimpleStringConfig[FiddleVersions]("Library", _.libraries.flatMap(libMap.get).mkString(", "))
+                        SimpleStringConfig[FiddleVersions]("Libs", _.libraries.flatMap(libMap.get).mkString(", "))
                       )
 
                       div(cls := "ui form celled striped table fiddle-list")(
