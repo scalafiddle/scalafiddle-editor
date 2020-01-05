@@ -1,6 +1,7 @@
 import sbt._
+import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
-
+import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
 /**
   * Application settings. Configure the build for your application here.
   * You normally don't have to touch the actual build definition after this.
@@ -8,7 +9,7 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 object Settings {
 
   /** The version of your application */
-  val version = "1.2.0"
+  val version = "1.2.6"
 
   /** Options for the scala compiler */
   val scalacOptions = Seq(
@@ -20,9 +21,9 @@ object Settings {
 
   /** Declare global dependency versions here to avoid mismatches in multi part dependencies */
   object versions {
-    val scala        = "2.12.4"
+    val scala        = "2.12.10"
     val scalatest    = "3.0.3"
-    val scalaDom     = "0.9.4"
+    val scalaDom     = "0.9.5"
     val scalajsReact = "1.0.0"
     val scalaCSS     = "0.5.3"
     val autowire     = "0.2.6"

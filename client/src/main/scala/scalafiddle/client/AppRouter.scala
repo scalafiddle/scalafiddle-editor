@@ -24,7 +24,8 @@ object AppRouter {
       import japgolly.scalajs.react.vdom.Implicits._
 
       (staticRoute(root, Home) ~> render(
-        fiddleData(d => FiddleEditor(d, None, AppCircuit.zoom(_.outputData), AppCircuit.zoom(_.loginData))))
+        fiddleData(d => FiddleEditor(d, None, AppCircuit.zoom(_.outputData), AppCircuit.zoom(_.loginData)))
+      )
         | dynamicRouteF(("sf" / string("\\w+") / string(".+")).pmap[EditorPage] { path =>
           Some(EditorPage(path._1, Try(path._2.takeWhile(_.isDigit).toInt).getOrElse(0)))
         }(page => (page.id, page.version.toString)))(p => Some(p.asInstanceOf[EditorPage])) ~> dynRender((p: EditorPage) => {

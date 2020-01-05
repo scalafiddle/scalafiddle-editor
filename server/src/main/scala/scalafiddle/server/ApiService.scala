@@ -13,8 +13,8 @@ import scalafiddle.server.models.User
 import scalafiddle.shared.{FiddleVersions, _}
 
 class ApiService(persistence: ActorRef, user: Option[User], _loginProviders: Seq[LoginProvider])(
-    implicit ec: ExecutionContext)
-    extends Api {
+    implicit ec: ExecutionContext
+) extends Api {
   implicit val timeout = Timeout(15.seconds)
 
   val saveCount   = Kamon.metrics.counter("fiddle-save")
@@ -59,7 +59,8 @@ class ApiService(persistence: ActorRef, user: Option[User], _loginProviders: Seq
 
   override def userInfo(): UserInfo =
     user.fold(UserInfo("", "", None, loggedIn = false))(u =>
-      UserInfo(u.userID, u.name.getOrElse("Anonymous"), u.avatarURL, loggedIn = true))
+      UserInfo(u.userID, u.name.getOrElse("Anonymous"), u.avatarURL, loggedIn = true)
+    )
 
   override def listFiddles(): Future[Seq[FiddleVersions]] = {
     user match {

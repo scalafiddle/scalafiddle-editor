@@ -33,7 +33,7 @@ object Router extends autowire.Server[Js.Value, Reader, Writer] {
   override def write[R: Writer](r: R)       = writeJs(r)
 }
 
-class Application @Inject()(
+class Application @Inject() (
     implicit val config: Configuration,
     env: Environment,
     ec: ExecutionContext,
@@ -60,7 +60,8 @@ class Application @Inject()(
     } else if (libUri.startsWith("http")) {
       System.setProperty(
         "http.agent",
-        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.29 Safari/537.36")
+        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.29 Safari/537.36"
+      )
       scala.io.Source.fromURL(libUri, "UTF-8")
     } else {
       env.resourceAsStream(libUri).map(s => scala.io.Source.fromInputStream(s, "UTF-8")).get
@@ -69,8 +70,10 @@ class Application @Inject()(
 
   val librarian = new Librarian(libSource _)
   // refresh libraries every N minutes
-  actorSystem.scheduler.schedule(config.get[Int]("scalafiddle.refreshLibraries").seconds,
-                                 config.get[Int]("scalafiddle.refreshLibraries").seconds)(librarian.refresh())
+  actorSystem.scheduler.schedule(
+    config.get[Int]("scalafiddle.refreshLibraries").seconds,
+    config.get[Int]("scalafiddle.refreshLibraries").seconds
+  )(librarian.refresh())
   val defaultSource = config.get[String]("scalafiddle.defaultSource")
 
   if (env.mode != Mode.Prod)
@@ -81,11 +84,13 @@ class Application @Inject()(
       indexCounter.increment()
     } else {
       fiddleCounter.increment()
-      persistence ! AddAccess(fiddleId,
-                              version.toInt,
-                              request.identity.map(_.userID),
-                              embedded = false,
-                              Option(request.remoteAddress).getOrElse("unknown"))
+      persistence ! AddAccess(
+        fiddleId,
+        version.toInt,
+        request.identity.map(_.userID),
+        embedded = false,
+        Option(request.remoteAddress).getOrElse("unknown")
+      )
     }
 
     val source = request.getQueryString("zrc").flatMap(decodeSource) orElse request.getQueryString("source")
@@ -108,11 +113,13 @@ class Application @Inject()(
 
   def rawFiddle(fiddleId: String, version: String) = Action.async { implicit request =>
     if (fiddleId.nonEmpty)
-      persistence ! AddAccess(fiddleId,
-                              version.toInt,
-                              None,
-                              embedded = true,
-                              Option(request.remoteAddress).getOrElse("unknown"))
+      persistence ! AddAccess(
+        fiddleId,
+        version.toInt,
+        None,
+        embedded = true,
+        Option(request.remoteAddress).getOrElse("unknown")
+      )
 
     loadFiddle(fiddleId, version.toInt).map {
       case Success(fd) =>
@@ -136,11 +143,13 @@ class Application @Inject()(
 
   def htmlFiddle(fiddleId: String, version: String) = Action.async { implicit request =>
     if (fiddleId.nonEmpty)
-      persistence ! AddAccess(fiddleId,
-                              version.toInt,
-                              None,
-                              embedded = true,
-                              Option(request.remoteAddress).getOrElse("unknown"))
+      persistence ! AddAccess(
+        fiddleId,
+        version.toInt,
+        None,
+        embedded = true,
+        Option(request.remoteAddress).getOrElse("unknown")
+      )
 
     loadFiddle(fiddleId, version.toInt).map {
       case Success(fd) =>
@@ -322,7 +331,9 @@ class Application @Inject()(
               .getOrElse(config.get[String]("scalafiddle.defaultScalaVersion")),
             None,
             System.currentTimeMillis()
-          )))
+          )
+        )
+      )
     } else {
       ask(persistence, FindFiddle(id, version)).mapTo[Try[Fiddle]].flatMap {
         case Success(f) if f.user == "anonymous" =>
@@ -337,7 +348,9 @@ class Application @Inject()(
                 f.scalaVersion,
                 None,
                 f.created
-              )))
+              )
+            )
+          )
         case Success(f) =>
           ask(persistence, FindUser(f.user)).mapTo[Try[User]].map {
             case Success(u) =>
@@ -352,7 +365,8 @@ class Application @Inject()(
                   f.scalaVersion,
                   Some(user),
                   f.created
-                ))
+                )
+              )
             case _ =>
               Success(
                 FiddleData(
@@ -364,7 +378,8 @@ class Application @Inject()(
                   f.scalaVersion,
                   None,
                   f.created
-                ))
+                )
+              )
           }
         case Failure(e) =>
           Future.successful(Failure(e))
@@ -427,7 +442,8 @@ class Application @Inject()(
             } else {
               Future.successful(())
             }
-        })
+          }
+        )
       }
     }
     Await.result(createTableIfNotExists(Seq(dal.fiddles, dal.users, dal.accesses)), Duration.Inf)

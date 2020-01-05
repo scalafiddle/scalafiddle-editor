@@ -47,10 +47,12 @@ object Highlighter {
   )
 
   type HighlightLine = Vector[(String, HighlightCode)]
-  def highlightIndices(parser: Parser[_],
-                       buffer: Array[Char],
-                       ruleColors: PartialFunction[Parser[_], HighlightCode],
-                       endColor: HighlightCode): Vector[HighlightLine] = {
+  def highlightIndices(
+      parser: Parser[_],
+      buffer: Array[Char],
+      ruleColors: PartialFunction[Parser[_], HighlightCode],
+      endColor: HighlightCode
+  ): Vector[HighlightLine] = {
     val indices = collection.mutable.Buffer((0, endColor))
     var done    = false
     val input   = buffer.mkString
@@ -106,9 +108,11 @@ object Highlighter {
       spans.foldLeft((Vector.empty[HighlightLine], Vector.empty[(String, HighlightCode)])) {
         case ((lines, line), (str, code)) =>
           if (str.contains('\n')) {
-            @tailrec def splitLine(lines: Vector[HighlightLine] = lines,
-                                   line: HighlightLine = line,
-                                   str: String = str): (Vector[HighlightLine], HighlightLine) = {
+            @tailrec def splitLine(
+                lines: Vector[HighlightLine] = lines,
+                line: HighlightLine = line,
+                str: String = str
+            ): (Vector[HighlightLine], HighlightLine) = {
               if (str.isEmpty) {
                 (lines, line)
               } else if (str.contains('\n')) {

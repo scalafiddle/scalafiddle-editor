@@ -25,10 +25,12 @@ object FiddleEditor {
 
   case class EditorBinding(name: String, keys: String, action: () => Any)
 
-  case class Props(data: ModelProxy[FiddleData],
-                   fiddleId: Option[FiddleId],
-                   outputData: ModelR[AppModel, OutputData],
-                   loginData: ModelR[AppModel, LoginData]) {
+  case class Props(
+      data: ModelProxy[FiddleData],
+      fiddleId: Option[FiddleId],
+      outputData: ModelR[AppModel, OutputData],
+      loginData: ModelR[AppModel, LoginData]
+  ) {
     def dispatch(a: Action) = data.dispatchCB(a)
   }
 
@@ -95,15 +97,19 @@ object FiddleEditor {
             ),
             div(cls := "ui basic button", onClick --> props.dispatch(SaveFiddle(reconstructSource(state))))(
               Icon.pencil,
-              "Save").when(showSave),
+              "Save"
+            ).when(showSave),
             div(cls := "ui basic button", onClick --> props.dispatch(UpdateFiddle(reconstructSource(state))))(
               Icon.pencil,
-              "Update").when(showUpdate),
+              "Update"
+            ).when(showUpdate),
             div(cls := "ui basic button", onClick --> props.dispatch(ForkFiddle(reconstructSource(state))))(
               Icon.codeFork,
-              "Fork").when(fiddleHasId),
+              "Fork"
+            ).when(fiddleHasId),
             Dropdown("top basic button embed-options", span("Embed", Icon.caretDown))(_ =>
-              div(cls := "menu", display.block)(EmbedEditor(props.fiddleId.get))).when(fiddleHasId)
+              div(cls := "menu", display.block)(EmbedEditor(props.fiddleId.get))
+            ).when(fiddleHasId)
           ),
           div(cls := "right")(
             div(cls := "ui basic button", onClick --> props.dispatch(ShowHelp(ScalaFiddleConfig.helpURL)))(
@@ -127,7 +133,8 @@ object FiddleEditor {
                         label("Show template")
                       )
                     )
-                ))
+                  )
+                )
               ),
               div.ref(editorRef = _)(id := "editor")
             ),
@@ -142,7 +149,7 @@ object FiddleEditor {
                     width := "100%",
                     height := "100%",
                     frameBorder := "0",
-                    sandbox := "allow-scripts allow-popups allow-popups-to-escape-sandbox",
+                    sandbox := "allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms",
                     src := s"/resultframe?theme=light"
                   )
                 )
@@ -199,7 +206,7 @@ object FiddleEditor {
                     width := "0%",
                     height := "0%",
                     frameBorder := "0",
-                    sandbox := "allow-scripts allow-popups allow-popups-to-escape-sandbox",
+                    sandbox := "allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms",
                     src := s"/resultframe?theme=light"
                   )
                 )
@@ -349,26 +356,30 @@ object FiddleEditor {
         editor.updateDynamic("$blockScrolling")(Double.PositiveInfinity)
 
         val globalBindings = Seq(
-          EditorBinding("Compile",
-                        "enter",
-                        () =>
-                          beginCompilation().foreach(_ => {
-                            buildFullSource
-                              .flatMap { source =>
-                                props.dispatch(compile(source, FastOpt))
-                              }
-                              .runNow()
-                          })),
-          EditorBinding("FullOptimize",
-                        "shift+enter",
-                        () =>
-                          beginCompilation().foreach(_ => {
-                            buildFullSource
-                              .flatMap { source =>
-                                props.dispatch(compile(source, FullOpt))
-                              }
-                              .runNow()
-                          })),
+          EditorBinding(
+            "Compile",
+            "enter",
+            () =>
+              beginCompilation().foreach(_ => {
+                buildFullSource
+                  .flatMap { source =>
+                    props.dispatch(compile(source, FastOpt))
+                  }
+                  .runNow()
+              })
+          ),
+          EditorBinding(
+            "FullOptimize",
+            "shift+enter",
+            () =>
+              beginCompilation().foreach(_ => {
+                buildFullSource
+                  .flatMap { source =>
+                    props.dispatch(compile(source, FullOpt))
+                  }
+                  .runNow()
+              })
+          ),
           EditorBinding("Show JavaScript", "j", () => $.state.map(state => showJSCode(state)).runNow()),
           EditorBinding(
             "Save",
@@ -411,7 +422,8 @@ object FiddleEditor {
                 "sender" -> "editor|cli"
               ),
               "exec" -> func
-            ))
+            )
+          )
         }
 
         // register auto complete
@@ -443,7 +455,8 @@ object FiddleEditor {
                 }
               }
             )
-            .value)
+            .value
+        )
 
         // focus to the editor
         editor.focus()
@@ -464,8 +477,9 @@ object FiddleEditor {
         props.dispatch(UpdateLoginInfo) >>
         updateFiddle(props.data()) >>
         Callback.when(props.fiddleId.isDefined)(
-          props.dispatch(
-            compile(addDeps(props.data().sourceCode, props.data().libraries, props.data().scalaVersion), FastOpt)))
+          props
+            .dispatch(compile(addDeps(props.data().sourceCode, props.data().libraries, props.data().scalaVersion), FastOpt))
+        )
     }
 
     val fiddleStart = """\s*// \$FiddleStart\s*$""".r
@@ -501,7 +515,8 @@ object FiddleEditor {
           val indent = main.filter(_.nonEmpty).map(_.takeWhile(_ == ' ').length).min
           editor.getSession().setValue(main.map(_.drop(indent)).mkString("\n"))
           $.setState(
-            state.copy(preCode = pre, mainCode = main, postCode = post, indent = indent, lastModified = fiddle.modified))
+            state.copy(preCode = pre, mainCode = main, postCode = post, indent = indent, lastModified = fiddle.modified)
+          )
         }
       }
     }
@@ -594,9 +609,11 @@ object FiddleEditor {
             // start running the code after a short delay, to allow DOM to update in case the code is slow to complete
             js.timers.setTimeout(30) {
               // pass compiled data to the iframe
-              val data = js.Dynamic.literal(code = jsCode,
-                                            jsDeps = compilerData.jsDeps.toJSArray,
-                                            cssDeps = compilerData.cssDeps.toJSArray)
+              val data = js.Dynamic.literal(
+                code = jsCode,
+                jsDeps = compilerData.jsDeps.toJSArray,
+                cssDeps = compilerData.cssDeps.toJSArray
+              )
               sendFrameCmd("code", data)
             }
           }
@@ -621,9 +638,11 @@ object FiddleEditor {
     .componentWillReceiveProps(scope => scope.backend.updateProps(scope.nextProps, scope.state))
     .build
 
-  def apply(data: ModelProxy[FiddleData],
-            fiddleId: Option[FiddleId],
-            compilerData: ModelR[AppModel, OutputData],
-            loginData: ModelR[AppModel, LoginData]) =
+  def apply(
+      data: ModelProxy[FiddleData],
+      fiddleId: Option[FiddleId],
+      compilerData: ModelR[AppModel, OutputData],
+      loginData: ModelR[AppModel, LoginData]
+  ) =
     component(Props(data, fiddleId, compilerData, loginData))
 }
