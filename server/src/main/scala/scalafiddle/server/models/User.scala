@@ -14,15 +14,16 @@ import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
   * @param avatarURL Maybe the avatar URL of the authenticated provider.
   * @param activated Indicates that the user has activated its registration.
   */
-case class User(userID: String,
-                loginInfo: LoginInfo,
-                firstName: Option[String],
-                lastName: Option[String],
-                fullName: Option[String],
-                email: Option[String],
-                avatarURL: Option[String],
-                activated: Boolean)
-    extends Identity {
+case class User(
+    userID: String,
+    loginInfo: LoginInfo,
+    firstName: Option[String],
+    lastName: Option[String],
+    fullName: Option[String],
+    email: Option[String],
+    avatarURL: Option[String],
+    activated: Boolean
+) extends Identity {
 
   /**
     * Tries to construct a name.

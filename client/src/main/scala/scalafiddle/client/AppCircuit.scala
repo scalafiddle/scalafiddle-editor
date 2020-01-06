@@ -19,8 +19,10 @@ object AppCircuit extends Circuit[AppModel] with ReactConnector[AppModel] {
     AppModel(Home, None, fiddleData, ScalaFiddleHelp(ScalaFiddleConfig.helpURL), LoginData(Empty, Empty))
 
   override protected def actionHandler = composeHandlers(
-    new FiddleHandler(zoomRW(_.fiddleData)((m, v) => m.copy(fiddleData = v)),
-                      zoomRW(_.fiddleId)((m, v) => m.copy(fiddleId = v))),
+    new FiddleHandler(
+      zoomRW(_.fiddleData)((m, v) => m.copy(fiddleData = v)),
+      zoomRW(_.fiddleId)((m, v) => m.copy(fiddleId = v))
+    ),
     new CompilerHandler(zoomRW(_.outputData)((m, v) => m.copy(outputData = v))),
     new LoginHandler(zoomRW(_.loginData)((m, v) => m.copy(loginData = v))),
     navigationHandler
@@ -43,5 +45,5 @@ object AppCircuit extends Circuit[AppModel] with ReactConnector[AppModel] {
         Some(ModelUpdateSilent(model.copy(navLocation = page)))
       case _ =>
         None
-  }
+    }
 }

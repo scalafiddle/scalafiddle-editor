@@ -87,9 +87,11 @@ object Mousetrap extends js.Object {
   def bind(key: String | js.Array[String], f: js.Function1[dom.KeyboardEvent, Boolean], event: String = js.native): Unit =
     js.native
 
-  def bindGlobal(key: String | js.Array[String],
-                 f: js.Function1[dom.KeyboardEvent, Boolean],
-                 event: String = js.native): Unit = js.native
+  def bindGlobal(
+      key: String | js.Array[String],
+      f: js.Function1[dom.KeyboardEvent, Boolean],
+      event: String = js.native
+  ): Unit = js.native
 
   def unbind(key: String): Unit = js.native
 

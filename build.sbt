@@ -1,13 +1,15 @@
 import sbt.Keys._
 import sbt.Project.projectToRef
+import org.scalajs.sbtplugin.ScalaJSPlugin
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
-scalafmtOnCompile in ThisBuild := true
-scalafmtVersion in ThisBuild := "1.3.0"
+ThisBuild / scalafmtOnCompile := true
 
 resolvers in ThisBuild += Resolver.jcenterRepo
 
 // a special crossProject for configuring a JS/JVM/shared structure
-lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared"))
+lazy val shared = (crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure) in file("shared"))
   .settings(
     version := Settings.version,
     scalaVersion := Settings.versions.scala,

@@ -23,6 +23,12 @@ You can now start the editor with
 which will launch the Play framework, waiting for a connection on 0.0.0.0:9000. At this point you can already navigate to http://localhost:9000 and use the
 editor.
 
+If you get errors like `Cannot run program "node": Malformed argument has embedded quote`, you may need to add a 
+JVM configuration option and restart `sbt`.
+```
+export JAVA_TOOL_OPTIONS=-Djdk.lang.Process.allowAmbiguousCommands=true
+```
+
 Before you can compile anything, you must also start the `router` and `compilerServer` in the other `sbt` session. These are built on Akka-HTTP instead of Play,
 so you can run them in the background with
 

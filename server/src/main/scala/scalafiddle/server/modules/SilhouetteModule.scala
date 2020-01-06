@@ -72,9 +72,11 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
     * @return The Silhouette environment.
     */
   @Provides
-  def provideEnvironment(userService: UserService,
-                         authenticatorService: AuthenticatorService[CookieAuthenticator],
-                         eventBus: EventBus): Environment[DefaultEnv] = {
+  def provideEnvironment(
+      userService: UserService,
+      authenticatorService: AuthenticatorService[CookieAuthenticator],
+      eventBus: EventBus
+  ): Environment[DefaultEnv] = {
 
     Environment[DefaultEnv](
       userService,
@@ -96,14 +98,16 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
     * @return The Silhouette environment.
     */
   @Provides
-  def provideSocialProviderRegistry(facebookProvider: FacebookProvider,
-                                    googleProvider: GoogleProvider,
-                                    githubProvider: GitHubProvider,
-                                    gitlabProvider: GitLabProvider,
-                                    vkProvider: VKProvider,
-                                    twitterProvider: TwitterProvider,
-                                    xingProvider: XingProvider,
-                                    yahooProvider: YahooProvider): SocialProviderRegistry = {
+  def provideSocialProviderRegistry(
+      facebookProvider: FacebookProvider,
+      googleProvider: GoogleProvider,
+      githubProvider: GitHubProvider,
+      gitlabProvider: GitLabProvider,
+      vkProvider: VKProvider,
+      twitterProvider: TwitterProvider,
+      xingProvider: XingProvider,
+      yahooProvider: YahooProvider
+  ): SocialProviderRegistry = {
 
     SocialProviderRegistry(
       Seq(
@@ -115,7 +119,8 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
         yahooProvider,
         githubProvider,
         gitlabProvider
-      ))
+      )
+    )
   }
 
   /**
@@ -199,25 +204,29 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
     * @return The authenticator service.
     */
   @Provides
-  def provideAuthenticatorService(@Named("authenticator-signer") cookieSigner: Signer,
-                                  @Named("authenticator-crypter") crypter: Crypter,
-                                  cookieHeaderEncoding: CookieHeaderEncoding,
-                                  fingerprintGenerator: FingerprintGenerator,
-                                  idGenerator: IDGenerator,
-                                  configuration: Configuration,
-                                  clock: Clock): AuthenticatorService[CookieAuthenticator] = {
+  def provideAuthenticatorService(
+      @Named("authenticator-signer") cookieSigner: Signer,
+      @Named("authenticator-crypter") crypter: Crypter,
+      cookieHeaderEncoding: CookieHeaderEncoding,
+      fingerprintGenerator: FingerprintGenerator,
+      idGenerator: IDGenerator,
+      configuration: Configuration,
+      clock: Clock
+  ): AuthenticatorService[CookieAuthenticator] = {
 
     val config  = configuration.underlying.as[CookieAuthenticatorSettings]("silhouette.authenticator")
     val encoder = new CrypterAuthenticatorEncoder(crypter)
 
-    new CookieAuthenticatorService(config,
-                                   None,
-                                   cookieSigner,
-                                   cookieHeaderEncoding,
-                                   encoder,
-                                   fingerprintGenerator,
-                                   idGenerator,
-                                   clock)
+    new CookieAuthenticatorService(
+      config,
+      None,
+      cookieSigner,
+      cookieHeaderEncoding,
+      encoder,
+      fingerprintGenerator,
+      idGenerator,
+      clock
+    )
   }
 
   /**
@@ -239,10 +248,12 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
     * @return The OAuth1 token secret provider implementation.
     */
   @Provides
-  def provideOAuth1TokenSecretProvider(@Named("oauth1-token-secret-cookie-signer") cookieSigner: Signer,
-                                       @Named("oauth1-token-secret-crypter") crypter: Crypter,
-                                       configuration: Configuration,
-                                       clock: Clock): OAuth1TokenSecretProvider = {
+  def provideOAuth1TokenSecretProvider(
+      @Named("oauth1-token-secret-cookie-signer") cookieSigner: Signer,
+      @Named("oauth1-token-secret-crypter") crypter: Crypter,
+      configuration: Configuration,
+      clock: Clock
+  ): OAuth1TokenSecretProvider = {
 
     val settings = configuration.underlying.as[CookieSecretSettings]("silhouette.oauth1TokenSecretProvider")
     new CookieSecretProvider(settings, cookieSigner, crypter, clock)
@@ -268,9 +279,11 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
     * @return The CSRF state item implementation.
     */
   @Provides
-  def provideCsrfStateItemHandler(idGenerator: IDGenerator,
-                                  @Named("csrf-state-item-signer") signer: Signer,
-                                  configuration: Configuration): CsrfStateItemHandler = {
+  def provideCsrfStateItemHandler(
+      idGenerator: IDGenerator,
+      @Named("csrf-state-item-signer") signer: Signer,
+      configuration: Configuration
+  ): CsrfStateItemHandler = {
     val settings = configuration.underlying.as[CsrfStateSettings]("silhouette.csrfStateItemHandler")
     new CsrfStateItemHandler(settings, idGenerator, signer)
   }
@@ -295,8 +308,10 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
     * @return The social state handler implementation.
     */
   @Provides
-  def provideSocialStateHandler(@Named("social-state-signer") signer: Signer,
-                                csrfStateItemHandler: CsrfStateItemHandler): SocialStateHandler = {
+  def provideSocialStateHandler(
+      @Named("social-state-signer") signer: Signer,
+      csrfStateItemHandler: CsrfStateItemHandler
+  ): SocialStateHandler = {
 
     new DefaultSocialStateHandler(Set(csrfStateItemHandler), signer)
   }
@@ -310,9 +325,11 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
     * @return The Github provider.
     */
   @Provides
-  def provideGitHubProvider(httpLayer: HTTPLayer,
-                            socialStateHandler: SocialStateHandler,
-                            configuration: Configuration): GitHubProvider = {
+  def provideGitHubProvider(
+      httpLayer: HTTPLayer,
+      socialStateHandler: SocialStateHandler,
+      configuration: Configuration
+  ): GitHubProvider = {
 
     new GitHubProvider(httpLayer, socialStateHandler, configuration.underlying.as[OAuth2Settings]("silhouette.github"))
   }
@@ -326,9 +343,11 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
     * @return The Github provider.
     */
   @Provides
-  def provideGitLabProvider(httpLayer: HTTPLayer,
-                            socialStateHandler: SocialStateHandler,
-                            configuration: Configuration): GitLabProvider = {
+  def provideGitLabProvider(
+      httpLayer: HTTPLayer,
+      socialStateHandler: SocialStateHandler,
+      configuration: Configuration
+  ): GitLabProvider = {
 
     new GitLabProvider(httpLayer, socialStateHandler, configuration.underlying.as[OAuth2Settings]("silhouette.gitlab"))
   }
@@ -342,9 +361,11 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
     * @return The Facebook provider.
     */
   @Provides
-  def provideFacebookProvider(httpLayer: HTTPLayer,
-                              socialStateHandler: SocialStateHandler,
-                              configuration: Configuration): FacebookProvider = {
+  def provideFacebookProvider(
+      httpLayer: HTTPLayer,
+      socialStateHandler: SocialStateHandler,
+      configuration: Configuration
+  ): FacebookProvider = {
 
     new FacebookProvider(httpLayer, socialStateHandler, configuration.underlying.as[OAuth2Settings]("silhouette.facebook"))
   }
@@ -358,9 +379,11 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
     * @return The Google provider.
     */
   @Provides
-  def provideGoogleProvider(httpLayer: HTTPLayer,
-                            socialStateHandler: SocialStateHandler,
-                            configuration: Configuration): GoogleProvider = {
+  def provideGoogleProvider(
+      httpLayer: HTTPLayer,
+      socialStateHandler: SocialStateHandler,
+      configuration: Configuration
+  ): GoogleProvider = {
 
     new GoogleProvider(httpLayer, socialStateHandler, configuration.underlying.as[OAuth2Settings]("silhouette.google"))
   }
@@ -374,9 +397,11 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
     * @return The VK provider.
     */
   @Provides
-  def provideVKProvider(httpLayer: HTTPLayer,
-                        socialStateHandler: SocialStateHandler,
-                        configuration: Configuration): VKProvider = {
+  def provideVKProvider(
+      httpLayer: HTTPLayer,
+      socialStateHandler: SocialStateHandler,
+      configuration: Configuration
+  ): VKProvider = {
 
     new VKProvider(httpLayer, socialStateHandler, configuration.underlying.as[OAuth2Settings]("silhouette.vk"))
   }
@@ -390,9 +415,11 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
     * @return The Twitter provider.
     */
   @Provides
-  def provideTwitterProvider(httpLayer: HTTPLayer,
-                             tokenSecretProvider: OAuth1TokenSecretProvider,
-                             configuration: Configuration): TwitterProvider = {
+  def provideTwitterProvider(
+      httpLayer: HTTPLayer,
+      tokenSecretProvider: OAuth1TokenSecretProvider,
+      configuration: Configuration
+  ): TwitterProvider = {
 
     val settings = configuration.underlying.as[OAuth1Settings]("silhouette.twitter")
     new TwitterProvider(httpLayer, new PlayOAuth1Service(settings), tokenSecretProvider, settings)
@@ -407,9 +434,11 @@ class SilhouetteModule extends AbstractModule with ScalaModule with AkkaGuiceSup
     * @return The Xing provider.
     */
   @Provides
-  def provideXingProvider(httpLayer: HTTPLayer,
-                          tokenSecretProvider: OAuth1TokenSecretProvider,
-                          configuration: Configuration): XingProvider = {
+  def provideXingProvider(
+      httpLayer: HTTPLayer,
+      tokenSecretProvider: OAuth1TokenSecretProvider,
+      configuration: Configuration
+  ): XingProvider = {
 
     val settings = configuration.underlying.as[OAuth1Settings]("silhouette.xing")
     new XingProvider(httpLayer, new PlayOAuth1Service(settings), tokenSecretProvider, settings)

@@ -71,17 +71,21 @@ object EmbedEditor {
                 label(`for` := "layout")("Direction"),
                 div(cls := "field")(
                   div(cls := "ui radio checkbox")(
-                    input.radio(name := "layout",
-                                checked := state.layout.isInstanceOf[Horizontal],
-                                onChange --> layoutChanged(Horizontal(state.layout.split))),
+                    input.radio(
+                      name := "layout",
+                      checked := state.layout.isInstanceOf[Horizontal],
+                      onChange --> layoutChanged(Horizontal(state.layout.split))
+                    ),
                     label("Horizontal")
                   )
                 ),
                 div(cls := "field")(
                   div(cls := "ui radio checkbox")(
-                    input.radio(name := "layout",
-                                checked := state.layout.isInstanceOf[Vertical],
-                                onChange --> layoutChanged(Vertical(state.layout.split))),
+                    input.radio(
+                      name := "layout",
+                      checked := state.layout.isInstanceOf[Vertical],
+                      onChange --> layoutChanged(Vertical(state.layout.split))
+                    ),
                     label("Vertical")
                   )
                 )

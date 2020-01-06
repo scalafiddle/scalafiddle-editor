@@ -50,7 +50,7 @@ case class FindAccesses(fiddleId: String)
 
 case class FindAccessesBetween(startTime: Long, endTime: Long = System.currentTimeMillis())
 
-class Persistence @Inject()(config: Configuration) extends Actor with ActorLogging {
+class Persistence @Inject() (config: Configuration) extends Actor with ActorLogging {
   val dbConfig = DatabaseConfig.forConfig[JdbcProfile](config.get[String]("scalafiddle.dbConfig"))
   val db       = dbConfig.db
   val dal      = new FiddleDAL(dbConfig.profile)
@@ -79,27 +79,31 @@ class Persistence @Inject()(config: Configuration) extends Actor with ActorLoggi
   def receive = {
     case AddFiddle(fiddle, user) =>
       val id = createId
-      val newFiddle = Fiddle(id,
-                             0,
-                             fiddle.name,
-                             fiddle.description,
-                             fiddle.sourceCode,
-                             fiddle.libraries.map(Library.stringify).toList,
-                             fiddle.scalaVersion,
-                             user)
+      val newFiddle = Fiddle(
+        id,
+        0,
+        fiddle.name,
+        fiddle.description,
+        fiddle.sourceCode,
+        fiddle.libraries.map(Library.stringify).toList,
+        fiddle.scalaVersion,
+        user
+      )
       runAndReply(dal.insertFiddle(newFiddle))(r => Success(FiddleId(id, 0))) pipeTo sender()
 
     case ForkFiddle(fiddle, id, version, user) =>
       val id = createId
-      val newFiddle = Fiddle(id,
-                             0,
-                             fiddle.name,
-                             fiddle.description,
-                             fiddle.sourceCode,
-                             fiddle.libraries.map(Library.stringify).toList,
-                             fiddle.scalaVersion,
-                             user,
-                             Some(s"$id/$version"))
+      val newFiddle = Fiddle(
+        id,
+        0,
+        fiddle.name,
+        fiddle.description,
+        fiddle.sourceCode,
+        fiddle.libraries.map(Library.stringify).toList,
+        fiddle.scalaVersion,
+        user,
+        Some(s"$id/$version")
+      )
       runAndReply(dal.insertFiddle(newFiddle))(r => Success(FiddleId(id, 0))) pipeTo sender()
 
     case FindFiddle(id, version) =>
@@ -179,7 +183,8 @@ class Persistence @Inject()(config: Configuration) extends Actor with ActorLoggi
         .map(r =>
           Success(r.map {
             case (id, version, name) => FiddleInfo(name, FiddleId(id, version))
-          }))
+          })
+        )
         .recover {
           case e: Throwable => Failure(e)
         }
@@ -224,8 +229,8 @@ class Persistence @Inject()(config: Configuration) extends Actor with ActorLoggi
 
     case AddAccess(fiddleId, version, userId, embedded, sourceIP) =>
       runAndReply(
-        dal.insertAccess(FiddleAccess(0, fiddleId, version, System.currentTimeMillis(), userId, embedded, sourceIP)))(_ =>
-        Success(fiddleId)) pipeTo sender()
+        dal.insertAccess(FiddleAccess(0, fiddleId, version, System.currentTimeMillis(), userId, embedded, sourceIP))
+      )(_ => Success(fiddleId)) pipeTo sender()
 
     case FindAccesses(fiddleId) =>
       runAndReply(dal.findAccesses(fiddleId))(Success(_)) pipeTo sender()

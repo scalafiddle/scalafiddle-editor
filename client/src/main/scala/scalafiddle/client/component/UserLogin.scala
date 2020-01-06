@@ -20,11 +20,11 @@ object UserLogin {
         case Ready(userInfo) if userInfo.loggedIn =>
           div(cls := "userinfo")(
             img(cls := "author", src := userInfo.avatarUrl.getOrElse("/assets/images/anon.png")),
-            Dropdown("top right pointing", div(cls := "username", userInfo.name))(
-              closeCB =>
-                div(cls := "ui vertical menu", display.block)(
-                  a(cls := "item", onClick --> { Callback(AppCircuit.dispatch(LoadUserFiddles)) >> closeCB() })("My fiddles")
-              )),
+            Dropdown("top right pointing", div(cls := "username", userInfo.name))(closeCB =>
+              div(cls := "ui vertical menu", display.block)(
+                a(cls := "item", onClick --> { Callback(AppCircuit.dispatch(LoadUserFiddles)) >> closeCB() })("My fiddles")
+              )
+            ),
             a(href := "/signout", div(cls := "ui basic button", "Sign out"))
           )
         case Ready(userInfo) if !userInfo.loggedIn =>
@@ -35,10 +35,12 @@ object UserLogin {
                 div(cls := "ui button login")(
                   img(src := provider.logoUrl),
                   s"Sign in with ${provider.name}"
-                ))
+                )
+              )
             case Ready(loginProviders) =>
               Dropdown("top basic button embed-options", span("Sign in", Icon.caretDown))(_ =>
-                div(cls := "menu", display.block)(div("Login providers")))
+                div(cls := "menu", display.block)(div("Login providers"))
+              )
             case _ =>
               div(img(src := "/assets/images/wait-ring.gif"))
           }

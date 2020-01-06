@@ -4,16 +4,18 @@ case class FiddleId(id: String, version: Int) {
   override def toString: String = s"$id/$version"
 }
 
-case class Library(name: String,
-                   organization: String,
-                   artifact: String,
-                   version: String,
-                   compileTimeOnly: Boolean,
-                   scalaVersions: Seq[String],
-                   extraDeps: Seq[String],
-                   group: String,
-                   docUrl: String,
-                   exampleUrl: Option[String])
+case class Library(
+    name: String,
+    organization: String,
+    artifact: String,
+    version: String,
+    compileTimeOnly: Boolean,
+    scalaVersions: Seq[String],
+    extraDeps: Seq[String],
+    group: String,
+    docUrl: String,
+    exampleUrl: Option[String]
+)
 
 object Library {
   def stringify(lib: Library) =

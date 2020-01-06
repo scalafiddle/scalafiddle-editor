@@ -86,18 +86,23 @@ object Sidebar {
           ),
           div(cls := "title", "Libraries", i(cls := "icon dropdown")),
           div(cls := "content")(
-            div(cls := "ui horizontal divider header",
-                (style := js.Dynamic.literal(display = "none")).when(fd.libraries.isEmpty),
-                "Selected"),
+            div(
+              cls := "ui horizontal divider header",
+              (style := js.Dynamic.literal(display = "none")).when(fd.libraries.isEmpty),
+              "Selected"
+            ),
             div(cls := "liblist", (style := js.Dynamic.literal(display = "none")).when(fd.libraries.isEmpty))(
               div(cls := "ui middle aligned divided list")(
-                fd.libraries.toTagMod(renderLibrary(_, SelectedLib, fd.scalaVersion, props.dispatch)))
+                fd.libraries.toTagMod(renderLibrary(_, SelectedLib, fd.scalaVersion, props.dispatch))
+              )
             ),
             div(cls := "ui horizontal divider header", "Available"),
             div(cls := "ui checkbox")(
-              input.checkbox(name := "all-versions",
-                             checked := state.showAllVersions,
-                             onChange --> $.modState(s => s.copy(showAllVersions = !s.showAllVersions))),
+              input.checkbox(
+                name := "all-versions",
+                checked := state.showAllVersions,
+                onChange --> $.modState(s => s.copy(showAllVersions = !s.showAllVersions))
+              ),
               label("Show all versions")
             ),
             div(cls := "liblist")(
@@ -159,11 +164,13 @@ object Sidebar {
       div(cls := "item")(
         div(cls := "right floated")(
           lib.exampleUrl
-            .map(
-              url =>
-                button(cls := s"mini ui icon basic button",
-                       title := s"Load example fiddle for ${lib.name}",
-                       onClick --> dispatch(LoadFiddle(url)))(i(cls := "file code outline icon codeicon")))
+            .map(url =>
+              button(
+                cls := s"mini ui icon basic button",
+                title := s"Load a sample fiddle for ${lib.name}",
+                onClick --> dispatch(LoadFiddle(url))
+              )(i(cls := "file code outline icon codeicon"))
+            )
             .whenDefined
             .when(mode == SelectedLib),
           button(cls := s"mini ui icon basic button", onClick --> dispatch(action))(icon)
@@ -172,7 +179,8 @@ object Sidebar {
           div(cls := "content left floated")(
             b(lib.name),
             " ",
-            span(cls := (if (lib.scalaVersions.contains(scalaVersion)) "text grey" else "text red"), lib.version))
+            span(cls := (if (lib.scalaVersions.contains(scalaVersion)) "text grey" else "text red"), lib.version)
+          )
         )
       )
     }
@@ -185,7 +193,8 @@ object Sidebar {
     .componentDidMount(_ =>
       Callback {
         JQueryStatic(accordionRef).accordion(js.Dynamic.literal(exclusive = true, animateChildren = false))
-    })
+      }
+    )
     .build
 
   def apply(data: ModelProxy[FiddleData]) = component(Props(data))

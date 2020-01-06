@@ -9,7 +9,7 @@ import play.api.routing.Router
 import scala.concurrent._
 
 @Singleton
-class ErrorHandler @Inject()(
+class ErrorHandler @Inject() (
     env: Environment,
     config: Configuration,
     sourceMapper: OptionalSourceMapper,

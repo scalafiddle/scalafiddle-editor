@@ -20,11 +20,12 @@ import scalafiddle.server.utils.auth.DefaultEnv
   * @param userService The user service implementation.
   * @param socialProviderRegistry The social provider registry.
   */
-class SocialAuthController @Inject()(implicit val silhouette: Silhouette[DefaultEnv],
-                                     ec: ExecutionContext,
-                                     userService: UserService,
-                                     socialProviderRegistry: SocialProviderRegistry)
-    extends InjectedController
+class SocialAuthController @Inject() (
+    implicit val silhouette: Silhouette[DefaultEnv],
+    ec: ExecutionContext,
+    userService: UserService,
+    socialProviderRegistry: SocialProviderRegistry
+) extends InjectedController
     with I18nSupport
     with Logger {
 
