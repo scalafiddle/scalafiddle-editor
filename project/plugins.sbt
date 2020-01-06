@@ -1,4 +1,4 @@
-resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases/"
+resolvers += "typesafe" at "https://repo.typesafe.com/typesafe/releases/"
 
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.31")
 

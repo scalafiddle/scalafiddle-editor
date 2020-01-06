@@ -9,7 +9,7 @@ import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
 object Settings {
 
   /** The version of your application */
-  val version = "1.2.6"
+  val version = "1.2.9"
 
   /** Options for the scala compiler */
   val scalacOptions = Seq(
