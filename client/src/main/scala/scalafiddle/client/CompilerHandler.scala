@@ -1,5 +1,7 @@
 package scalafiddle.client
 
+import java.nio.charset.StandardCharsets
+
 import autowire._
 import diode._
 import org.scalajs.dom
@@ -7,7 +9,6 @@ import org.scalajs.dom.ext.Ajax
 import upickle.default._
 
 import scala.scalajs.js
-import scala.scalajs.niocharset.StandardCharsets
 import scala.concurrent.ExecutionContext.Implicits.global
 import scalafiddle.shared.{Api, FiddleVersions}
 

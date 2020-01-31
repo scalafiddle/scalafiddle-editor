@@ -37,6 +37,7 @@ object Sidebar {
       val availableVersions = fd.available
         .filterNot(lib => fd.libraries.exists(_.name == lib.name))
         .filter(lib => lib.scalaVersions.contains(fd.scalaVersion))
+        .filter(lib => lib.scalaJSVersions.contains(fd.scalaJSVersion))
 
       // hide alternative versions, if requested
       val available =
@@ -135,6 +136,31 @@ object Sidebar {
                           }
                         ),
                         label(version)
+                      )
+                    )
+                  }
+                )
+              )
+            ),
+            div(cls := "ui grid")(
+              div(cls := "eight wide column")(
+                h4("Scala.js version")
+              ),
+              div(cls := "eight wide column right aligned")(
+                div(cls := "grouped fields")(
+                  ScalaFiddleConfig.scalaJSVersions.toTagMod { version =>
+                    div(cls := "field")(
+                      div(cls := "ui radio checkbox")(
+                        input.radio(
+                          name := "scalajsversion",
+                          value := version,
+                          checked := props.data().scalaJSVersion == version,
+                          onChange ==> { (e: ReactEventFromInput) =>
+                            val newVersion = e.currentTarget.value
+                            props.dispatch(SelectScalaJSVersion(newVersion))
+                          }
+                        ),
+                        label(version + ".x")
                       )
                     )
                   }

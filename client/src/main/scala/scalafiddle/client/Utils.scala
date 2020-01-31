@@ -76,9 +76,10 @@ object SHA1 extends js.Object {
 @js.native
 @JSGlobal("ScalaFiddleConfig")
 object ScalaFiddleConfig extends js.Object {
-  val compilerURL: String             = js.native
-  val helpURL: String                 = js.native
-  val scalaVersions: js.Array[String] = js.native
+  val compilerURL: String               = js.native
+  val helpURL: String                   = js.native
+  val scalaVersions: js.Array[String]   = js.native
+  val scalaJSVersions: js.Array[String] = js.native
 }
 
 @js.native

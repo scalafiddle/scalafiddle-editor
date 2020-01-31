@@ -12,6 +12,7 @@ class Librarian(libSource: () => BufferedSource) {
   case class LibraryVersion(
       version: String,
       scalaVersions: Seq[String],
+      scalaJSVersions: Seq[String],
       extraDeps: Seq[String],
       organization: Option[String],
       artifact: Option[String],
@@ -25,6 +26,7 @@ class Librarian(libSource: () => BufferedSource) {
       LibraryVersion(
         readJs[String](values("version")),
         readJs[Seq[String]](values("scalaVersions")),
+        values.get("scalaJSVersions").map(readJs[Seq[String]]).getOrElse(Seq("0.6")),
         readJs[Seq[String]](values.getOrElse("extraDeps", Js.Arr())),
         values.get("organization").map(readJs[String]),
         values.get("artifact").map(readJs[String]),
@@ -80,6 +82,7 @@ class Librarian(libSource: () => BufferedSource) {
         versionDef.version,
         lib.compileTimeOnly,
         versionDef.scalaVersions,
+        versionDef.scalaJSVersions,
         versionDef.extraDeps,
         f"$idx%02d:${group.group}",
         createDocURL(versionDef.doc.getOrElse(lib.doc)),

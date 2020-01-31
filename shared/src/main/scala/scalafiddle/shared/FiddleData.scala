@@ -11,6 +11,7 @@ case class Library(
     version: String,
     compileTimeOnly: Boolean,
     scalaVersions: Seq[String],
+    scalaJSVersions: Seq[String],
     extraDeps: Seq[String],
     group: String,
     docUrl: String,
@@ -32,6 +33,7 @@ case class FiddleData(
     libraries: Seq[Library],
     available: Seq[Library],
     scalaVersion: String,
+    scalaJSVersion: String,
     author: Option[UserInfo],
     modified: Long
 )

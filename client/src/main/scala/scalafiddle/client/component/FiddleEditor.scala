@@ -176,9 +176,11 @@ object FiddleEditor {
                           .flatMap(version => Seq[TagMod](fLink(f)(version)(version.toString), span(" | ")))
                           .init
 
-                      def config[B: Ordering](name: String,
-                                              renderer: CellRenderer[FiddleVersions],
-                                              order: FiddleVersions => B) =
+                      def config[B: Ordering](
+                          name: String,
+                          renderer: CellRenderer[FiddleVersions],
+                          order: FiddleVersions => B
+                      ) =
                         ColumnConfig[FiddleVersions](name, renderer)(DefaultOrdering[FiddleVersions, B](order))
 
                       val configs = List(
@@ -290,12 +292,13 @@ object FiddleEditor {
       source
     }
 
-    def addDeps(source: String, deps: Seq[Library], scalaVersion: String): String = {
+    def addDeps(source: String, deps: Seq[Library], scalaVersion: String, scalaJSVersion: String): String = {
       val extraDeps = deps.flatMap(_.extraDeps)
       val allDeps   = extraDeps ++ deps.map(Library.stringify)
       source + "\n" +
         allDeps.map(dep => s"// $$FiddleDependency $dep\n").mkString +
-        s"// $$ScalaVersion $scalaVersion\n"
+        s"// $$ScalaVersion $scalaVersion\n" +
+        s"// $$ScalaJSVersion $scalaJSVersion\n"
     }
 
     def buildFullSource: CallbackTo[String] = {
@@ -304,7 +307,8 @@ object FiddleEditor {
         state <- $.state
       } yield {
         val source = reconstructSource(state)
-        addDeps(source, props.data().libraries, props.data().scalaVersion)
+        val data   = props.data()
+        addDeps(source, data.libraries, data.scalaVersion, data.scalaJSVersion)
       }
     }
 
@@ -472,10 +476,11 @@ object FiddleEditor {
       } >>
         props.dispatch(UpdateLoginInfo) >>
         updateFiddle(props.data()) >>
-        Callback.when(props.fiddleId.isDefined)(
+        Callback.when(props.fiddleId.isDefined) {
+          val data = props.data()
           props
-            .dispatch(compile(addDeps(props.data().sourceCode, props.data().libraries, props.data().scalaVersion), FastOpt))
-        )
+            .dispatch(compile(addDeps(data.sourceCode, data.libraries, data.scalaVersion, data.scalaJSVersion), FastOpt))
+        }
     }
 
     val fiddleStart = """\s*// \$FiddleStart\s*$""".r

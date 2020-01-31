@@ -43,6 +43,7 @@
           cfg.compilerURL = "@config.get[String]("scalafiddle.compilerURL")";
           cfg.helpURL = "@config.get[String]("scalafiddle.helpURL")";
           cfg.scalaVersions = @Html(config.get[Seq[String]]("scalafiddle.scalaVersions").mkString("[\"","\",\"","\"]"));
+          cfg.scalaJSVersions = @Html(config.get[Seq[String]]("scalafiddle.scalaJSVersions").mkString("[\"","\",\"","\"]"));
           window.ScalaFiddleConfig = cfg;
           window.ScalaFiddleData = @Html(fiddleData);
         </script>

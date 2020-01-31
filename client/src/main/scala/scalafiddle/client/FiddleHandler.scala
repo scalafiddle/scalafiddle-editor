@@ -15,6 +15,8 @@ case class DeselectLibrary(lib: Library) extends Action
 
 case class SelectScalaVersion(version: String) extends Action
 
+case class SelectScalaJSVersion(version: String) extends Action
+
 case class UpdateInfo(name: String, description: String) extends Action
 
 case class UpdateSource(source: String) extends Action
@@ -42,6 +44,9 @@ class FiddleHandler[M](modelRW: ModelRW[M, FiddleData], fidRW: ModelRW[M, Option
 
     case SelectScalaVersion(version) =>
       updated(value.copy(scalaVersion = version))
+
+    case SelectScalaJSVersion(version) =>
+      updated(value.copy(scalaJSVersion = version))
 
     case UpdateInfo(name, description) =>
       updated(value.copy(name = name, description = description))
