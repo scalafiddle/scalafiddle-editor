@@ -47,6 +47,7 @@ class Application @Inject() (
   val scalafiddleUrl   = new URL(config.get[String]("scalafiddle.scalafiddleURL"))
   val compilerUrl      = config.get[String]("scalafiddle.compilerURL")
   val scalaVersions    = config.get[Seq[String]]("scalafiddle.scalaVersions")
+  val scalaJSVersions  = config.get[Seq[String]]("scalafiddle.scalaJSVersions")
 
   Kamon.start()
 
@@ -133,6 +134,7 @@ class Application @Inject() (
         val allLibs = fd.libraries.flatMap(lib => Library.stringify(lib) +: lib.extraDeps)
         sourceCode.append(allLibs.map(lib => s"// $$FiddleDependency $lib").mkString("\n", "\n", "\n"))
         sourceCode.append(s"// $$ScalaVersion ${fd.scalaVersion}\n")
+        sourceCode.append(s"// $$ScalaJSVersion ${fd.scalaJSVersion}\n")
         nameOpt.foreach(name => sourceCode.append(s"// $$FiddleName $name\n"))
 
         Ok(sourceCode.toString).withHeaders(CACHE_CONTROL -> "max-age=7200")
@@ -317,7 +319,7 @@ class Application @Inject() (
 
   private def loadFiddle(id: String, version: Int, sourceOpt: Option[String] = None): Future[Try[FiddleData]] = {
     if (id == "") {
-      val (source, libs, scalaVersion) = parseFiddle(sourceOpt.fold(defaultSource)(identity))
+      val (source, libs, scalaVersion, scalaJSVersion) = parseFiddle(sourceOpt.fold(defaultSource)(identity))
       Future.successful(
         Success(
           FiddleData(
@@ -329,6 +331,9 @@ class Application @Inject() (
             scalaVersion
               .flatMap(v => scalaVersions.find(_ == v))
               .getOrElse(config.get[String]("scalafiddle.defaultScalaVersion")),
+            scalaJSVersion
+              .flatMap(v => scalaJSVersions.find(_ == v))
+              .getOrElse(config.get[String]("scalafiddle.defaultScalaJSVersion")),
             None,
             System.currentTimeMillis()
           )
@@ -346,6 +351,7 @@ class Application @Inject() (
                 f.libraries.flatMap(librarian.findLibrary),
                 librarian.libraries,
                 f.scalaVersion,
+                f.scalaJSVersion,
                 None,
                 f.created
               )
@@ -363,6 +369,7 @@ class Application @Inject() (
                   f.libraries.flatMap(librarian.findLibrary),
                   librarian.libraries,
                   f.scalaVersion,
+                  f.scalaJSVersion,
                   Some(user),
                   f.created
                 )
@@ -376,6 +383,7 @@ class Application @Inject() (
                   f.libraries.flatMap(librarian.findLibrary),
                   librarian.libraries,
                   f.scalaVersion,
+                  f.scalaJSVersion,
                   None,
                   f.created
                 )
@@ -387,16 +395,20 @@ class Application @Inject() (
     }
   }
 
-  private def parseFiddle(source: String): (String, Seq[Library], Option[String]) = {
-    val dependencyRE = """ *// \$FiddleDependency +(.+)""".r
-    val versionRE    = """ *// \$ScalaVersion +([0-9]+\.[0-9]+)""".r
-    val lines        = source.split("\n")
+  private def parseFiddle(source: String): (String, Seq[Library], Option[String], Option[String]) = {
+    val dependencyRE     = """ *// \$FiddleDependency +(.+)""".r
+    val scalaVersionRE   = """ *// \$ScalaVersion +([0-9]+\.[0-9]+)""".r
+    val scalaJSVersionRE = """ *// \$ScalaJSVersion +([0-9]+(?:\.[0-9]+)?)""".r
+    val lines            = source.split("\n")
     val (libLines, codeLines) = lines.partition { line =>
-      dependencyRE.findFirstIn(line).isDefined || versionRE.findFirstIn(line).isDefined
+      dependencyRE.findFirstIn(line).isDefined ||
+      scalaVersionRE.findFirstIn(line).isDefined ||
+      scalaVersionRE.findFirstIn(line).isDefined
     }
-    val libs    = libLines.flatMap(line => dependencyRE.findFirstMatchIn(line).flatMap(d => librarian.findLibrary(d.group(1))))
-    val version = libLines.flatMap(line => versionRE.findFirstMatchIn(line).map(_.group(1))).headOption
-    (codeLines.mkString("\n"), libs, version)
+    val libs           = libLines.flatMap(line => dependencyRE.findFirstMatchIn(line).flatMap(d => librarian.findLibrary(d.group(1))))
+    val scalaVersion   = libLines.flatMap(line => scalaVersionRE.findFirstMatchIn(line).map(_.group(1))).headOption
+    val scalaJSVersion = libLines.flatMap(line => scalaJSVersionRE.findFirstMatchIn(line).map(_.group(1))).headOption
+    (codeLines.mkString("\n"), libs, scalaVersion, scalaJSVersion)
   }
 
   private def decodeSource(b64: String): Option[String] = {

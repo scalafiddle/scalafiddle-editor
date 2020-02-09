@@ -6,17 +6,21 @@ jdk:
 - openjdk8
 script:
 - sbt ++$TRAVIS_SCALA_VERSION server/test client/test
-# Tricks to avoid unnecessary cache updates, from
-# http://www.scala-sbt.org/0.13/docs/Travis-CI-with-sbt.html
-- find $HOME/.sbt -name "*.lock" | xargs rm
-- find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
 cache:
   directories:
+    - $HOME/.cache/coursier
     - $HOME/.ivy2/cache
-    - $HOME/.sbt/boot/
+    - $HOME/.sbt
 install:
   - . $HOME/.nvm/nvm.sh
   - nvm install stable
   - nvm use stable
   - npm install
   - npm install jsdom@9.12.0
+
+# Tricks to avoid unnecessary cache updates, from
+# https://www.scala-sbt.org/1.x/docs/Travis-CI-with-sbt.html#Caching
+before_cache:
+  - rm -fv $HOME/.ivy2/.sbt.ivy.lock
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
+  - find $HOME/.sbt -name "*.lock" -print -delete

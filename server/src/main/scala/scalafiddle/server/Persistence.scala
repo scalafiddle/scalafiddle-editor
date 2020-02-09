@@ -87,6 +87,7 @@ class Persistence @Inject() (config: Configuration) extends Actor with ActorLogg
         fiddle.sourceCode,
         fiddle.libraries.map(Library.stringify).toList,
         fiddle.scalaVersion,
+        fiddle.scalaJSVersion,
         user
       )
       runAndReply(dal.insertFiddle(newFiddle))(r => Success(FiddleId(id, 0))) pipeTo sender()
@@ -101,6 +102,7 @@ class Persistence @Inject() (config: Configuration) extends Actor with ActorLogg
         fiddle.sourceCode,
         fiddle.libraries.map(Library.stringify).toList,
         fiddle.scalaVersion,
+        fiddle.scalaJSVersion,
         user,
         Some(s"$id/$version")
       )
@@ -142,6 +144,7 @@ class Persistence @Inject() (config: Configuration) extends Actor with ActorLogg
               fiddle.sourceCode,
               fiddle.libraries.map(Library.stringify).toList,
               fiddle.scalaVersion,
+              fiddle.scalaJSVersion,
               latest.user,
               Some(s"${latest.id}/${latest.version}")
             )
